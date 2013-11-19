@@ -1,0 +1,22 @@
+- import org.jtalks.antarcticle.persistence._
+-@ val articles: List[ArticleListModel] = Nil
+
+p= "First template"
+
+table
+  caption Articles
+  thead
+    tr
+      th Title
+      th Content
+      th Created at
+      th Author
+  tbody
+  - articles foreach
+    - article =>
+      tr
+        td= article.title
+        td
+          != article.content
+        td= article.createdAt
+        td= article.author.username

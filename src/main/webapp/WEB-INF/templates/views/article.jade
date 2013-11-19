@@ -1,0 +1,8 @@
+- import org.jtalks.antarcticle.persistence._
+-@ val article: ArticleListModel = null
+
+h2= article.title
+p
+  != article.content
+span= article.createdAt
+span = article.author.username

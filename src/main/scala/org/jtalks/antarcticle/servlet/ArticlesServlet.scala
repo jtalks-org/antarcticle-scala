@@ -20,7 +20,7 @@ class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet 
     article match {
       case Some(article) =>
         jade("/article.jade", "article" -> article)
-      case None => NotFound
+      case None => resourceNotFound()
     }
   }
 }

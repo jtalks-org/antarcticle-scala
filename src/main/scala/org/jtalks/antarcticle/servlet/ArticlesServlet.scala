@@ -8,6 +8,12 @@ import org.jtalks.antarcticle.persistence.repositories.ArticlesRepositoryCompone
 class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet {
   import dal._
 
+  get("/") {
+    val repo = articlesRepository
+    val articles = repo.findAll
+    jade("/articles.jade", "articles" -> articles)
+  }
+
   get("/articles") {
     val repo = articlesRepository
     val articles = repo.findAll

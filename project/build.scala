@@ -57,6 +57,8 @@ object AntarcticleBuild extends Build {
         else
           Some("JTalks Nexus Releases"  at nexus + "releases")
       },
+      // file with repository credentialfile with repository credentialss
+      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
       // disable .jar publishing
       publishArtifact in (Compile, packageBin) := false,
       // disable publishing the main API jar

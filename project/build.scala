@@ -9,7 +9,7 @@ import ScalateKeys._
 object AntarcticleBuild extends Build {
   val Organization = "org.jtalks"
   val Name = "antarcticle"
-  val Version = "0.1.0-SNAPSHOT"
+  val Version = "0.1-SNAPSHOT"
   val ScalaVersion = "2.10.2"
   val ScalatraVersion = "2.2.1"
 

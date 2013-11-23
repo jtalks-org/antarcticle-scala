@@ -3,6 +3,7 @@ import Keys._
 import org.scalatra.sbt._
 import org.scalatra.sbt.PluginKeys._
 import com.mojolly.scalate.ScalatePlugin._
+import com.earldouglas.xsbtwebplugin.PluginKeys._
 import ScalateKeys._
 
 object AntarcticleBuild extends Build {
@@ -13,9 +14,10 @@ object AntarcticleBuild extends Build {
   val ScalatraVersion = "2.2.1"
 
   lazy val project = Project (
-    "scalatra-testing",
+    "antarcticle",
     file("."),
-    settings = Defaults.defaultSettings ++ ScalatraPlugin.scalatraWithJRebel ++ scalateSettings ++ Seq(
+    settings = Defaults.defaultSettings ++ ScalatraPlugin.scalatraWithJRebel ++ scalateSettings ++ addArtifact(artifact in (Compile,
+      packageWar), (packageWar in Compile)) ++ Seq(
       organization := Organization,
       name := Name,
       version := Version,
@@ -44,6 +46,24 @@ object AntarcticleBuild extends Build {
             Some("templates")
           )
         )
+      },
+      // repositories
+      publishTo <<= version { (v: String) =>
+        val nexus = "http://repo.jtalks.org/content/repositories/"
+        if (v.trim.endsWith("SNAPSHOT"))
+          Some("JTalks Nexus Snapshots" at nexus + "snapshots")
+        else
+          Some("JTalks Nexus Releases"  at nexus + "releases")
+      },
+      // disable .jar publishing
+      publishArtifact in (Compile, packageBin) := false,
+      // disable publishing the main API jar
+      publishArtifact in (Compile, packageDoc) := false,
+      // disable publishing the main sources jar
+      publishArtifact in (Compile, packageSrc) := false,
+      // create an Artifact for publishing the .war file
+      artifact in (Compile, packageWar) ~= { (art: Artifact) =>
+        art.copy(`type` = "war", extension = "war")
       }
     )
   )

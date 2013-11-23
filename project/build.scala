@@ -47,6 +47,8 @@ object AntarcticleBuild extends Build {
           )
         )
       },
+      // disable using the Scala version in output paths and artifacts
+      crossPaths := false,
       // repositories
       publishTo <<= version { (v: String) =>
         val nexus = "http://repo.jtalks.org/content/repositories/"

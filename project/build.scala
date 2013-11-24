@@ -16,8 +16,7 @@ object AntarcticleBuild extends Build {
   lazy val project = Project (
     "antarcticle",
     file("."),
-    settings = Defaults.defaultSettings ++ ScalatraPlugin.scalatraWithJRebel ++ scalateSettings ++ addArtifact(artifact in (Compile,
-      packageWar), (packageWar in Compile)) ++ Seq(
+    settings = Defaults.defaultSettings ++ ScalatraPlugin.scalatraWithJRebel ++ scalateSettings ++ Seq(
       organization := Organization,
       name := Name,
       version := Version,
@@ -48,27 +47,7 @@ object AntarcticleBuild extends Build {
         )
       },
       // disable using the Scala version in output paths and artifacts
-      crossPaths := false,
-      // repositories
-      publishTo <<= version { (v: String) =>
-        val nexus = "http://repo.jtalks.org/content/repositories/"
-        if (v.trim.endsWith("SNAPSHOT"))
-          Some("JTalks Nexus Snapshots" at nexus + "snapshots")
-        else
-          Some("JTalks Nexus Releases"  at nexus + "releases")
-      },
-      // file with repository credentialfile with repository credentialss
-      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-      // disable .jar publishing
-      publishArtifact in (Compile, packageBin) := false,
-      // disable publishing the main API jar
-      publishArtifact in (Compile, packageDoc) := false,
-      // disable publishing the main sources jar
-      publishArtifact in (Compile, packageSrc) := false,
-      // create an Artifact for publishing the .war file
-      artifact in (Compile, packageWar) ~= { (art: Artifact) =>
-        art.copy(`type` = "war", extension = "war")
-      }
+      crossPaths := false
     )
   )
 }

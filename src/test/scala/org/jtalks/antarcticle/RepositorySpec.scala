@@ -1,7 +1,6 @@
 package org.jtalks.antarcticle
 
-import org.scalatest.{BeforeAndAfter, fixture}
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.{fixture, Matchers}
 import scala.slick.session.Database
 import scala.slick.driver.{H2Driver, ExtendedProfile}
 import org.jtalks.antarcticle.persistence.{Schema, Profile, DatabaseProvider}
@@ -13,7 +12,7 @@ import scala.slick.session
  * Runs each test inside session.
  * Provides trait with configured database.
  */
-trait RepositorySpec extends fixture.FunSpec with ShouldMatchers with BeforeAndAfter {
+trait RepositorySpec extends fixture.FunSpec with Matchers {
   val h2db: Database = Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver")
   val h2Profile: ExtendedProfile = H2Driver
 
@@ -23,7 +22,7 @@ trait RepositorySpec extends fixture.FunSpec with ShouldMatchers with BeforeAndA
   type FixtureParam = Session
 
   // wrap each test inside withDb
-  override def withFixture(test: OneArgTest) {
+  override def withFixture(test: OneArgTest) = {
     withDb { implicit session: Session =>
       withFixture(test.toNoArgTest(session))
     }

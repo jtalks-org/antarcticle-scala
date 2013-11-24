@@ -27,6 +27,7 @@ object AntarcticleBuild extends Build {
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
+        "org.scalatest" % "scalatest_2.10" % "2.0" % "test",
         "com.typesafe.slick" %% "slick" % "1.0.1",
         "com.h2database" % "h2" % "1.3.166",
         "c3p0" % "c3p0" % "0.9.1.2",

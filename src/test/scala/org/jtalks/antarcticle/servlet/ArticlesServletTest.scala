@@ -1,13 +1,12 @@
 package org.jtalks.antarcticle.servlet
 
-import org.scalatra.test.scalatest.ScalatraSuite
-import org.scalatest.FunSuite
 import org.jtalks.antarcticle.persistence.repositories.ArticlesRepositoryComponent
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import org.jtalks.antarcticle.models.{ArticleListModel, UserModel}
+import org.jtalks.antarcticle.ControllerSpec
 
-class ArticlesServletTest extends ScalatraSuite with FunSuite with MockitoSugar {
+class ArticlesServletTest extends ControllerSpec with MockitoSugar {
 
   val testDal = new ArticlesRepositoryComponent  {
     val repo = mock[ArticlesRepository]

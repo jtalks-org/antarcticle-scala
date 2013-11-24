@@ -1,8 +1,5 @@
 package org.jtalks.antarcticle.servlet
 
-import org.scalatra._
-import scala.slick.driver.H2Driver.simple._
-import Database.threadLocalSession
 import org.jtalks.antarcticle.persistence.repositories.ArticlesRepositoryComponent
 
 class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet {
@@ -24,8 +21,7 @@ class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet 
     val article = articlesRepository.get(params("id").toInt)
 
     article match {
-      case Some(article) =>
-        jade("/article.jade", "article" -> article)
+      case Some(article) => jade("/article.jade", "article" -> article)
       case None => resourceNotFound()
     }
   }

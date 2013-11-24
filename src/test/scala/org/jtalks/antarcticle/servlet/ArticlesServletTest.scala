@@ -3,9 +3,9 @@ package org.jtalks.antarcticle.servlet
 import org.scalatra.test.scalatest.ScalatraSuite
 import org.scalatest.FunSuite
 import org.jtalks.antarcticle.persistence.repositories.ArticlesRepositoryComponent
-import org.jtalks.antarcticle.persistence.{UserModel, ArticleListModel}
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
+import org.jtalks.antarcticle.models.{ArticleListModel, UserModel}
 
 class ArticlesServletTest extends ScalatraSuite with FunSuite with MockitoSugar {
 

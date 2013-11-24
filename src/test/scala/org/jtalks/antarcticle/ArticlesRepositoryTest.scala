@@ -2,28 +2,24 @@ package org.jtalks.antarcticle
 
 import org.jtalks.antarcticle.persistence.repositories.SlickArticlesRepositoryComponent
 import org.jtalks.antarcticle.persistence._
-import scala.slick.driver.{H2Driver, ExtendedProfile}
-import scala.slick.session.{Session, Database}
-import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.jtalks.antarcticle.persistence.User
-import org.jtalks.antarcticle.persistence.Article
 import java.sql.Timestamp
-import org.scalatest.matchers.ShouldMatchers
+import org.jtalks.antarcticle.persistence.schema.{User, Article}
+import org.jtalks.antarcticle.models.{ArticleListModel, UserModel}
 
-class ArticlesRepositoryTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
-  val database = Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver")
 
-  val repository = new SlickArticlesRepositoryComponent with UsersComponent with ArticlesComponent with Profile with DatabaseProvider {
-    override val profile: ExtendedProfile = H2Driver
-    override val db = database
-    val schema = Articles.ddl ++ Users.ddl
-  }
+class ArticlesRepositoryTest extends RepositorySpec {
+
+  val repository = new SlickArticlesRepositoryComponent
+        with TestDbProvider
+        with Schema
+
+  override def schema = repository
 
   import repository._
-  import repository.profile.simple._
+  import profile.simple._
 
-  test("findAll") {
-    withDb { implicit session: Session =>
+  describe("findAll") {
+    it("returns all articles") { implicit session: Session =>
       val time = new Timestamp(new java.util.Date().getTime())
 
       Users.insertAll(
@@ -41,9 +37,8 @@ class ArticlesRepositoryTest extends FunSuite with ShouldMatchers with BeforeAnd
     }
   }
 
-
-  test("get") {
-    withDb { implicit session: Session =>
+  describe("get") {
+    it("returns article by id") { implicit session: Session =>
       val time = new Timestamp(new java.util.Date().getTime())
 
       Users.insertAll(
@@ -58,17 +53,6 @@ class ArticlesRepositoryTest extends FunSuite with ShouldMatchers with BeforeAnd
 
       val article = articlesRepository.get(1)
       article.get should be (ArticleListModel(1, "New title", "<b>content</b>", time, UserModel(1,"user1")))
-    }
-  }
-
-  def withDb[T](f: Session => T): T = {
-    database.withSession { implicit session: Session =>
-      try {
-        repository.schema.create
-        f(session)
-      } finally {
-        repository.schema.drop
-      }
     }
   }
 

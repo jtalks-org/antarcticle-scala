@@ -3,6 +3,9 @@ package org.jtalks.antarcticle.persistence.repositories
 import org.jtalks.antarcticle.persistence._
 import scala.slick.session.Session
 import org.jtalks.antarcticle.persistence.DatabaseProvider
+import org.jtalks.antarcticle.persistence.schema._
+import org.jtalks.antarcticle.persistence.schema.Article
+import org.jtalks.antarcticle.models.{ArticleListModel, UserModel}
 
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository

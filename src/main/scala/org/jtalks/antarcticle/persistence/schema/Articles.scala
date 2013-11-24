@@ -1,13 +1,15 @@
-package org.jtalks.antarcticle.persistence
+package org.jtalks.antarcticle.persistence.schema
 
 import java.sql.Timestamp
 
-case class ArticleListModel(id: Int, title: String, content: String, createdAt: java.util.Date, author: UserModel)
+import org.jtalks.antarcticle.persistence.Profile
+import org.jtalks.antarcticle.models.UserModel
 
 case class Article(id: Option[Int], title: String, content: String, createdAt: Timestamp, authorId: Int)
 
 trait ArticlesComponent  {
   this: Profile with UsersComponent =>
+
   import profile.simple._
 
   object Articles extends Table[Article]("articles") {

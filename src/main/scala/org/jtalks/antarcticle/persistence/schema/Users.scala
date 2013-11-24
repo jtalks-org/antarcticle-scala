@@ -1,11 +1,12 @@
-package org.jtalks.antarcticle.persistence
+package org.jtalks.antarcticle.persistence.schema
 
-case class UserModel(id: Int, username: String)
+import org.jtalks.antarcticle.persistence.Profile
 
 case class User(id: Option[Int], username: String)
 
 trait UsersComponent {
   this: Profile =>
+
   import profile.simple._
 
   object Users extends Table[User]("users") {

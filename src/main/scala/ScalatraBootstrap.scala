@@ -1,5 +1,6 @@
 import org.jtalks.antarcticle.persistence._
 import org.jtalks.antarcticle.persistence.repositories.SlickArticlesRepositoryComponent
+import org.jtalks.antarcticle.persistence.schema.{User, Article}
 import org.jtalks.antarcticle.servlet.{UsersServlet, ArticlesServlet}
 import org.jtalks.antarcticle.persistence.DatabaseProvider
 import org.scalatra._
@@ -10,33 +11,41 @@ import scala.slick.driver.{H2Driver, ExtendedProfile}
 import scala.slick.session.Database
 import java.sql.Timestamp
 
-class DAL(override val profile: ExtendedProfile, override val db: Database)
+object DAL
   extends SlickArticlesRepositoryComponent
-  with UsersComponent
-  with ArticlesComponent
-  with DatabaseProvider
-  with Profile {
+  with ProductionDatabase
+  with Schema {
 
   import profile.simple._
   def createDb = {
     db withSession { implicit session: Session =>
-      (Articles.ddl ++ Users.ddl).create
+      schema.create
     }
+  }
+}
+
+trait ProductionDatabase extends DatabaseProvider with Profile {
+  private val logger = LoggerFactory.getLogger(getClass)
+
+  private val dataSource = new ComboPooledDataSource
+  logger.info("Created c3p0 connection pool")
+
+  val db = Database.forDataSource(dataSource)
+  val profile = H2Driver
+
+  override def close = {
+    logger.info("Closing c3p0 connection pool")
+    dataSource.close
   }
 }
 
 
 class ScalatraBootstrap extends LifeCycle {
-  var logger = LoggerFactory.getLogger(getClass)
+  def createData {
+    import DAL._
+    import DAL.profile.simple._
 
-  val dataSource = new ComboPooledDataSource
-  logger.info("Created c3p0 connection pool")
-
-  def createData(dal: DAL) {
-    import dal._
-    import dal.profile.simple._
-
-    dal.createDb
+    DAL.createDb
 
     db withSession { implicit session: Session =>
       Users.insertAll(
@@ -52,22 +61,12 @@ class ScalatraBootstrap extends LifeCycle {
   }
 
   override def init(context: ServletContext) {
-    val db = Database.forDataSource(dataSource)
-    val dal = new DAL(H2Driver, db)
-
-    createData(dal)
-
-    context.mount(new ArticlesServlet(dal), "/*")
+    context.mount(new ArticlesServlet(DAL), "/*")
     context.mount(new UsersServlet, "/*")
   }
 
   override def destroy(context: ServletContext) {
     super.destroy(context)
-    closeDbConnection()
-  }
-
-  private def closeDbConnection() {
-     logger.info("Closing c3p0 connection pool")
-     dataSource.close
+    DAL.close
   }
 }

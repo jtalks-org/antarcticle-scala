@@ -29,8 +29,8 @@ class ArticlesRepositoryTest extends RepositorySpec with OptionValues {
       )
 
       Articles.insertAll(
-        Article(None, "New title", "<b>content</b>", time, 1),
-        Article(None, "New title 2", "<i>html text</i>", time, 2)
+        Article(None, "New title", "<b>content</b>", time, time, "description1", 1),
+        Article(None, "New title 2", "<i>html text</i>", time, time, "description2", 2)
       )
 
       val articles = articlesRepository.findAll
@@ -53,8 +53,8 @@ class ArticlesRepositoryTest extends RepositorySpec with OptionValues {
       )
 
       Articles.insertAll(
-        Article(None, "New title", "<b>content</b>", time, 1),
-        Article(None, "New title 2", "<i>html text</i>", time, 2)
+        Article(None, "New title", "<b>content</b>", time, time, "description1", 1),
+        Article(None, "New title 2", "<i>html text</i>", time, time, "description2", 2)
       )
 
       val article = articlesRepository.get(1)

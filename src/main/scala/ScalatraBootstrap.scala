@@ -47,6 +47,7 @@ class ScalatraBootstrap extends LifeCycle {
 
     DAL.createDb
 
+    val time: Timestamp = new Timestamp(new java.util.Date().getTime())
     db withSession { implicit session: Session =>
       Users.insertAll(
         User(None, "user1"),
@@ -54,8 +55,8 @@ class ScalatraBootstrap extends LifeCycle {
       )
 
       Articles.insertAll(
-        Article(None, "New title", "<b>content</b>", new Timestamp(new java.util.Date().getTime()), 1),
-        Article(None, "New title 2", "<i>html text</i>", new Timestamp(new java.util.Date().getTime()), 2)
+        Article(None, "New title", "<b>content</b>", time, time, "description1", 1),
+        Article(None, "New title 2", "<i>html text</i>", time, time, "description2", 2)
       )
     }
   }

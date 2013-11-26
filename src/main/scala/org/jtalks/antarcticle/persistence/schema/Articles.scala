@@ -22,7 +22,7 @@ trait ArticlesComponent  {
     def description = column[String]("description")
     def authorId = column[Int]("author_id", O.NotNull)
 
-    def author = foreignKey("author_fk", authorId, Users)(_.id)
+    def author = foreignKey("article_author_fk", authorId, Users)(_.id)
 
     def * = id.? ~ title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (Article.apply _, Article.unapply _)
     def autoInc = * returning id

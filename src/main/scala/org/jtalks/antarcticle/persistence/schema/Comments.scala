@@ -20,8 +20,8 @@ trait CommentsComponent {
     def createdAt = column[Timestamp]("created_at", O.NotNull)
     def updatedAt = column[Timestamp]("updated_at")
 
-    def author = foreignKey("author_fk", userId, Users)(_.id)
-    def article = foreignKey("article_fk", articleId, Articles)(_.id)
+    def author = foreignKey("comment_author_fk", userId, Users)(_.id)
+    def article = foreignKey("comment_article_fk", articleId, Articles)(_.id)
 
     def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt <> (Comment.apply _, Comment.unapply _)
     def autoInc = * returning id

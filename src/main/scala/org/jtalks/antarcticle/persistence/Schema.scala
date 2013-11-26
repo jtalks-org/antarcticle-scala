@@ -1,8 +1,8 @@
 package org.jtalks.antarcticle.persistence
 
-import org.jtalks.antarcticle.persistence.schema.{UsersComponent, ArticlesComponent}
+import org.jtalks.antarcticle.persistence.schema.{CommentsComponent, UsersComponent, ArticlesComponent}
 
 
-trait Schema extends UsersComponent with ArticlesComponent { self: Profile =>
-  def schema = (Articles.ddl ++ Users.ddl)
+trait Schema extends UsersComponent with ArticlesComponent with CommentsComponent { self: Profile =>
+  def schema = (Articles.ddl ++ Users.ddl ++ Comments.ddl)
 }

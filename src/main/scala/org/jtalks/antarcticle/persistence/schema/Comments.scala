@@ -7,7 +7,7 @@ case class Comment(id: Option[Int], userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp, updatedAt: Timestamp)
 
 
-trait Comments {
+trait CommentsComponent {
   this: Profile with UsersComponent with ArticlesComponent =>
 
   import profile.simple._

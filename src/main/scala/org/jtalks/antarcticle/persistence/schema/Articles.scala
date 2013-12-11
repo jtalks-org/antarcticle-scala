@@ -5,15 +5,18 @@ import java.sql.Timestamp
 import org.jtalks.antarcticle.persistence.Profile
 import org.jtalks.antarcticle.models.UserModel
 
-case class Article(id: Option[Int], title: String, content: String,
+case class ArticleRecord(id: Option[Int], title: String, content: String,
                    createdAt: Timestamp, updatedAt: Timestamp, description: String, authorId: Int)
+
+case class ArticleToUpdate(title: String, content: String,
+                           updatedAt: Timestamp, description: String)
 
 trait ArticlesComponent  {
   this: Profile with UsersComponent =>
 
   import profile.simple._
 
-  object Articles extends Table[Article]("articles") {
+  object Articles extends Table[ArticleRecord]("articles") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def title = column[String]("title", O.NotNull)
     def content = column[String]("content", O.NotNull)
@@ -24,7 +27,8 @@ trait ArticlesComponent  {
 
     def author = foreignKey("article_author_fk", authorId, Users)(_.id)
 
-    def * = id.? ~ title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (Article.apply _, Article.unapply _)
+    def * = id.? ~ title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleRecord.apply _, ArticleRecord.unapply _)
+    def updateProjection = title ~ content ~ updatedAt ~ description <> (ArticleToUpdate.apply _, ArticleToUpdate.unapply _)
     def autoInc = * returning id
 
     def authorIdx = index("index_articles_on_user_id", authorId)

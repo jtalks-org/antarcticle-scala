@@ -1,4 +1,4 @@
-- import org.jtalks.antarcticle.models._
+- import org.jtalks.antarcticle.models.ArticleModels.ArticleListModel
 -@ val articles: List[ArticleListModel] = Nil
 
 p= "First template"
@@ -8,7 +8,7 @@ table
   thead
     tr
       th Title
-      th Content
+      th Description
       th Created at
       th Author
   tbody
@@ -17,6 +17,6 @@ table
       tr
         td= article.title
         td
-          != article.content
+          != article.description
         td= article.createdAt
         td= article.author.username

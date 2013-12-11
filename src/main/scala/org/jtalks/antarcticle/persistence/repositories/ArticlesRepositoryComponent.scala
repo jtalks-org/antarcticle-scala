@@ -4,15 +4,19 @@ import org.jtalks.antarcticle.persistence._
 import scala.slick.session.Session
 import org.jtalks.antarcticle.persistence.DatabaseProvider
 import org.jtalks.antarcticle.persistence.schema._
-import org.jtalks.antarcticle.persistence.schema.Article
-import org.jtalks.antarcticle.models.{ArticleListModel, UserModel}
+import org.jtalks.antarcticle.persistence.schema.ArticleRecord
+import org.jtalks.antarcticle.models.UserModel
+import org.jtalks.antarcticle.models.ArticleModels.{ArticleDetailsModel, ArticleListModel}
 
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository
 
   trait ArticlesRepository {
-    def findAll: List[ArticleListModel]
-    def get(id: Int): Option[ArticleListModel]
+    def getList(offset: Int, portionSize: Int): List[(ArticleRecord, UserRecord)]
+    def get(id: Int): Option[(ArticleRecord, UserRecord)]
+    def insert(article: ArticleRecord): ArticleRecord
+    def update(id: Int, article: ArticleToUpdate): Boolean
+    def remove(id: Int): Boolean
   }
 }
 
@@ -24,28 +28,47 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
   class SlickArticlesRepository extends ArticlesRepository {
 
-    def findAll = {
+    def getList(offset: Int, portionSize: Int) = {
       db withSession { implicit session: Session =>
-        articleWithAuthor.list.map(toModel(_))
+        articlesWithAuthor
+          .drop(offset)
+          .take(portionSize)
+          .sortBy { case (article, _) => article.createdAt }
+          .list
       }
     }
 
     def get(id: Int) = {
       db withSession { implicit session: Session =>
         (for {
-          (article, author) <- articleWithAuthor if article.id === id
-        } yield (article, author)).firstOption.map(toModel(_))
+          (article, author) <- articlesWithAuthor if article.id === id
+        } yield (article, author)).firstOption
       }
     }
 
-    private val toModel = (tuple: (Article, User)) => tuple match {
-      case (article, author) =>
-        ArticleListModel(article.id.get, article.title,
-          article.content, article.createdAt,
-            UserModel(author.id.get, author.username))
+    def insert(article: ArticleRecord) = {
+      db withSession { implicit session: Session =>
+        val id = Articles.autoInc.insert(article)
+        article.copy(id = Option(id))
+      }
     }
 
-    private def articleWithAuthor = for {
+    def update(id: Int, articleToUpdate: ArticleToUpdate) = {
+      db withSession { implicit session: Session =>
+        Query(Articles)
+          .filter(_.id === id)
+          .map(_.updateProjection)
+          .update(articleToUpdate) > 0
+      }
+    }
+
+    def remove(id: Int) = {
+      db withSession { implicit session: Session =>
+        Articles.where(_.id === id).delete > 0
+      }
+    }
+
+    private def articlesWithAuthor = for {
         article <- Articles
         author <- article.author
       } yield (article, author)

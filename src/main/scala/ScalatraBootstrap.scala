@@ -1,6 +1,6 @@
 import org.jtalks.antarcticle.persistence._
 import org.jtalks.antarcticle.persistence.repositories.SlickArticlesRepositoryComponent
-import org.jtalks.antarcticle.persistence.schema.{User, Article}
+import org.jtalks.antarcticle.persistence.schema.{UserRecord, ArticleRecord}
 import org.jtalks.antarcticle.servlet.{UsersServlet, ArticlesServlet}
 import org.jtalks.antarcticle.persistence.DatabaseProvider
 import org.scalatra._
@@ -50,13 +50,13 @@ class ScalatraBootstrap extends LifeCycle {
     val time: Timestamp = new Timestamp(new java.util.Date().getTime())
     db withSession { implicit session: Session =>
       Users.insertAll(
-        User(None, "user1"),
-        User(None, "user2")
+        UserRecord(None, "user1"),
+        UserRecord(None, "user2")
       )
 
       Articles.insertAll(
-        Article(None, "New title", "<b>content</b>", time, time, "description1", 1),
-        Article(None, "New title 2", "<i>html text</i>", time, time, "description2", 2)
+        ArticleRecord(None, "New title", "<b>content</b>", time, time, "description1", 1),
+        ArticleRecord(None, "New title 2", "<i>html text</i>", time, time, "description2", 2)
       )
     }
   }

@@ -7,13 +7,13 @@ class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet 
 
   get("/") {
     val repo = articlesRepository
-    val articles = repo.findAll
+    val articles = repo.getList(1,1) //TODO
     jade("/articles.jade", "articles" -> articles)
   }
 
   get("/articles") {
     val repo = articlesRepository
-    val articles = repo.findAll
+    val articles = repo.getList(1,1) // TODO
     jade("/articles.jade", "articles" -> articles)
   }
 
@@ -22,7 +22,7 @@ class ArticlesServlet(val dal: ArticlesRepositoryComponent) extends BaseServlet 
 
     article match {
       case Some(article) => jade("/article.jade", "article" -> article)
-      case None => resourceNotFound()
+      case None => halt(404)
     }
   }
 }

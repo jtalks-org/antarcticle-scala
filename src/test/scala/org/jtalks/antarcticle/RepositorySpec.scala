@@ -3,7 +3,7 @@ package org.jtalks.antarcticle
 import org.scalatest.{fixture, Matchers}
 import scala.slick.session.Database
 import scala.slick.driver.{H2Driver, ExtendedProfile}
-import org.jtalks.antarcticle.persistence.{Schema, Profile, DatabaseProvider}
+import org.jtalks.antarcticle.persistence.{Schema, DatabaseProfile}
 import scala.slick.session
 
 /**
@@ -44,7 +44,7 @@ trait RepositorySpec extends fixture.FunSpec with Matchers {
   def schema: Schema
 
   // DatabaseProvider configured with test database
-  trait TestDbProvider extends DatabaseProvider with Profile {
+  trait TestDbProvider extends DatabaseProfile {
     val profile: ExtendedProfile = h2Profile
     val db: session.Database = h2db
   }

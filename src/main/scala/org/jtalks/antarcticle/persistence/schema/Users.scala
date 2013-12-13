@@ -1,12 +1,12 @@
 package org.jtalks.antarcticle.persistence.schema
 
-import org.jtalks.antarcticle.persistence.Profile
+import org.jtalks.antarcticle.persistence.DatabaseProfile
 
 case class UserRecord(id: Option[Int], username: String, admin: Boolean = false,
                 firstName: Option[String] = None, lastName: Option[String] = None)
 
 trait UsersComponent {
-  this: Profile =>
+  this: DatabaseProfile =>
 
   import profile.simple._
 

@@ -2,12 +2,11 @@ import org.jtalks.antarcticle.persistence._
 import org.jtalks.antarcticle.persistence.repositories.SlickArticlesRepositoryComponent
 import org.jtalks.antarcticle.persistence.schema.{UserRecord, ArticleRecord}
 import org.jtalks.antarcticle.servlet.{UsersServlet, ArticlesServlet}
-import org.jtalks.antarcticle.persistence.DatabaseProvider
 import org.scalatra._
 import javax.servlet.ServletContext
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import org.slf4j.LoggerFactory
-import scala.slick.driver.{H2Driver, ExtendedProfile}
+import scala.slick.driver.H2Driver
 import scala.slick.session.Database
 import java.sql.Timestamp
 
@@ -24,7 +23,7 @@ object DAL
   }
 }
 
-trait ProductionDatabase extends DatabaseProvider with Profile {
+trait ProductionDatabase extends DatabaseProfile {
   private val logger = LoggerFactory.getLogger(getClass)
 
   private val dataSource = new ComboPooledDataSource

@@ -1,6 +1,6 @@
 package org.jtalks.antarcticle.persistence.schema
 
-import org.jtalks.antarcticle.persistence.Profile
+import org.jtalks.antarcticle.persistence.DatabaseProfile
 import java.sql.Timestamp
 
 case class Comment(id: Option[Int], userId: Int, articleId: Int,
@@ -8,7 +8,7 @@ case class Comment(id: Option[Int], userId: Int, articleId: Int,
 
 
 trait CommentsComponent {
-  this: Profile with UsersComponent with ArticlesComponent =>
+  this: DatabaseProfile with UsersComponent with ArticlesComponent =>
 
   import profile.simple._
 

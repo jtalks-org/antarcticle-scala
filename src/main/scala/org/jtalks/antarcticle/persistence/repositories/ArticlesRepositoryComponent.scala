@@ -1,12 +1,8 @@
 package org.jtalks.antarcticle.persistence.repositories
 
 import org.jtalks.antarcticle.persistence._
-import scala.slick.session.Session
-import org.jtalks.antarcticle.persistence.DatabaseProvider
 import org.jtalks.antarcticle.persistence.schema._
 import org.jtalks.antarcticle.persistence.schema.ArticleRecord
-import org.jtalks.antarcticle.models.UserModel
-import org.jtalks.antarcticle.models.ArticleModels.{ArticleDetailsModel, ArticleListModel}
 
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository
@@ -21,7 +17,7 @@ trait ArticlesRepositoryComponent {
 }
 
 trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
-  this: DatabaseProvider with Profile with UsersComponent with ArticlesComponent =>
+  this: DatabaseProfile with UsersComponent with ArticlesComponent =>
   import profile.simple._
 
   val articlesRepository = new SlickArticlesRepository

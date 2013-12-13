@@ -2,7 +2,7 @@ package org.jtalks.antarcticle.persistence.schema
 
 import java.sql.Timestamp
 
-import org.jtalks.antarcticle.persistence.Profile
+import org.jtalks.antarcticle.persistence.DatabaseProfile
 import org.jtalks.antarcticle.models.UserModel
 
 case class ArticleRecord(id: Option[Int], title: String, content: String,
@@ -12,7 +12,7 @@ case class ArticleToUpdate(title: String, content: String,
                            updatedAt: Timestamp, description: String)
 
 trait ArticlesComponent  {
-  this: Profile with UsersComponent =>
+  this: DatabaseProfile with UsersComponent =>
 
   import profile.simple._
 

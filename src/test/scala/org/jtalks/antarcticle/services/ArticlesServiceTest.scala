@@ -10,7 +10,6 @@ import org.joda.time.DateTime
 import org.jtalks.antarcticle.util.DateImplicits._
 import org.jtalks.antarcticle.utils.TimeFridge
 import scala.Some
-import org.jtalks.antarcticle.services.Article
 import org.jtalks.antarcticle.models.ArticleModels.{ArticleListModel, ArticleDetailsModel}
 
 

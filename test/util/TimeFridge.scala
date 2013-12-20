@@ -8,10 +8,11 @@ object TimeFridge {
    * Useful for testing temporary data.
    * WARNING: may cause problem in multi-threaded environment
    */
-  def withFrozenTime[T](frozenDateTime: DateTime = DateTime.now)(f: (DateTime) => T) = {
+  def withFrozenTime[T](frozenDateTime: DateTime = DateTime.now)(f: (DateTime) => T): T = {
     DateTimeUtils.setCurrentMillisFixed(frozenDateTime.getMillis)
-    f(frozenDateTime)
+    val res = f(frozenDateTime)
     DateTimeUtils.setCurrentMillisSystem()
+    res
   }
 }
 

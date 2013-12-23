@@ -19,3 +19,9 @@ playScalaSettings
 Play2WarPlugin.play2WarSettings
 
 Play2WarKeys.servletVersion := "3.0"
+
+// disable publishing the main API jar
+publishArtifact in (Compile, packageDoc) := false
+
+// disable publishing the main sources jar
+publishArtifact in (Compile, packageSrc) := false

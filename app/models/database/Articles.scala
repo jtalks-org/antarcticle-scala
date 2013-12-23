@@ -6,6 +6,9 @@ import play.api.db.slick.Config.driver.simple._
 case class ArticleRecord(id: Option[Int], title: String, content: String,
                    createdAt: Timestamp, updatedAt: Timestamp, description: String, authorId: Int)
 
+case class ArticleToInsert(title: String, content: String, createdAt: Timestamp,
+                           updatedAt: Timestamp, description: String, authorId: Int)
+
 case class ArticleToUpdate(title: String, content: String,
                            updatedAt: Timestamp, description: String)
 
@@ -26,8 +29,10 @@ trait ArticlesComponent  {
     def author = foreignKey("article_author_fk", authorId, Users)(_.id)
 
     def * = id.? ~ title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleRecord.apply _, ArticleRecord.unapply _)
-    def updateProjection = title ~ content ~ updatedAt ~ description <> (ArticleToUpdate.apply _, ArticleToUpdate.unapply _)
-    def autoInc = * returning id
+
+    def forUpdate = title ~ content ~ updatedAt ~ description <> (ArticleToUpdate.apply _, ArticleToUpdate.unapply _)
+
+    def forInsert = title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleToInsert.apply _, ArticleToInsert.unapply _) returning id
 
     def authorIdx = index("index_articles_on_user_id", authorId)
   }

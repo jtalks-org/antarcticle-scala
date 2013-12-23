@@ -2,6 +2,9 @@ package models.database
 
 import play.api.db.slick.Config.driver.simple._
 
+case class UserToInsert(username: String, admin: Boolean = false,
+                      firstName: Option[String] = None, lastName: Option[String] = None)
+
 case class UserRecord(id: Option[Int], username: String, admin: Boolean = false,
                 firstName: Option[String] = None, lastName: Option[String] = None)
 
@@ -18,7 +21,7 @@ trait UsersComponent {
     def lastName = column[String]("last_name", O.Nullable)
 
     def * = id.? ~ username ~ admin ~ firstName.? ~ lastName.? <> (UserRecord.apply _, UserRecord.unapply _)
-    def autoInc = * returning id
+    def forInsert = username ~ admin ~ firstName.? ~ lastName.? <> (UserToInsert.apply _, UserToInsert.unapply _) returning id
 
     def usernameIdx = index("index_users_on_username", username, unique = true)
   }

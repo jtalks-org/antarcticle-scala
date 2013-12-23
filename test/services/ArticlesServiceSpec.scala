@@ -78,8 +78,8 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   "creating new article" should {
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>
-        val record = ArticleRecord(None, "", "", dt, dt, "", 1)
-        articlesRepository.insert(any[ArticleRecord])(Matchers.eq(FakeSessionValue)) returns record.copy(id=Some(0))
+        val record = ArticleToInsert("", "", dt, dt, "", 1)
+        articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(FakeSessionValue)) returns 1
 
         articlesService.createArticle(Article(None, "", "", List()))
 
@@ -88,8 +88,8 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "return model" in {
-      val record = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)
-      articlesRepository.insert(any[ArticleRecord])(Matchers.eq(FakeSessionValue)) returns record
+      val record = ArticleToInsert("", "", DateTime.now, DateTime.now, "", 1)
+      articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(FakeSessionValue)) returns 1
 
       val model: ArticleDetailsModel = articlesService.createArticle(Article(None, "", "", List()))
 

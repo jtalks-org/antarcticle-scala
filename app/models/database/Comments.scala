@@ -3,6 +3,11 @@ package models.database
 import java.sql.Timestamp
 import play.api.db.slick.Config.driver.simple._
 
+case class CommentToInsert(userId: Int, articleId: Int,
+                   content: String, createdAt: Timestamp)
+
+case class CommentToUpdate(content: String, updatedAt: Timestamp)
+
 case class Comment(id: Option[Int], userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp, updatedAt: Timestamp)
 
@@ -23,6 +28,8 @@ trait CommentsComponent {
     def article = foreignKey("comment_article_fk", articleId, Articles)(_.id)
 
     def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt <> (Comment.apply _, Comment.unapply _)
-    def autoInc = * returning id
+    def forUpdate = content ~ updatedAt <> (CommentToUpdate.apply _, CommentToUpdate.unapply _)
+    def forInsert = userId ~ articleId ~ content ~ createdAt <>
+      (CommentToInsert.apply _, CommentToInsert.unapply _) returning id
   }
 }

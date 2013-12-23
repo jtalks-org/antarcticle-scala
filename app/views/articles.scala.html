@@ -1,0 +1,14 @@
+@(articles: Seq[models.ArticleModels.ArticleListModel], page: Int)
+
+<h2>Articles</h2>
+<table>
+    @for(article <- articles) {
+    <tr>
+        <td>@article.title</td>
+        <td>@article.description</td>
+        <td>@article.createdAt.format("dd.mm.YYYY")</td>
+        <td>@article.author.username</td>
+    </tr>
+    }
+</table>
+<a href="@routes.Application.articles(page + 1)">Next page</a>

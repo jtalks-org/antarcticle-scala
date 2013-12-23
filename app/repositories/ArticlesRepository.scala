@@ -9,7 +9,7 @@ trait ArticlesRepositoryComponent {
   trait ArticlesRepository {
     def getList(offset: Int, portionSize: Int)(implicit s: Session): List[(ArticleRecord, UserRecord)]
     def get(id: Int)(implicit s: Session): Option[(ArticleRecord, UserRecord)]
-    def insert(article: ArticleRecord)(implicit s: Session): ArticleRecord
+    def insert(article: ArticleToInsert)(implicit s: Session): Int
     def update(id: Int, article: ArticleToUpdate)(implicit s: Session): Boolean
     def remove(id: Int)(implicit s: Session): Boolean
   }
@@ -37,15 +37,14 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       } yield (article, author)).firstOption
     }
 
-    def insert(article: ArticleRecord)(implicit s: Session) = {
-      val id = Articles.autoInc.insert(article)
-      article.copy(id = Option(id))
+    def insert(article: ArticleToInsert)(implicit s: Session) = {
+      Articles.forInsert.insert(article)
     }
 
     def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: Session) = {
       Articles
         .filter(_.id === id)
-        .map(_.updateProjection)
+        .map(_.forUpdate)
         .update(articleToUpdate) > 0
     }
 

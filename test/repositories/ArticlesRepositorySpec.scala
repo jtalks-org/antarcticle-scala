@@ -12,10 +12,6 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     val profile = scala.slick.driver.H2Driver
   }
 
-
-  //TODO: what the fuck is going on here!? can't acquire connection through DriverManager.
-  // looks like classloader issue in sbt.
-  // broken:  val db = scala.slick.session.Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver")
   val db = scala.slick.session.Database.forDriver(
     driver = Class.forName("org.h2.Driver").newInstance.asInstanceOf[java.sql.Driver],
     url = "jdbc:h2:mem:test1")
@@ -27,21 +23,17 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     (Articles.ddl ++ Users.ddl).create
 
     val time = DateTime.now
-    val users = List(UserRecord(None, "user1"),  UserRecord(None, "user2"))
+    val users = List(UserRecord(None, "user1"), UserRecord(None, "user2"))
     val articles = List(
-      ArticleRecord(None, "New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
-      ArticleRecord(None, "New title 2", "<i>html text</i>", time, time, "description2", 2),
-      ArticleRecord(None, "New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
-      ArticleRecord(None, "New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
+      ArticleToInsert("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
+      ArticleToInsert("New title 2", "<i>html text</i>", time, time, "description2", 2),
+      ArticleToInsert("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
+      ArticleToInsert("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
     )
 
     Users.autoInc.insertAll(users : _*)
-    val articlesIds = Articles.autoInc.insertAll(articles: _*)
-
-    val articlesWithId = articles.zipWithIndex.map {
-      case (article, idx) => article.copy(id = Some(articlesIds(idx)))
-    }
-    (users, articlesWithId)
+    val articlesIds = Articles.forInsert.insertAll(articles: _*)
+    (users, articles, articlesIds)
   }
 
   def session[T](t: (Session) => T) = {
@@ -64,8 +56,8 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return portion with offset 1" in session { implicit session: Session =>
-      val (_, articles) = populateDb
-      val secondArticle = articles(1)
+      val (_, _, articlesIds) = populateDb
+      val secondArticleId = articlesIds(1)
 
       val offset = 1
       val portionSize = 2
@@ -73,15 +65,16 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val portion = articlesRepository.getList(offset, portionSize)
 
       val firstArticleInPortion = portion(0)._1
-      firstArticleInPortion must_== secondArticle
+      firstArticleInPortion.id must beSome(secondArticleId)
     }
 
     "be sorted by creation time" in session { implicit session: Session =>
-      val (_, articles) = populateDb
+      val (_, _, articlesIds) = populateDb
 
       val portion = articlesRepository.getList(0, 2)
 
-      portion.map(_._1) must contain(exactly(articles(1), articles(0)).inOrder)
+      portion.map(_._1).apply(0).id must beSome(articlesIds(1))
+      portion.map(_._1).apply(1).id must beSome(articlesIds(0))
     }
     //TODO: test author correctness
   }
@@ -108,11 +101,11 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
   "inserting new article" should {
     "inserts new article record" in session { implicit session: Session =>
-      val (_, articles) = populateDb
+      val (_, articles, _) = populateDb
       val oldCount = articles.size
 
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleToInsert("test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
       articlesRepository.insert(newArticle)
 
@@ -123,26 +116,26 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       populateDb
 
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleToInsert("test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
-      val insertedArticle = articlesRepository.insert(newArticle)
-
-      insertedArticle.id must beSome
+      val insertedArticleId = articlesRepository.insert(newArticle)
+      true
     }
   }
 
   "updating article" should {
     "updates existing article" in session { implicit session: Session =>
-      val (_, articles) = populateDb
+      val (_, articles, articlesIds) = populateDb
       val articleToBeUpdated = articles(1)
+      val updatedArticleId = articlesIds(1)
 
       val newContent = "new content"
       val upd = ArticleToUpdate(articleToBeUpdated.title,
         newContent, articleToBeUpdated.createdAt, articleToBeUpdated.description)
 
       //TODO: split assertions
-      articlesRepository.update(articleToBeUpdated.id.get, upd) must beTrue
-      val actualContent = Query(Articles).filter(_.id === articleToBeUpdated.id).map(_.content).first
+      articlesRepository.update(updatedArticleId, upd) must beTrue
+      val actualContent = Query(Articles).filter(_.id === updatedArticleId).map(_.content).first
       actualContent must_== newContent
     }
 
@@ -157,7 +150,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
   "removing article" should {
     "removes article" in session { implicit session: Session =>
-      val (_, articles) = populateDb
+      val (_, articles, _) = populateDb
       val oldCount = articles.size
 
       articlesRepository.remove(2) must beTrue

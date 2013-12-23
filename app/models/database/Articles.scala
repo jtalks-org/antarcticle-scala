@@ -1,7 +1,6 @@
 package models.database
 
 import java.sql.Timestamp
-import play.api.db.slick.Config.driver.simple._
 
 case class ArticleRecord(id: Option[Int], title: String, content: String,
                    createdAt: Timestamp, updatedAt: Timestamp, description: String, authorId: Int)

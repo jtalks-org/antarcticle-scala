@@ -1,7 +1,5 @@
 package models.database
 
-import play.api.db.slick.Config.driver.simple._
-
 case class UserToInsert(username: String, admin: Boolean = false,
                       firstName: Option[String] = None, lastName: Option[String] = None)
 

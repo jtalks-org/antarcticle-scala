@@ -1,7 +1,7 @@
 package repositories
 
-import play.api.db.slick.Config.driver.simple._
 import models.database._
+import scala.slick.session.Session
 
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository

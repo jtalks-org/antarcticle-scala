@@ -23,7 +23,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     (Articles.ddl ++ Users.ddl).create
 
     val time = DateTime.now
-    val users = List(UserRecord(None, "user1"), UserRecord(None, "user2"))
+    val users = List(UserToInsert("user1"), UserToInsert("user2"))
     val articles = List(
       ArticleToInsert("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
       ArticleToInsert("New title 2", "<i>html text</i>", time, time, "description2", 2),
@@ -31,7 +31,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       ArticleToInsert("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
     )
 
-    Users.autoInc.insertAll(users : _*)
+    Users.forInsert.insertAll(users : _*)
     val articlesIds = Articles.forInsert.insertAll(articles: _*)
     (users, articles, articlesIds)
   }

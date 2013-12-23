@@ -1,7 +1,6 @@
 package models.database
 
 import java.sql.Timestamp
-import play.api.db.slick.Config.driver.simple._
 
 case class CommentToInsert(userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp)

@@ -2,13 +2,12 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import services.{SlickSessionProvider, ArticlesServiceComponentImpl}
+import services.{ArticlesServiceComponent, SlickSessionProvider, ArticlesServiceComponentImpl}
 import repositories.SlickArticlesRepositoryComponent
 import models.database._
 import scala.slick.driver.{PostgresDriver, H2Driver}
-import models.database.UserRecord
 
-object app extends ArticlesServiceComponentImpl
+trait Backend extends ArticlesServiceComponentImpl
   with SlickArticlesRepositoryComponent with UsersComponent
   with ArticlesComponent with CommentsComponent with Profile with SlickSessionProvider {
 
@@ -50,14 +49,16 @@ object app extends ArticlesServiceComponentImpl
   }
 }
 
-object Application extends Controller {
-  import app._
+trait ArticlesController {
+  this: Controller with ArticlesServiceComponent =>
 
   def index = Action {
-    Ok(views.html.articles(articlesService.getPage(0), 0))
+    Redirect(routes.Application.articles(0))
   }
 
   def articles(page: Int) = Action {
     Ok(views.html.articles(articlesService.getPage(page), page))
   }
 }
+
+object Application extends ArticlesController with Controller with Backend

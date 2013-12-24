@@ -16,6 +16,11 @@ libraryDependencies ++= Seq(
 
 playScalaSettings
 
+// Coffee Script compilation options
+coffeescriptOptions := Seq("bare")
+
+// WAR packaging
+
 Play2WarPlugin.play2WarSettings
 
 Play2WarKeys.servletVersion := "3.0"

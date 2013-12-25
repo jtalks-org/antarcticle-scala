@@ -5,6 +5,8 @@ name := "antarcticle-scala"
 
 version := "0.1"
 
+scalaVersion := "2.10.3"
+
 libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "1.0.1",
   // Joda time wrapper for scala

@@ -2,10 +2,16 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import services.{ArticlesServiceComponent, SlickSessionProvider, ArticlesServiceComponentImpl}
-import repositories.SlickArticlesRepositoryComponent
+import services._
+import repositories.{Repositories, SlickArticlesRepositoryComponent}
 import models.database._
-import scala.slick.driver.{PostgresDriver, H2Driver}
+import scala.slick.driver.{MySQLDriver, ExtendedProfile, PostgresDriver, H2Driver}
+import scala.slick.session.Database
+import models.database.UserToInsert
+import models.database.ArticleToInsert
+import conf.{DatabaseConfiguration, JndiProperties}
+import scala.util.Try
+import javax.naming.NamingException
 
 trait Backend extends ArticlesServiceComponentImpl
   with SlickArticlesRepositoryComponent with UsersComponent
@@ -53,7 +59,7 @@ trait ArticlesController {
   this: Controller with ArticlesServiceComponent =>
 
   def index = Action {
-    Redirect(routes.Application.articles(0))
+    Redirect(routes.ArticlesController.articles(0))
   }
 
   def articles(page: Int) = Action {
@@ -61,4 +67,4 @@ trait ArticlesController {
   }
 }
 
-object Application extends ArticlesController with Controller with Backend
+object Application extends Services with Controllers with Repositories with Schema with DatabaseConfiguration

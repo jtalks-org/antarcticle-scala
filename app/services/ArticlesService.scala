@@ -8,6 +8,7 @@ import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.DateImplicits._
 import scala.slick.session.Session
+import conf.Constants
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
@@ -50,7 +51,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     def getPage(page: Int) = withSession { implicit s: Session =>
-      val pageSize = 3 //TODO: move to some settings file
+      val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * page
       articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
     }

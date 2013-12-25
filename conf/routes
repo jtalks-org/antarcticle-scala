@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /articles                   controllers.Application.articles(page: Int ?= 0)
+GET     /articles                   @controllers.ArticlesController.articles(page: Int ?= 0)
 
 # Map static resources
 GET     /*file               controllers.Assets.at(path="/public", file)

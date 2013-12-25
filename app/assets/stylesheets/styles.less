@@ -1,3 +1,385 @@
-h2 {
-  color: red;
+@import "bootstrap.css";
+@import "bootstrap-tagsinput";
+@import "font-awesome.css";
+@import url('http://fonts.googleapis.com/css?family=Ubuntu:400,300&subset=latin,cyrillic');
+
+// fix for icons in drop-down
+.icon-white,
+.nav-tabs > .active > a > [class^="icon-"],
+.nav-tabs > .active > a > [class*=" icon-"],
+.nav-pills > .active > a > [class^="icon-"],
+.nav-pills > .active > a > [class*=" icon-"],
+.nav-list > .active > a > [class^="icon-"],
+.nav-list > .active > a > [class*=" icon-"],
+.navbar-inverse .nav > .active > a > [class^="icon-"],
+.navbar-inverse .nav > .active > a > [class*=" icon-"],
+.dropdown-menu > li > a:hover > [class^="icon-"],
+.dropdown-menu > li > a:hover > [class*=" icon-"],
+.dropdown-menu > .active > a > [class^="icon-"],
+.dropdown-menu > .active > a > [class*=" icon-"] {
+  background-image: none;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: rgb(247, 247, 247);
+  background-image: url("../images/fabric_plaid.png");
+}
+
+hr {
+  border-color: rgb(200, 200, 200) -moz-use-text-color white;
+}
+
+.well2 {
+  margin-bottom: 20px;
+  padding: 19px;
+  min-height: 20px;
+  border: medium none;
+  border-radius: 4px 4px 4px 4px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2), -1px -1px 0px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 300;
+  font-family: "Ubuntu", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+pre, code {
+  overflow: auto;
+  white-space: pre;
+  word-wrap: normal;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+.global-block {
+  float: none;
+  margin: 0 auto;
+}
+
+// global footer
+.footer {
+  bottom: 0;
+  padding-top: 10px;
+  width: 100%;
+  height: 60px;
+  border-top: 1px solid rgb(229, 229, 229);
+  background: url("../images/bg_tan_grid.png") repeat scroll center top transparent;
+  background-color: rgb(235, 235, 235);
+  box-shadow: inset 0 5px 5px -5px #000000;
+  text-align: center;
+  font-family: "Josefin Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  a {
+    color: rgb(51, 51, 51);
+  }
+}
+
+#page-wrapper {
+  position: relative;
+  min-height: 100%;
+}
+
+#main-container {
+  padding-bottom: 100px;
+}
+
+.navbar .nav > li > a {
+  padding: 10px 0px 10px 15px;
+}
+
+.centralized-inputs {
+  text-align: center;
+}
+
+.page-header {
+  margin: 12px 0px;
+  padding-bottom: 0px;
+}
+
+
+/***********************************************
+ * USER PROFILE
+ ***********************************************/
+.user-profile {
+
+  &:extend(.col-md-10)
+;
+  &:extend(.col-md-offset-1)
+;
+
+  .user-profile-header {
+
+    &:extend(.clearfix)
+  ;
+    border: 1px dashed rgb(200, 200, 200);
+    padding: 5px 10px;
+    .username {
+      margin: 0;
+      display: inline-block;
+    }
+
+    .name {
+      margin: 0 0 0 10px;
+      display: inline-block;
+      color: rgb(102, 102, 102);
+    }
+
+    .user-stats {
+
+      &:extend(.clearfix)
+    ;
+      margin: 0px;
+      width: 105px;
+      color: #676767;
+      list-style: none;
+
+      li {
+        display: block;
+        float: left;
+        padding-left: 8px;
+        width: 95px;
+        height: 45px;
+        border-left: 1px dashed rgb(200, 200, 200);
+        text-transform: uppercase;
+        /*border-right: 1px solid rgb(200, 200, 200);*/
+
+        strong {
+          display: block;
+          color: #434343;
+          font-weight: bold;
+          font-size: 1.4em;
+          line-height: 1.1em;
+        }
+      }
+
+    }
+  }
+}
+
+/***********************************************
+ * ARTICLES
+ ***********************************************/
+.tag-search{
+  line-height: 25px;
+  padding-bottom:15px;
+  margin-left:40px;
+  input {
+    padding-right:35px;
+  }
+}
+
+.date {
+  position: relative;
+  width: 70px;
+  font-family: Georgia, serif;
+  color: rgb(100, 100, 100);
+  .day, .month, .year {
+    position: absolute;
+  }
+
+  .day {
+    font-size: 30px;
+    top: 10px;
+  }
+
+  .month {
+    top: 0;
+    left: 0;
+    font-size: 18px;
+  }
+
+  .year {
+    top: 14px;
+    right: 0;
+    font-size: 20px;
+    rotation: -90deg !important;
+    /* ** Hacks ** */
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+  }
+}
+
+.articles-list {
+  margin: 5px 0px 10px 0px;
+}
+
+article.entry {
+  .main-content {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+    header {
+      margin: 0;
+      border-bottom: none;
+      position: relative;
+      .date {
+        top: 5px;
+        left: 3px;
+      }
+      h2 {
+        font-size: 1.8em;
+        border-bottom: 1px dashed rgb(238, 238, 238);
+        border-left: medium none;
+        border-right: medium none;
+        border-top: medium none;
+        border-radius: 4px 4px 0px 0px;
+        background-color: rgb(255, 255, 255);
+        padding: 18px;
+        box-shadow: 1px 0px 1px rgba(0, 0, 0, 0.2), -1px -1px 0px rgba(0, 0, 0, 0.1);
+        margin: 0px 0px 0px 70px;
+        a {
+          color: rgb(51, 51, 51);
+        }
+      }
+    }
+
+    .body {
+      min-height: 40px;
+      background-color: rgb(255, 255, 255);
+      border-left: medium none;
+      border-right: medium none;
+      border-bottom: medium none;
+      border-radius: 4px 0px 4px 4px;
+      padding: 15px;
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2), -1px -1px 0px rgba(0, 0, 0, 0.1);
+
+      .read-more {
+        margin-top: 5px;
+      }
+    }
+  }
+
+  footer {
+    .footer-elements {
+
+      border: 1px solid rgb(221, 221, 221);
+      background-color: rgb(251, 251, 251);
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+
+      .tags {
+        margin: 0;
+        list-style: none;
+        li {
+
+          white-space: nowrap;
+          float: left;
+
+          &:not(:last-child) {
+            margin-right: 5px;
+          }
+
+          i {
+            float: left;
+            line-height: 20px;
+          }
+
+          a {
+            display: inline-block;
+            white-space: normal;
+          }
+        }
+      }
+
+    }
+  }
+
+  .manage-buttons {
+    margin-bottom: 10px;
+  }
+
+}
+
+.comments {
+  .comment-bubble {
+    word-wrap: break-word;
+    background-color: white;
+    border-radius: 3px;
+    box-shadow: 0 0 3px #B2B2B2;
+    /*display: inline-block;*/
+    display: block;
+    padding: 10px 18px;
+    position: relative;
+    vertical-align: top;
+    margin: 5px 30px 5px 30px;
+
+    &:before {
+      background-color: white;
+      content: "\00a0";
+      display: block;
+      height: 16px;
+      position: absolute;
+      top: 11px;
+      transform: rotate(29deg) skew(-35deg);
+      -moz-transform: rotate(29deg) skew(-35deg);
+      -ms-transform: rotate(29deg) skew(-35deg);
+      -o-transform: rotate(29deg) skew(-35deg);
+      -webkit-transform: rotate(29deg) skew(-35deg);
+      width: 20px;
+    }
+
+    header {
+      border-bottom: 1px dashed #EEE;
+    }
+
+    &.comment-bubble-author {
+      &:before {
+        box-shadow: 2px -2px 2px 0 rgba(178, 178, 178, .4);
+        right: -9px;
+      }
+    }
+
+    &.comment-bubble-other {
+      &:before {
+        box-shadow: -2px 2px 2px 0 rgba(178, 178, 178, .4);
+        left: -9px;
+      }
+    }
+  }
+
+  .comment {
+    position: relative;
+
+    time {
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .toolb {
+      position: absolute;
+      a {
+        display: block;
+        margin-bottom: 3px;
+      }
+    }
+
+    &.comment-other .toolb {
+      right: 2px;
+      top: 1px;
+    }
+
+    &.comment-author .toolb {
+      left: 2px;
+      top: 1px;
+    }
+
+  }
+
+  form {
+    label {
+      margin: 0;
+    }
+    .control-group {
+      margin: 0;
+    }
+    textarea {
+      padding: 0;
+    }
+  }
+
 }

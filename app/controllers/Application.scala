@@ -57,7 +57,7 @@ trait ArticlesController {
   }
 
   def articles(page: Int) = Action {
-    Ok(views.html.articles(articlesService.getPage(page), page))
+    Ok(views.html.main("Articles")(views.html.articles(articlesService.getPage(page), page)))
   }
 }
 

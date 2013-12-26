@@ -1,30 +1,19 @@
 package services
 
-import org.specs2.mutable._
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import models.database._
 import utils.DateImplicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
 import repositories.ArticlesRepositoryComponent
-import scala.slick.session.Session
 import org.mockito.Matchers
 import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
-import util.TimeFridge
-import java.sql.Timestamp
+import util.{FakeSessionProvider, TimeFridge}
+import util.FakeSessionProvider.FakeSessionValue
 import models.Page
 
-object FakeSessionProvider {
-  val FakeSessionValue: Session = null
-}
 
-trait FakeSessionProvider extends SessionProvider {
-  import FakeSessionProvider._
-  def withSession[T](f: Session => T): T = f(FakeSessionValue)
-  def withTransaction[T](f: Session => T): T = f(FakeSessionValue)
-}
 
 class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito {
   object service extends ArticlesServiceComponentImpl
@@ -33,7 +22,6 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   import service._
-  import FakeSessionProvider._
 
   val dbRecord = {
     val article = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)

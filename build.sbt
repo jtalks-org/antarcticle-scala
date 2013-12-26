@@ -13,7 +13,10 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "0.6.0",
   "com.h2database" % "h2" % "1.3.174",
   "org.mockito" % "mockito-all" % "1.9.0",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4"
+  // temporary dependency
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",
+  // markdown support
+  "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2"
 )
 
 playScalaSettings

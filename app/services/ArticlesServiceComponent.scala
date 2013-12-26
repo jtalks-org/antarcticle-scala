@@ -26,7 +26,7 @@ trait ArticlesServiceComponent {
 }
 
 trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
-  this: ArticlesRepositoryComponent with SessionProvider =>
+  this: ArticlesRepositoryComponent with TagsServiceComponent with SessionProvider =>
 
   val articlesService = new ArticlesServiceImpl
 
@@ -35,8 +35,11 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       val currentTime = DateTime.now
       val currentUserId = 1 //TODO
       val newRecord = ArticleToInsert(article.title, article.content, currentTime, currentTime, article.description, currentUserId)
-      val inserted = articlesRepository.insert(newRecord)
-      insertToDetailsModel(inserted, newRecord, UserRecord(Some(1), ""))// TODO: real user
+      val id = articlesRepository.insert(newRecord)
+
+      tagsService.createTagsForArticle(id, article.tags)
+
+      insertToDetailsModel(id, newRecord, UserRecord(Some(1), ""))// TODO: real user
     }
 
     def updateArticle(article: Article) = withTransaction { implicit s: Session =>

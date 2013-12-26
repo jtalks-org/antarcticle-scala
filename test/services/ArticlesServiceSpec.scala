@@ -12,16 +12,22 @@ import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
 import util.{FakeSessionProvider, TimeFridge}
 import util.FakeSessionProvider.FakeSessionValue
 import models.Page
+import org.specs2.specification.BeforeExample
 
 
-
-class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito {
+class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito with BeforeExample {
   object service extends ArticlesServiceComponentImpl
-      with ArticlesRepositoryComponent with FakeSessionProvider {
+      with ArticlesRepositoryComponent with TagsServiceComponent with FakeSessionProvider {
     override val articlesRepository = mock[ArticlesRepository]
+    override val tagsService = mock[TagsService]
   }
 
   import service._
+
+  def before = {
+    org.mockito.Mockito.reset(tagsService)
+    org.mockito.Mockito.reset(articlesRepository)
+  }
 
   val dbRecord = {
     val article = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)
@@ -76,8 +82,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "contain list models" in {
-      val res = List(dbRecord)
-      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns res
+      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns List(dbRecord)
 
       val model: Page[ArticleListModel] = articlesService.getPage(1)
 
@@ -86,6 +91,8 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "contain current page" in {
+      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns List(dbRecord)
+
       val model = articlesService.getPage(1)
 
       model.currentPage must_== 1
@@ -93,6 +100,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
     "contain total pages count" in {
       val count = 5
+      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns List(dbRecord)
       articlesRepository.count()(Matchers.eq(FakeSessionValue)) returns count
 
       val model = articlesService.getPage(1)
@@ -120,6 +128,16 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
       val model: ArticleDetailsModel = articlesService.createArticle(Article(None, "", "", List()))
 
       model.id must_== 1
+    }
+
+    "create tags" in {
+      val tags = List("tag1", "tag2")
+      val articleId = 1
+      articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(FakeSessionValue)) returns articleId
+
+      articlesService.createArticle(Article(None, "", "", tags))
+
+      there was one(tagsService).createTagsForArticle(articleId, tags)
     }
   }
 

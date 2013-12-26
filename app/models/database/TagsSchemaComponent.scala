@@ -2,6 +2,8 @@ package models.database
 
 import scala.slick.lifted.ForeignKeyAction
 
+case class Tag(id: Int, name: String)
+
 trait TagsSchemaComponent {
   this: Profile with ArticlesSchemaComponent =>
 

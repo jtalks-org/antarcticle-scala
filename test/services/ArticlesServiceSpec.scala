@@ -34,16 +34,38 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   import service._
   import FakeSessionProvider._
 
+  val dbRecord = {
+    val article = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)
+    val user = UserRecord(Some(1), "")
+    val tags = List("tag1", "tag2")
+    (article, user, tags)
+  }
+
   "get article" should {
+    val article = Some(dbRecord)
+
     "return model" in {
-      val record = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)
-      val user = UserRecord(Some(1), "")
-      articlesRepository.get(anyInt)(Matchers.eq(FakeSessionValue)) returns Some((record, user))
+      articlesRepository.get(anyInt)(Matchers.eq(FakeSessionValue)) returns article
 
       val model = articlesService.get(1)
 
       model.map(_.id) must beSome(1)
+    }
+
+    "have correct author" in {
+      articlesRepository.get(anyInt)(Matchers.eq(FakeSessionValue)) returns article
+
+      val model = articlesService.get(1)
+
       model.map(_.author.id) must beSome(1)
+    }
+
+    "have correct tags" in {
+      articlesRepository.get(anyInt)(Matchers.eq(FakeSessionValue)) returns article
+
+      val model = articlesService.get(1)
+
+      model.map(_.tags).get must containTheSameElementsAs(dbRecord._3)
     }
   }
 
@@ -65,7 +87,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "return list models" in {
-      val res = List((ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1), UserRecord(Some(1), "")))
+      val res = List(dbRecord)
       articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns res
 
       val model: List[ArticleListModel] = articlesService.getPage(1)

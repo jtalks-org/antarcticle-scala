@@ -65,19 +65,19 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     private def insertToDetailsModel(id: Int, article: ArticleToInsert, authorRecord: UserRecord) = {
       ArticleDetailsModel(id, article.title,
         article.content, article.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username))
+        UserModel(authorRecord.id.get, authorRecord.username), List[String]())
     }
 
-    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord) = {
+    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: List[String]) = {
       ArticleDetailsModel(articleRecord.id.get, articleRecord.title,
         articleRecord.content, articleRecord.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username))
+        UserModel(authorRecord.id.get, authorRecord.username), tags)
     }
 
-    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord) = {
+    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: List[String]) = {
       ArticleListModel(articleRecord.id.get, articleRecord.title,
         articleRecord.description, articleRecord.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username), Seq("tag1", "tag2"))     // todo: tags from db
+        UserModel(authorRecord.id.get, authorRecord.username), tags)
     }
   }
 }

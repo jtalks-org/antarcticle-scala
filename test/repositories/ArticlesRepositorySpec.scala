@@ -36,6 +36,10 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     (users, articles, articlesIds)
   }
 
+  def asArticle(t: (ArticleRecord, UserRecord, List[String])) = t._1
+  def asAuthor(t: (ArticleRecord, UserRecord, List[String])) = t._2
+  def asTags(t: (ArticleRecord, UserRecord, List[String])) = t._3
+
   "list portion" should {
     "return portion with size 2" in withSession { implicit session: Session =>
       populateDb
@@ -57,7 +61,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
       val portion = articlesRepository.getList(offset, portionSize)
 
-      val firstArticleInPortion = portion(0)._1
+      val firstArticleInPortion = asArticle(portion(0))
       firstArticleInPortion.id must beSome(secondArticleId)
     }
 
@@ -66,10 +70,27 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
       val portion = articlesRepository.getList(0, 2)
 
-      portion.map(_._1).apply(0).id must beSome(articlesIds(1))
-      portion.map(_._1).apply(1).id must beSome(articlesIds(0))
+      asArticle(portion(0)).id must beSome(articlesIds(1))
+      asArticle(portion(1)).id must beSome(articlesIds(0))
     }
-    //TODO: test author correctness
+
+    "return article tags" in withSession { implicit session: Session =>
+      populateDb
+
+      val portion = articlesRepository.getList(0, 2)
+
+      asTags(portion(0)) must have size 2
+      asTags(portion(1)) must have size 2
+    }
+
+    "return article author" in withSession { implicit session: Session =>
+      populateDb
+
+      val portion = articlesRepository.getList(0, 2)
+
+      asAuthor(portion(0)).id must beSome(2)
+      asAuthor(portion(1)).id must beSome(1)
+    }
   }
 
 
@@ -80,7 +101,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val article = articlesRepository.get(2)
 
       article must beSome
-      article.flatMap(_._1.id) must beSome(2)
+      asArticle(article.get).id must beSome(2)
     }
 
     "return None when there are no article with id 2000" in withSession { implicit session: Session =>
@@ -117,7 +138,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "updating article" should {
-    "updates existing article" in withSession { implicit session: Session =>
+    "update existing article" in withSession { implicit session: Session =>
       val (_, articles, articlesIds) = populateDb
       val articleToBeUpdated = articles(1)
       val updatedArticleId = articlesIds(1)
@@ -132,7 +153,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       actualContent must_== newContent
     }
 
-    "returns false when updating not existing article" in withSession { implicit session: Session =>
+    "return false when updating not existing article" in withSession { implicit session: Session =>
       populateDb
 
       val upd = ArticleToUpdate("title", "content", DateTime.now, "desc")
@@ -142,7 +163,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "removing article" should {
-    "removes article" in withSession { implicit session: Session =>
+    "remove article" in withSession { implicit session: Session =>
       val (_, articles, _) = populateDb
       val oldCount = articles.size
 
@@ -150,7 +171,16 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       articlesCount must_== (oldCount - 1)
     }
 
-    "removes expected article" in withSession { implicit session: Session =>
+    "remove associated tags" in withSession { implicit session: Session =>
+      populateDb
+      val articleId = 1
+
+      articlesRepository.remove(articleId)
+
+      ArticlesTags.filter(_.articleId === articleId).list must be empty
+    }
+
+    "remove expected article" in withSession { implicit session: Session =>
       populateDb
       val articleId = 2
 
@@ -159,7 +189,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       Articles.filter(_.id === articleId).list must be empty
     }
 
-    "returns false when article not exists" in withSession { implicit session: Session =>
+    "return false when article not exists" in withSession { implicit session: Session =>
       populateDb
       articlesRepository.remove(1000) must beFalse
     }

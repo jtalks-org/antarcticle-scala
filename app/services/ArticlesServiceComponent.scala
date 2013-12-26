@@ -8,13 +8,15 @@ import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.DateImplicits._
 import scala.slick.session.Session
+import scala.math.ceil
 import conf.Constants
+import models.Page
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
-    def getPage(page: Int): List[ArticleListModel]
+    def getPage(page: Int): Page[ArticleListModel]
     def createArticle(article: Article): ArticleDetailsModel
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article)
@@ -53,7 +55,9 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def getPage(page: Int) = withSession { implicit s: Session =>
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * page
-      articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
+      val list = articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
+      val totalPages = ceil(articlesRepository.count() / pageSize.toDouble).toInt
+      Page(page, totalPages, list)
     }
 
     //TODO: Extract converions and write tests for them

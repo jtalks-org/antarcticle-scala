@@ -12,6 +12,7 @@ trait ArticlesRepositoryComponent {
     def insert(article: ArticleToInsert)(implicit s: Session): Int
     def update(id: Int, article: ArticleToUpdate)(implicit s: Session): Boolean
     def remove(id: Int)(implicit s: Session): Boolean
+    def count()(implicit s: Session): Int
   }
 }
 
@@ -50,6 +51,10 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def remove(id: Int)(implicit s: Session) = {
       Articles.where(_.id === id).delete > 0
+    }
+
+    def count()(implicit s: Session) = {
+      Query(Articles.length).first
     }
 
     //TODO: join tags in the same slick query as article

@@ -195,5 +195,15 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
   }
 
+  "articles count" should {
+    "return articles count" in withSession { implicit session: Session =>
+      val (_, articles, _) = populateDb
+
+      val count = articlesRepository.count
+
+      count must_== articles.size
+    }
+  }
+
   def articlesCount(implicit session: Session) = Query(Articles.length).first
 }

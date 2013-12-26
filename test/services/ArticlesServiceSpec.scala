@@ -14,6 +14,7 @@ import org.mockito.Matchers
 import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
 import util.TimeFridge
 import java.sql.Timestamp
+import models.Page
 
 object FakeSessionProvider {
   val FakeSessionValue: Session = null
@@ -86,14 +87,29 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
       there was one(articlesRepository).getList(6, 3)(FakeSessionValue)
     }
 
-    "return list models" in {
+    "contain list models" in {
       val res = List(dbRecord)
       articlesRepository.getList(anyInt, anyInt)(Matchers.eq(FakeSessionValue)) returns res
 
-      val model: List[ArticleListModel] = articlesService.getPage(1)
+      val model: Page[ArticleListModel] = articlesService.getPage(1)
 
-      model(0).id must_== 1
-      model(0).author.id must_== 1
+      model.list(0).id must_== 1
+      model.list(0).author.id must_== 1
+    }
+
+    "contain current page" in {
+      val model = articlesService.getPage(1)
+
+      model.currentPage must_== 1
+    }
+
+    "contain total pages count" in {
+      val count = 5
+      articlesRepository.count()(Matchers.eq(FakeSessionValue)) returns count
+
+      val model = articlesService.getPage(1)
+
+      model.totalPages must_== 2
     }
   }
 

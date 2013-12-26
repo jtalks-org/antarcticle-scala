@@ -11,8 +11,8 @@ case class ArticleToInsert(title: String, content: String, createdAt: Timestamp,
 case class ArticleToUpdate(title: String, content: String,
                            updatedAt: Timestamp, description: String)
 
-trait ArticlesComponent  {
-  this: Profile with UsersComponent =>
+trait ArticlesSchemaComponent  {
+  this: Profile with UsersSchemaComponent =>
 
   import profile.simple._
 
@@ -33,7 +33,7 @@ trait ArticlesComponent  {
 
     def forInsert = title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleToInsert.apply _, ArticleToInsert.unapply _) returning id
 
-    def authorIdx = index("index_articles_on_user_id", authorId)
+    //def authorIdx = index("index_articles_on_user_id", authorId)
   }
 
 }

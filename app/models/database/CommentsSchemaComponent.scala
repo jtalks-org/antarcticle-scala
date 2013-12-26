@@ -10,8 +10,8 @@ case class CommentToUpdate(content: String, updatedAt: Timestamp)
 case class Comment(id: Option[Int], userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp, updatedAt: Timestamp)
 
-trait CommentsComponent {
-  this: Profile with UsersComponent with ArticlesComponent =>
+trait CommentsSchemaComponent {
+  this: Profile with UsersSchemaComponent with ArticlesSchemaComponent =>
 
   import profile.simple._
 

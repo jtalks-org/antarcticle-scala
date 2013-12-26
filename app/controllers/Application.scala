@@ -14,8 +14,8 @@ import scala.util.Try
 import javax.naming.NamingException
 
 trait Backend extends ArticlesServiceComponentImpl
-  with SlickArticlesRepositoryComponent with UsersComponent
-  with ArticlesComponent with CommentsComponent with Profile with SlickSessionProvider {
+  with SlickArticlesRepositoryComponent with UsersSchemaComponent
+  with ArticlesSchemaComponent with CommentsSchemaComponent with Profile with SlickSessionProvider {
 
   val db = scala.slick.session.Database.forURL(url = "jdbc:postgresql:antarcticle",
     user = "postgres", password = "postgres", driver = "org.postgresql.Driver")

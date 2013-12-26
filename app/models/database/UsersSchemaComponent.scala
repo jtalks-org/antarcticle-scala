@@ -6,7 +6,7 @@ case class UserToInsert(username: String, admin: Boolean = false,
 case class UserRecord(id: Option[Int], username: String, admin: Boolean = false,
                 firstName: Option[String] = None, lastName: Option[String] = None)
 
-trait UsersComponent {
+trait UsersSchemaComponent {
   this: Profile =>
 
   import profile.simple._
@@ -21,7 +21,7 @@ trait UsersComponent {
     def * = id.? ~ username ~ admin ~ firstName.? ~ lastName.? <> (UserRecord.apply _, UserRecord.unapply _)
     def forInsert = username ~ admin ~ firstName.? ~ lastName.? <> (UserToInsert.apply _, UserToInsert.unapply _) returning id
 
-    def usernameIdx = index("index_users_on_username", username, unique = true)
+    //def usernameIdx = index("index_users_on_username", username, unique = true)
   }
 }
 

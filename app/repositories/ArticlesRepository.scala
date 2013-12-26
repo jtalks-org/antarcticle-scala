@@ -16,7 +16,7 @@ trait ArticlesRepositoryComponent {
 }
 
 trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
-  this: Profile with UsersComponent with ArticlesComponent =>
+  this: Profile with UsersSchemaComponent with ArticlesSchemaComponent =>
 
   val articlesRepository = new SlickArticlesRepository
 

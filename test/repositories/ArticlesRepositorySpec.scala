@@ -6,21 +6,17 @@ import models.database._
 import utils.DateImplicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
+import util.TestDatabaseConfiguration
 
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends SlickArticlesRepositoryComponent with UsersComponent with ArticlesComponent with Profile {
-    val profile = scala.slick.driver.H2Driver
-  }
+  object repository extends SlickArticlesRepositoryComponent with Schema with TestDatabaseConfiguration
 
-  val db = scala.slick.session.Database.forDriver(
-    driver = Class.forName("org.h2.Driver").newInstance.asInstanceOf[java.sql.Driver],
-    url = "jdbc:h2:mem:test1")
 
   import repository._
   import profile.simple._
 
   def populateDb(implicit session: Session) = {
-    (Articles.ddl ++ Users.ddl).create
+    createSchema
 
     val time = DateTime.now
     val users = List(UserToInsert("user1"), UserToInsert("user2"))

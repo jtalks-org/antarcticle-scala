@@ -2,6 +2,9 @@ package models.database
 
 import scala.slick.jdbc.meta.MTable
 
+/**
+ * Database schema layer
+ */
 trait Schema
   extends ArticlesSchemaComponent
   with CommentsSchemaComponent
@@ -23,5 +26,6 @@ trait Schema
     createIfNotExists(Articles)
     createIfNotExists(Comments)
     createIfNotExists(Tags)
+    createIfNotExists(ArticlesTags)
   }
 }

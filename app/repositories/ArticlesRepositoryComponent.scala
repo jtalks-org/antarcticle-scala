@@ -56,6 +56,5 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
         article <- Articles
         author <- article.author
       } yield (article, author)
-
   }
 }

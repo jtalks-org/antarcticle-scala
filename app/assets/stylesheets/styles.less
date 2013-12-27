@@ -66,6 +66,7 @@ pre, code {
 // global footer
 .footer {
   bottom: 0;
+  position:absolute;
   padding-top: 10px;
   width: 100%;
   height: 60px;
@@ -75,23 +76,22 @@ pre, code {
   box-shadow: inset 0 5px 5px -5px #000000;
   text-align: center;
   font-family: "Josefin Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
   a {
     color: rgb(51, 51, 51);
   }
 }
 
-#page-wrapper {
+.main-container {
+  padding-bottom: 100px;
+}
+
+.page-wrapper {
   position: relative;
   min-height: 100%;
 }
 
-#main-container {
-  padding-bottom: 100px;
-}
-
 .navbar .nav > li > a {
-  padding: 10px 0px 10px 15px;
+  padding: 15px 0px 10px 15px;
 }
 
 .centralized-inputs {

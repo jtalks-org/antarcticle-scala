@@ -2,11 +2,16 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET     /                           controllers.Application.index
-GET     /articles                   @controllers.ArticlesController.articles(page: Int ?= 0)
+# Authentication
+GET         /signin        @controllers.AuthenticationController.signin
+POST        /signin        @controllers.AuthenticationController.authenticate
+GET         /signout       @controllers.AuthenticationController.signout
 
-# Map static resources
-GET     /*file               controllers.Assets.at(path="/public", file)
+# Application pages
+GET         /              @controllers.ArticlesController.articles(page: Int ?= 0)
+GET         /articles      @controllers.ArticlesController.articles(page: Int ?= 0)
+GET         /articles/:id  @controllers.ArticlesController.article(id:Int)
+# Static resources: styles, scripts, images, fonts, etc
+GET         /*file         controllers.Assets.at(path="/public", file)
 
     

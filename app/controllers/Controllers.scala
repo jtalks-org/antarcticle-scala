@@ -6,6 +6,9 @@ import services.Services
 /**
  * Controllers layer implementation
  */
-trait Controllers extends Controller with ArticlesController {
+trait Controllers extends Controller
+                  with ArticlesController
+                  with AuthenticationController
+                  {
   this: Services =>
 }

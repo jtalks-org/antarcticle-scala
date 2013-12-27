@@ -51,13 +51,12 @@ import conf.DatabaseConfiguration
 trait ArticlesController {
   this: Controller with ArticlesServiceComponent =>
 
-  def index = Action {
-    Redirect(routes.ArticlesController.articles(0))
+  def articles(page: Int = 0) = Action {
+    implicit request => Ok(views.html.articles(articlesService.getPage(page)))
   }
 
-  def articles(page: Int) = Action {
-    Ok(views.html.main("Articles")(views.html.articles(articlesService.getPage(page))))
-  }
+  def article(id: Int) = TODO
 }
 
 object Application extends Services with Controllers with Repositories with Schema with DatabaseConfiguration
+

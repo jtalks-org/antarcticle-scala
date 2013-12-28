@@ -1,6 +1,5 @@
 package controllers
 
-import play.api.mvc._
 import services._
 import repositories.Repositories
 import models.database._
@@ -48,15 +47,7 @@ import conf.DatabaseConfiguration
 //  }
 //}
 
-trait ArticlesController {
-  this: Controller with ArticlesServiceComponent =>
 
-  def articles(page: Int = 0) = Action {
-    implicit request => Ok(views.html.articles(articlesService.getPage(page)))
-  }
-
-  def article(id: Int) = TODO
-}
 
 object Application extends Services with Controllers with Repositories with Schema with DatabaseConfiguration
 

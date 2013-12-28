@@ -33,12 +33,12 @@ trait AuthenticationController {
     implicit request =>
       loginForm.bindFromRequest.fold(
         formWithErrors => BadRequest(html.signin(formWithErrors)),
-        user => Redirect(routes.ArticlesController.articles()).withSession(Security.username -> user._1)
+        user => Redirect(routes.ArticleController.listAllArticles()).withSession(Security.username -> user._1)
       )
   }
 
   def signout = Action {
-    Redirect(routes.ArticlesController.articles()).withNewSession
+    Redirect(routes.ArticleController.listAllArticles()).withNewSession
   }
 }
 

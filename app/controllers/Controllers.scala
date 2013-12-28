@@ -7,8 +7,8 @@ import services.Services
  * Controllers layer implementation
  */
 trait Controllers extends Controller
-                  with ArticlesController
+                  with ArticleController
                   with AuthenticationController
-                  {
+                  with UserController{
   this: Services =>
 }

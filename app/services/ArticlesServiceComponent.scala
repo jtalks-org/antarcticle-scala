@@ -17,6 +17,7 @@ trait ArticlesServiceComponent {
 
   trait ArticlesService {
     def getPage(page: Int): Page[ArticleListModel]
+    def getPage(page: Int, userName : String): Page[ArticleListModel]
     def createArticle(article: Article): ArticleDetailsModel
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article)
@@ -53,6 +54,15 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     def getPage(page: Int) = withSession { implicit s: Session =>
+      val pageSize = Constants.PAGE_SIZE
+      val offset = pageSize * page
+      val list = articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
+      val totalPages = ceil(articlesRepository.count() / pageSize.toDouble).toInt
+      Page(page, totalPages, list)
+    }
+
+    //TODO: Fetch articles for given user only
+    def getPage(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit s: Session =>
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * page
       val list = articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)

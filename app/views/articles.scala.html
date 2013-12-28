@@ -1,5 +1,5 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel])(implicit request: Request[AnyContent])
-@template("Articles") {
+@templates.main("Articles") {
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
             <div class="clearfix">
@@ -12,56 +12,13 @@
                     </form>
                 </div>
                 <div class="pull-right">
-                    @* <%= link_to new_article_path, class: "btn btn-large btn-primary pull-right" do %>*@
-                    <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+                    <a class="btn btn-sm btn-primary" href="@routes.ArticleController.getNewArticlePage">
+                        <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+                    </a>
                     <div class="clearfix"></div>
                 </div>
             </div>
-            <section class="articles-list">
-                @for(article <- page.list) {
-                    <article id="@article.id" class="entry">
-                        <div class="main-content">
-                            <header>
-                                <div class="date">
-                                    <span class="day">@article.createdAt.format("dd")</span>
-                                    <span class="month">@article.createdAt.format("MMM")</span>
-                                    <span class="year">@article.createdAt.format("YYYY")</span>
-                                </div>
-                                <h2><a href="#">@article.title</a></h2>
-                            </header>
-                            <div class="body">
-                                <div class="content">@article.description</div>
-                                <a href="#" class="pull-right read-more">Read more</a>
-                                <div class="clearfix"></div>
-                            </div>
-                        </div>
-
-                        <footer>
-                            <ul class="footer-elements breadcrumb clearfix">
-                                <li>
-                                    <i class="glyphicon glyphicon-user"></i>
-                                    <strong>by </strong>
-                                    <a href="#">@article.author.username</a>
-                                </li>
-                                @for(tag <- article.tags) {
-                                    <li class="pull-right">
-                                        <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
-                                    </li>
-                                }
-                            </ul>
-                        </footer>
-                    </article>
-                }
-                @if(page.currentPage > 0) {
-                    <a href="@routes.ArticlesController.articles(page.currentPage - 1)">Prev page</a>
-                }
-                @for(pageNum <- (0 to page.totalPages)) {
-                    <a href="@routes.ArticlesController.articles(pageNum)">@pageNum</a>
-                }
-                @if(page.currentPage < page.totalPages) {
-                    <a href="@routes.ArticlesController.articles(page.currentPage + 1)">Next page</a>
-                }
-            </section>
+            @templates.bareArticleList(page)
         </div>
     </div>
 }

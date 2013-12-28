@@ -4,7 +4,8 @@ import play.api.mvc.{Security, Action, Controller}
 import services.ArticlesServiceComponent
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.ArticleDetailsModel
+import models.ArticleModels.{Article, ArticleDetailsModel}
+import views.html
 
 /**
  *
@@ -15,7 +16,8 @@ trait ArticleController {
   val articleForm = Form(
     tuple(
       "title" -> text,
-      "text" -> text
+      "content" -> text,
+      "tags" -> text
     )
   )
 
@@ -31,7 +33,16 @@ trait ArticleController {
     implicit request => Ok(views.html.articleEditor(articleForm))
   }
 
-  def postNewArticle = TODO
+  def postNewArticle = Action {
+    implicit request =>
+      articleForm.bindFromRequest.fold(
+        formWithErrors => BadRequest(html.articleEditor(formWithErrors)),
+        article => {
+          val created = articlesService.createArticle(Article(None, article._1, article._2, article._3.split(",")))
+          Ok(views.html.article(created))
+        }
+      )
+  }
 
   def editArticle(id: Int = 0) = TODO
 

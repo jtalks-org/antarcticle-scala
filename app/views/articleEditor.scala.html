@@ -1,11 +1,11 @@
-@(form: Form[(String, String)])(implicit request: Request[AnyContent])
+@(form: Form[(String, String, String)])(implicit request: Request[AnyContent])
 @templates.main("Title") {
     <div class="row">
         <div class="col-md-7 col-md-offset-2 well2">
-            <form accept-charset="UTF-8" action="/articles" class="new_article" id="new_article" method="post">
+            @helper.form(routes.ArticleController.postNewArticle()){
                 <div class="form-group ">
                     <div class="input-group">
-                        <input class="col-md-7 form-control" placeholder="Article title" size="100" type="text" />
+                        <input name="title" class="col-md-7 form-control" placeholder="Article title" size="100" type="text" />
                     </div>
                 </div>
                 <div class="form-group ">
@@ -15,16 +15,16 @@
                             Editor uses Markdown markup language. You can read reference
                             <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">here</a>.
                         </label>
-                        <textarea class="col-md-7 form-control" cols="40" placeholder="Enter article content here ..." rows="20"></textarea>
+                        <textarea name="content" class="col-md-7 form-control" cols="40" placeholder="Enter article content here ..." rows="20"></textarea>
                     </div>
                 </div>
                 <div class="form-group ">
                     <div class="input-group">
-                        <input class="col-md-7 form-control" placeholder="Tags (comma-separated)" size="100" type="text" value="" />
+                        <input name="tags" class="col-md-7 form-control" placeholder="Tags (comma-separated)" size="100" type="text" value="" />
                     </div>
                 </div>
                 <input class="btn btn-primary btn-lg pull-right" type="submit" value="Post article" />
-            </form>
+        }
         </div>
     </div>
 }

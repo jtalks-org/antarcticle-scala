@@ -7,6 +7,12 @@ import play.api.data.Forms._
 import views._
 
 /**
+ *  Handles sign in and sign out user actions.
+ *  After successful authentication current user name will be available in session,
+ *  one can obtain it as follows:
+ *  {{{
+ *    request.session.get(Security.username)
+ *  }}}
  *
  */
 trait AuthenticationController {
@@ -14,15 +20,15 @@ trait AuthenticationController {
 
   val loginForm = Form(
     tuple(
-      "email" -> text,
+      "login" -> text,
       "password" -> text
     ) verifying("Invalid username or password", result => result match {
-      case (email, password) => check(email, password)
+      case (login, password) => check(login, password)
     })
   )
 
-  def check(username: String, password: String) = {
-    username == "admin" && password == "admin"
+  def check(login: String, password: String) = {
+    login == "admin" && password == "admin"
   }
 
   def signin = Action {

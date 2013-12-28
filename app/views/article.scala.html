@@ -5,11 +5,7 @@
             <article id="@article.id" class="entry">
                 <div class="main-content">
                     <header>
-                        <div class="date">
-                            <span class="day">@article.createdAt.format("dd")</span>
-                            <span class="month">@article.createdAt.format("MMM")</span>
-                            <span class="year">@article.createdAt.format("YYYY")</span>
-                        </div>
+                        @templates.prettyDate(article.createdAt)
                         <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
                     </header>
                     <div class="body">

@@ -13,6 +13,7 @@ import conf.Constants
 import models.Page
 import scalaz._
 import Scalaz._
+import validators.Validator
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
@@ -20,7 +21,7 @@ trait ArticlesServiceComponent {
   trait ArticlesService {
     def getPage(page: Int): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String): Page[ArticleListModel]
-    def createArticle(article: Article): ArticleDetailsModel
+    def createArticle(article: Article): ValidationNel[String, ArticleDetailsModel]
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article)
     def removeArticle(id: Int)
@@ -28,21 +29,36 @@ trait ArticlesServiceComponent {
 }
 
 trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
-  this: ArticlesRepositoryComponent with TagsServiceComponent with SessionProvider =>
+  this: ArticlesRepositoryComponent with TagsServiceComponent
+    with SessionProvider =>
 
   val articlesService = new ArticlesServiceImpl
+  val articleValidator: Validator[Article]
 
   class ArticlesServiceImpl extends ArticlesService {
-    def createArticle(article: Article) = withTransaction { implicit s: Session =>
-      val currentTime = DateTime.now
-      val currentUserId = 1 //TODO
-      val newRecord = ArticleToInsert(article.title, article.content, currentTime, currentTime, article.description, currentUserId)
-      val id = articlesRepository.insert(newRecord)
+    def createArticle(article: Article) = withTransaction { implicit session: Session =>
+      def createRecord = {
+        val creationTime = DateTime.now
+        val currentUserId = 1 //TODO
+        articleToInsert(article, creationTime, currentUserId)
+      }
 
-      tagsService.createTagsForArticle(id, article.tags)
+      val result = for {
+        _ <- articleValidator.validate(article)
+        newRecord = createRecord
+        id = articlesRepository.insert(newRecord)
+        _ <- tagsService.createTagsForArticle(id, article.tags)
+      } yield insertToDetailsModel(id, newRecord, UserRecord(Some(1), "")/*TODO: real user*/)
 
-      insertToDetailsModel(id, newRecord, UserRecord(Some(1), ""))// TODO: real user
+      if (result.isFailure) {
+        // article should not be persisted, when tags creation failed
+        // reason: tags creation requires article id which is auto-increment column
+        session.rollback()
+      }
+
+      result
     }
+
 
     def updateArticle(article: Article) = withTransaction { implicit s: Session =>
       val modificationTime = DateTime.now
@@ -85,6 +101,10 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     //TODO: Extract conversions and write tests for them
+
+    private def articleToInsert(article: Article, creationTime: Timestamp, authorId: Int) = {
+      ArticleToInsert(article.title, article.content, creationTime, creationTime, article.description, authorId)
+    }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
       ArticleToUpdate(article.title, article.content, updatedAt, article.description)

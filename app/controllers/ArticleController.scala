@@ -6,6 +6,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{Article, ArticleDetailsModel}
 import views.html
+import scalaz._
+import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -27,35 +29,35 @@ trait ArticleController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
-  def listAllArticles(page: Int = 0) = Action {
-    implicit request => Ok(views.html.articles(articlesService.getPage(page)))
+  def listAllArticles(page: Int = 0) = Action { implicit request =>
+    Ok(views.html.articles(articlesService.getPage(page)))
   }
 
-  def viewArticle(id: Int) = Action {
-    implicit request => Ok(views.html.article(articlesService.get(id).get))
+  def viewArticle(id: Int) = Action { implicit request =>
+    Ok(views.html.article(articlesService.get(id).get))
   }
 
-  def getNewArticlePage = Action {
-    implicit request => Ok(views.html.createArticle(articleForm))
+  def getNewArticlePage = Action { implicit request =>
+    Ok(views.html.createArticle(articleForm))
   }
 
-  def postNewArticle = Action {
-    implicit request =>
+  def postNewArticle = Action { implicit request =>
       articleForm.bindFromRequest.fold(
         formWithErrors => BadRequest(html.createArticle(formWithErrors)),
         article => {
-          val created = articlesService.createArticle(article)
-          Redirect(routes.ArticleController.viewArticle(created.id))
+          articlesService.createArticle(article).fold(
+            fail = nel => BadRequest(nel.list.mkString(";")),
+            succ = created => Redirect(routes.ArticleController.viewArticle(created.id))
+          )
         }
       )
   }
 
-  def editArticle(id: Int = 0) = Action {
-    implicit request => Ok(views.html.editArticle(articleForm.fill(articlesService.get(id).get)))
+  def editArticle(id: Int = 0) = Action { implicit request =>
+    Ok(views.html.editArticle(articleForm.fill(articlesService.get(id).get)))
   }
 
-  def postArticleEdits() = Action {
-    implicit request =>
+  def postArticleEdits() = Action { implicit request =>
       articleForm.bindFromRequest.fold(
         formWithErrors => BadRequest(html.editArticle(formWithErrors)),
         article => {
@@ -65,9 +67,8 @@ trait ArticleController {
       )
   }
 
-      def removeArticle(id: Int) = Action {
-        implicit request =>
-          articlesService.removeArticle(id)
-          Redirect(routes.ArticleController.listAllArticles())
-      }
+  def removeArticle(id: Int) = Action { implicit request =>
+      articlesService.removeArticle(id)
+      Redirect(routes.ArticleController.listAllArticles())
   }
+}

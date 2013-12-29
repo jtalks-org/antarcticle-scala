@@ -9,17 +9,25 @@ import models.database.Tag
 import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.ArgumentCapture
+import validators.Validator
+import util.ScalazValidationTestUtils._
+import scalaz._
+import Scalaz._
 
 class TagsServiceSpec extends Specification with Mockito with BeforeExample {
   object service extends TagsServiceComponentImpl
                   with TagsRepositoryComponent
                   with FakeSessionProvider {
     override val tagsRepository = mock[TagsRepository]
+    override val tagValidator = mock[Validator[String]]
   }
 
   import service._
 
-  def before = org.mockito.Mockito.reset(tagsRepository)
+  def before = {
+    org.mockito.Mockito.reset(tagsRepository)
+    org.mockito.Mockito.reset(tagValidator)
+  }
 
   "tags creation for article" should {
     val tags = List("tag", " tag1 ", "tag2 ")
@@ -27,6 +35,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
     "trim tags with trailing spaces" in {
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List[Tag]()
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns (1 to tags.size)
+      tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)
 
@@ -40,6 +49,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val newTagId = 5
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns existingTags
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(newTagId)
+      tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)
 
@@ -50,6 +60,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val tagsIds = 1 to tags.size
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List[Tag]()
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns tagsIds
+      tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)
 
@@ -64,6 +75,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val newTagsIds = List(2, 3)
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(existingTag)
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns newTagsIds
+      tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)
 
@@ -71,6 +83,12 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val expectedArticleTagsAssociations = Seq((1, 1), (1, 2), (1, 3))
       there was one(tagsRepository).insertArticleTags(assocListCapture.capture)(Matchers.eq(FakeSessionValue))
       assocListCapture.value must containTheSameElementsAs(expectedArticleTagsAssociations)
+    }
+
+    "not create any tags if validation fail" in {
+      tagValidator.validate(any[String]) returns "".failNel
+
+      there was noMoreCallsTo(tagsRepository)
     }
   }
 }

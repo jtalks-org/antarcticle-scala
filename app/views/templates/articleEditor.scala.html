@@ -1,0 +1,28 @@
+@(form: Form[ArticleModels.Article], submitCaption: String)(implicit request: Request[AnyContent])
+@form.globalError.map { error =>
+    <div class="alert alert-danger">
+        <a class="close" data-dismiss="alert" href="#">x</a>
+        @error.message
+    </div>
+}
+<div class="form-group ">
+    <div class="input-group">
+        <input name="title" class="col-md-7 form-control" placeholder="Article title" size="100" type="text" value="@form("title").value"/>
+    </div>
+</div>
+<div class="form-group ">
+    <div class="input-group">
+        <i class="glyphicon glyphicon-pencil"></i>
+        <label for="article_content" class="editor-hint">
+            Editor uses Markdown markup language. You can read reference
+            <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">here</a>.
+        </label>
+        <textarea name="content" class="col-md-7 form-control" cols="40" placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
+    </div>
+</div>
+<div class="form-group ">
+    <div class="input-group">
+        <input name="tags" class="col-md-7 form-control" placeholder="Tags (comma-separated)" size="100" type="text" value="@form("tags").value"/>
+    </div>
+</div>
+<input class="btn btn-primary btn-lg pull-right" type="submit" value="@submitCaption" />

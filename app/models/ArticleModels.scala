@@ -3,6 +3,7 @@ package models
 import models.UserModels.UserModel
 
 object ArticleModels {
+
   case class ArticleListModel(id: Int, title: String, description: String,
                               createdAt: java.util.Date, author: UserModel, tags: Seq[String])
 
@@ -14,4 +15,7 @@ object ArticleModels {
     //TODO: strip tags
     lazy val description = content.take(300)
   }
+
+  implicit def detailsAsArticle(details: ArticleDetailsModel) =
+    Article(Some(details.id), details.title, details.content, details.tags)
 }

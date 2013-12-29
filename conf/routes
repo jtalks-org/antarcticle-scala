@@ -15,8 +15,8 @@ GET           /articles/new        @controllers.ArticleController.getNewArticleP
 POST          /articles/new        @controllers.ArticleController.postNewArticle
 GET           /articles/:id        @controllers.ArticleController.viewArticle(id:Int)
 GET           /articles/edit/:id        @controllers.ArticleController.editArticle(id: Int)
-POST          /articles/edit/:id        @controllers.ArticleController.postArticleEdits(id:Int)
-DELETE        /articles/:id        @controllers.ArticleController.removeArticle(id:Int)
+POST          /articles/edit        @controllers.ArticleController.postArticleEdits
+GET           /articles/remove/:id        @controllers.ArticleController.removeArticle(id:Int)
 
 GET           /users/:name        @controllers.UserController.viewProfile(name: String, page: Int ?= 0)
 

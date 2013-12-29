@@ -1,0 +1,11 @@
+@(form: Form[ArticleModels.Article])(implicit request: Request[AnyContent])
+@templates.main("Edit article") {
+    <div class="row">
+        <div class="col-md-7 col-md-offset-2 well2">
+        @helper.form(routes.ArticleController.postArticleEdits) {
+            <input type="hidden" name="id" value="@form("id").value">
+            @templates.articleEditor(form, "Save edit")
+        }
+        </div>
+    </div>
+}

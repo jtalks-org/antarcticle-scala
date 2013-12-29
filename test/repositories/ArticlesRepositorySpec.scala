@@ -93,6 +93,17 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
   }
 
+  "list portion for user" should {
+    "return articles created by user2" in withSession { implicit session: Session =>
+      populateDb
+      val userId = 2
+
+      val portion = articlesRepository.getListForUser(userId, 0, 10)
+
+      portion.map(asAuthor(_).id) must contain((id: Option[Int]) => id must beSome(userId))
+    }
+  }
+
 
   "article by id" should {
     "return article with id 2" in withSession { implicit session: Session =>
@@ -202,6 +213,17 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val count = articlesRepository.count
 
       count must_== articles.size
+    }
+  }
+
+  "articles count by author" should {
+    "return articles count for user2" in withSession { implicit session: Session =>
+      populateDb
+      val userId = 2
+
+      val count = articlesRepository.countForUser(userId)
+
+      count must_== 3
     }
   }
 

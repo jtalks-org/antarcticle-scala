@@ -12,7 +12,7 @@ trait UserController {
   //todo: must be protected with authentication
   def viewProfile(userName: String, page: Int = 0) = Action {
     implicit request => {
-      Ok(views.html.profile(articlesService.getPage(page, userName), userName))
+      Ok(views.html.profile(articlesService.getPageForUser(page, userName), userName))
     }
   }
 }

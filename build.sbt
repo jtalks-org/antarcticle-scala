@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   // temporary dependency
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   // markdown support
-  "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2"
+  "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2",
+  "org.scalaz" %% "scalaz-core" % "7.0.5"
 )
 
 playScalaSettings

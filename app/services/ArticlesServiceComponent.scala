@@ -11,13 +11,15 @@ import scala.slick.session.Session
 import scala.math.ceil
 import conf.Constants
 import models.Page
+import scalaz._
+import Scalaz._
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
     def getPage(page: Int): Page[ArticleListModel]
-    def getPage(page: Int, userName : String): Page[ArticleListModel]
+    def getPageForUser(page: Int, userName : String): Page[ArticleListModel]
     def createArticle(article: Article): ArticleDetailsModel
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article)
@@ -57,23 +59,32 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     def getPage(page: Int) = withSession { implicit s: Session =>
-      val pageSize = Constants.PAGE_SIZE
-      val offset = pageSize * page
-      val list = articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
-      val totalPages = ceil(articlesRepository.count() / pageSize.toDouble).toInt
-      Page(page, totalPages, list)
+      fetchPageFromDb(page)
     }
 
     //TODO: Fetch articles for given user only
-    def getPage(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit s: Session =>
-      val pageSize = Constants.PAGE_SIZE
-      val offset = pageSize * page
-      val list = articlesRepository.getList(offset, pageSize).map((recordToListModel _).tupled)
-      val totalPages = ceil(articlesRepository.count() / pageSize.toDouble).toInt
-      Page(page, totalPages, list)
+    def getPageForUser(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit s: Session =>
+      val userId = 1 // TODO
+      fetchPageFromDb(page, Some(userId))
     }
 
-    //TODO: Extract converions and write tests for them
+    private def fetchPageFromDb(page: Int, userId: Option[Int] = None)(implicit s: Session) = {
+      val pageSize = Constants.PAGE_SIZE
+      val offset = pageSize * page
+      val list = userId.cata(
+        some = articlesRepository.getListForUser(_, offset, pageSize),
+        none = articlesRepository.getList(offset, pageSize)
+      )
+      val modelsList = list.map((recordToListModel _).tupled)
+      val total = userId.cata(
+        some = articlesRepository.countForUser(_),
+        none = articlesRepository.count()
+      )
+      val totalPages = ceil(total / pageSize.toDouble).toInt
+      Page(page, totalPages, modelsList)
+    }
+
+    //TODO: Extract conversions and write tests for them
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
       ArticleToUpdate(article.title, article.content, updatedAt, article.description)

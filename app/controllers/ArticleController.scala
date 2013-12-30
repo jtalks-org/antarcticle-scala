@@ -40,14 +40,13 @@ trait ArticleController {
   }
 
   def postNewArticle = Action {
-    implicit request =>
-      articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.createArticle(formWithErrors)),
-        article => {
-          val created = articlesService.createArticle(article)
-          Redirect(routes.ArticleController.viewArticle(created.id))
-        }
-      )
+    implicit request => articleForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.createArticle(formWithErrors)),
+      article => {
+        val created = articlesService.createArticle(article)
+        Redirect(routes.ArticleController.viewArticle(created.id))
+      }
+    )
   }
 
   def editArticle(id: Int = 0) = Action {
@@ -55,19 +54,17 @@ trait ArticleController {
   }
 
   def postArticleEdits() = Action {
-    implicit request =>
-      articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.editArticle(formWithErrors)),
-        article => {
-          articlesService.updateArticle(article)
-          Redirect(routes.ArticleController.viewArticle(article.id.get))
-        }
-      )
+    implicit request => articleForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.editArticle(formWithErrors)),
+      article => {
+        articlesService.updateArticle(article)
+        Redirect(routes.ArticleController.viewArticle(article.id.get))
+      }
+    )
   }
 
-      def removeArticle(id: Int) = Action {
-        implicit request =>
-          articlesService.removeArticle(id)
-          Redirect(routes.ArticleController.listAllArticles())
-      }
+  def removeArticle(id: Int) = Action {
+    implicit request => articlesService.removeArticle(id)
+      Redirect(routes.ArticleController.listAllArticles())
   }
+}

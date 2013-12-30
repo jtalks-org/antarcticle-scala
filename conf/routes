@@ -2,25 +2,25 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+GET           /                       @controllers.ArticleController.listAllArticles(page: Int ?= 0)
 # Authentication
-GET           /signin        @controllers.AuthenticationController.signin
-POST          /signin        @controllers.AuthenticationController.authenticate
-GET           /signout        @controllers.AuthenticationController.signout
-
-# Application pages
-GET           /        @controllers.ArticleController.listAllArticles(page: Int ?= 0)
-
-GET           /articles        @controllers.ArticleController.listAllArticles(page: Int ?= 0)
-GET           /articles/new        @controllers.ArticleController.getNewArticlePage
-POST          /articles/new        @controllers.ArticleController.postNewArticle
-GET           /articles/:id        @controllers.ArticleController.viewArticle(id:Int)
-GET           /articles/edit/:id        @controllers.ArticleController.editArticle(id: Int)
-POST          /articles/edit        @controllers.ArticleController.postArticleEdits
-GET           /articles/remove/:id        @controllers.ArticleController.removeArticle(id:Int)
-
-GET           /users/:name        @controllers.UserController.viewProfile(name: String, page: Int ?= 0)
-
+GET           /signin                 @controllers.AuthenticationController.signin
+POST          /signin                 @controllers.AuthenticationController.authenticate
+GET           /signout                @controllers.AuthenticationController.signout
+# Articles
+GET           /articles               @controllers.ArticleController.listAllArticles(page: Int ?= 0)
+GET           /articles/new           @controllers.ArticleController.getNewArticlePage
+POST          /articles/new           @controllers.ArticleController.postNewArticle
+GET           /articles/:id           @controllers.ArticleController.viewArticle(id:Int)
+GET           /articles/edit/:id      @controllers.ArticleController.editArticle(id: Int)
+POST          /articles/edit          @controllers.ArticleController.postArticleEdits
+GET           /articles/remove/:id    @controllers.ArticleController.removeArticle(id:Int)
+# Comments
+POST          /comments/new           @controllers.CommentController.postNewComment
+GET           /comments/remove/:id    @controllers.CommentController.removeComment(id:Int)
+# Users
+GET           /users/:name            @controllers.UserController.viewProfile(name: String, page: Int ?= 0)
 # Static resources: styles, scripts, images, fonts, etc
-GET           /*file        controllers.Assets.at(path="/public", file)
+GET           /*file                  controllers.Assets.at(path="/public", file)
 
     

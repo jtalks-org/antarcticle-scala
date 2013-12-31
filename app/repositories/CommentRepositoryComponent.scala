@@ -17,7 +17,7 @@ trait CommentRepositoryComponent {
 
     def insert(comment: CommentToInsert)(implicit session: Session): Int
 
-    def update(comment: CommentToUpdate)(implicit session: Session): Boolean
+    def update(id: Int, comment: CommentToUpdate)(implicit session: Session): Boolean
 
     def delete(id: Int)(implicit session: Session): Boolean
   }
@@ -43,9 +43,9 @@ trait CommentRepositoryComponentImpl extends CommentRepositoryComponent {
         Comments.forInsert.insert(comment)
     }
 
-    def update(comment: CommentToUpdate)(implicit session: Session) = {
+    def update(id: Int, comment: CommentToUpdate)(implicit session: Session) = {
      Comments
-        .filter(_.id === comment.id)
+        .filter(_.id === id)
         .map(_.forUpdate)
         .update(comment) > 0
     }

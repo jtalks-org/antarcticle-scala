@@ -19,7 +19,7 @@ trait CommentServiceComponent {
 
     def insert(articleId: Int, content : String): CommentRecord
 
-    def update(comment: CommentToUpdate): Boolean
+    def update(id: Int, comment: CommentToUpdate): Boolean
 
     def removeComment(id: Int): Boolean
   }
@@ -32,29 +32,25 @@ trait CommentServiceComponentImpl extends CommentServiceComponent {
 
   class CommentServiceImpl extends CommentService {
 
+    //todo: real user
     def getByArticle(articleId: Int) = withTransaction {
-      implicit s: Session =>
-        //todo: real user
-        commentRepository.getByArticle(articleId).map((x : CommentRecord) =>
-          Comment(x.id.get, UserModel(1, "admin"), x.articleId, x.content, x.createdAt,x.updatedAt))
+      implicit s: Session => commentRepository.getByArticle(articleId).map(
+        (x : CommentRecord) => Comment(x.id.get, UserModel(1, "admin"), x.articleId, x.content, x.createdAt,x.updatedAt))
     }
 
+    // todo: real user
     def insert(articleId: Int, content : String) = withTransaction {
-      implicit s: Session =>
-        // todo: real user
-        val userId = 1
+      implicit s: Session => val userId = 1
         val id = commentRepository.insert(CommentToInsert(userId, articleId, content, DateTime.now))
         CommentRecord(Some(id), userId, articleId, content, DateTime.now, null)
     }
 
-    def update(comment: CommentToUpdate) = withTransaction {
-      implicit s: Session =>
-        commentRepository.update(comment)
+    def update(id: Int, comment: CommentToUpdate) = withTransaction {
+      implicit s: Session => commentRepository.update(id, comment)
     }
 
     def removeComment(id: Int) = withTransaction {
-      implicit s: Session =>
-        commentRepository.delete(id)
+      implicit s: Session => commentRepository.delete(id)
     }
   }
 }

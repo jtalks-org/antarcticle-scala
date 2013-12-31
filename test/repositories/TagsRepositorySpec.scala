@@ -7,9 +7,12 @@ import com.github.nscala_time.time.Imports._
 import models.database.{ArticleToInsert, UserToInsert, Schema}
 import util.TestDatabaseConfiguration
 import scala.slick.jdbc.meta.MTable
+import migrations.{MigrationTool, MigrationsContainer}
 
 class TagsRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends TagsRepositoryComponentImpl with Schema with TestDatabaseConfiguration
+  object repository extends TagsRepositoryComponentImpl with MigrationTool with Schema with TestDatabaseConfiguration {
+    val migrationsContainer = new MigrationsContainer {}
+  }
 
 
   import repository._
@@ -17,7 +20,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
   //TODO: get rid of this copypaste
   def populateDb(implicit session: Session) = {
-    createSchema
+    migrate
 
     val time = DateTime.now
     val users = List(UserToInsert("user1"), UserToInsert("user2"))

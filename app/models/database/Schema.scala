@@ -15,17 +15,6 @@ trait Schema
 
   import profile.simple._
 
-  def createSchema(implicit session: Session) = {
-    def createIfNotExists[T](table: Table[T])(implicit session: Session) = {
-      if (MTable.getTables(table.tableName).list.isEmpty) {
-        table.ddl.create
-      }
-    }
-
-    createIfNotExists(Users)
-    createIfNotExists(Articles)
-    createIfNotExists(Comments)
-    createIfNotExists(Tags)
-    createIfNotExists(ArticlesTags)
-  }
+  lazy val schema = Vector(Users, Articles, Comments, Tags,
+    ArticlesTags)
 }

@@ -1,4 +1,5 @@
 import controllers._
+import migrations.{Migrations, MigrationTool}
 import services._
 import repositories._
 import models.database._
@@ -6,7 +7,22 @@ import conf.DatabaseConfiguration
 import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
 
-object Application extends Services with Controllers with Repositories with Schema with DatabaseConfiguration
+object Application
+  extends Services
+  with Controllers
+  with Repositories
+  with MigrationTool
+  with Schema
+  with DatabaseConfiguration {
+
+  override val migrationsContainer = new Migrations(profile)
+
+  withSession { implicit s: scala.slick.session.Session =>
+    migrate
+  }
+}
+
+
 
 trait Repositories
   extends SlickArticlesRepositoryComponent

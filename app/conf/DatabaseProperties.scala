@@ -21,8 +21,7 @@ class JndiDatabasePropertiesProvider extends DatabasePropertiesProvider {
   } yield DatabaseProperties(url, user, password, driver)
 }
 
-// temporary
 object DefaultProvider extends DatabasePropertiesProvider {
-  def getProperties = Try(DatabaseProperties("jdbc:postgresql:antarcticle",
-    "postgres", "postgres", "org.postgresql.Driver"))
+  def getProperties = Try(DatabaseProperties("jdbc:h2:mem:test1;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1",
+    "sa", "", "org.h2.Driver"))
 }

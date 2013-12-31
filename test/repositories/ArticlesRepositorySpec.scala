@@ -7,16 +7,19 @@ import utils.DateImplicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import util.TestDatabaseConfiguration
+import migrations.{MigrationTool, MigrationsContainer}
 
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends SlickArticlesRepositoryComponent with Schema with TestDatabaseConfiguration
+  object repository extends SlickArticlesRepositoryComponent with MigrationTool with Schema with TestDatabaseConfiguration {
+    override val migrationsContainer = new MigrationsContainer {}
+  }
 
 
   import repository._
   import profile.simple._
 
   def populateDb(implicit session: Session) = {
-    createSchema
+    migrate
 
     val time = DateTime.now
     val users = List(UserToInsert("user1"), UserToInsert("user2"))

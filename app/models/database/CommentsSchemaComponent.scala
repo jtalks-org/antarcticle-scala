@@ -8,8 +8,8 @@ case class CommentToInsert(userId: Int, articleId: Int,
 
 case class CommentToUpdate(id: Option[Int], content: String, updatedAt: Timestamp)
 
-case class Comment(id: Option[Int], userId: Int, articleId: Int,
-                   content: String, createdAt: Timestamp, updatedAt: Timestamp)
+case class CommentRecord(id: Option[Int], userId: Int, articleId: Int,
+                   content: String, createdAt: Timestamp, updatedAt: Option[Timestamp])
 
 trait CommentsSchemaComponent {
   this: Profile with UsersSchemaComponent with ArticlesSchemaComponent =>
@@ -19,7 +19,7 @@ trait CommentsSchemaComponent {
   /**
    * Comments to articles
    */
-  object Comments extends Table[Comment]("comments") {
+  object Comments extends Table[CommentRecord]("comments") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)
@@ -34,7 +34,7 @@ trait CommentsSchemaComponent {
     def article = foreignKey("comment_article_fk", articleId, Articles)(_.id, onDelete = ForeignKeyAction.Cascade)
 
     // projections
-    def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt <> (Comment.apply _, Comment.unapply _)
+    def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt.? <> (CommentRecord.apply _, CommentRecord.unapply _)
     def forUpdate = id.? ~ content ~ updatedAt <> (CommentToUpdate.apply _, CommentToUpdate.unapply _)
     def forInsert = userId ~ articleId ~ content ~ createdAt <>
       (CommentToInsert.apply _, CommentToInsert.unapply _) returning id

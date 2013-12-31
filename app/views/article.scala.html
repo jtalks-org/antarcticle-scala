@@ -1,4 +1,5 @@
-@(article: models.ArticleModels.ArticleDetailsModel)(implicit request: Request[AnyContent])
+@(article: models.ArticleModels.ArticleDetailsModel,
+        comments: List[models.CommentModels.Comment])(implicit request: Request[AnyContent])
     @templates.main(article.title) {
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
@@ -41,9 +42,26 @@
                 </article>
                 <section class="comments" id="comments">
                     <h3 class="comments-header">Comments</h3>
-                    <div class="centralized-inputs">
-                        <h3>There are no comments yet</h3>
-                    </div>
+                    @if(comments.isEmpty) {
+                        <div class="centralized-inputs">
+                            <h3>There are no comments yet</h3>
+                        </div>
+                    } else {
+                        @for(comment <- comments) {
+                            <article class="clearfix comment comment-other">
+                                <div class="comment-bubble comment-bubble-other">
+                                    <header>
+                                        <i class="glyphicon glyphicon-user"></i>
+                                        <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
+                                        <time class="pull-right">
+                                            <i class="glyphicon glyphicon-calendar"></i>  @comment.createdAt
+                                        </time>
+                                    </header>
+                                    <div>@comment.content</div>
+                                </div>
+                            </article>
+                        }
+                    }
                     <form class="clearfix comment-bubble comment-bubble-other" id="comment_form" action="@routes.CommentController.postNewComment" method="post">
                         <div class="form-group">
                             <input id="article_id" type="hidden" value="@article.id"/>

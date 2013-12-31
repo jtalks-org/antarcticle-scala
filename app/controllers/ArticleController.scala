@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Security, Action, Controller}
-import services.ArticlesServiceComponent
+import services.{CommentServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{Article, ArticleDetailsModel}
@@ -12,7 +12,7 @@ import views.html
  * todo: handle 404
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent =>
+  this: Controller with ArticlesServiceComponent with CommentServiceComponent =>
 
   /**
    * Describes binding between Article model object and web-form
@@ -32,7 +32,7 @@ trait ArticleController {
   }
 
   def viewArticle(id: Int) = Action {
-    implicit request => Ok(views.html.article(articlesService.get(id).get))
+    implicit request => Ok(views.html.article(articlesService.get(id).get, commentService.getByArticle(id)))
   }
 
   def getNewArticlePage = Action {

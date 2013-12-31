@@ -2,7 +2,7 @@ package repositories
 
 import scala.slick.session.Session
 import models.database._
-import models.database.Comment
+import models.database.CommentRecord
 import models.database.CommentToInsert
 
 /**
@@ -13,7 +13,7 @@ trait CommentRepositoryComponent {
 
   trait CommentRepository {
 
-    def getByArticle(id: Int)(implicit session: Session): List[Comment]
+    def getByArticle(id: Int)(implicit session: Session): List[CommentRecord]
 
     def insert(comment: CommentToInsert)(implicit session: Session): Int
 
@@ -34,8 +34,8 @@ trait CommentRepositoryComponentImpl extends CommentRepositoryComponent {
 
     def getByArticle(id: Int)(implicit session: Session) = {
       Query(Comments)
-        .filter(_.articleId == id)
-        .sortBy(_.createdAt.desc)
+        .filter(_.articleId === id)
+        .sortBy(_.createdAt.asc)
         .list
     }
 

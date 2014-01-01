@@ -1,61 +1,79 @@
-@(article: models.ArticleModels.ArticleDetailsModel)(implicit request: Request[AnyContent])
-@templates.main(article.title) {
-    <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <div class="pull-right page-header">
-                <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
-                    <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
-                </a>
-                <a class="btn btn-sm btn-danger" id="delete-article" href="@routes.ArticleController.removeArticle(article.id)">
-                    <i class="glyphicon glyphicon-remove icon-white"></i> Delete
-                </a>
+@(article: models.ArticleModels.ArticleDetailsModel,
+        comments: List[models.CommentModels.Comment])(implicit request: Request[AnyContent])
+    @templates.main(article.title) {
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="pull-right page-header">
+                    <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
+                        <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
+                    </a>
+                    <a class="btn btn-sm btn-danger" id="delete-article" href="@routes.ArticleController.removeArticle(article.id)">
+                        <i class="glyphicon glyphicon-remove icon-white"></i> Delete
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <article id="@article.id" class="entry">
-                <div class="main-content">
-                    <header>
-                        @templates.prettyDate(article.createdAt)
-                        <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
-                    </header>
-                    <div class="body">
-                        <div class="content clearfix">@article.content</div>
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <article id="@article.id" class="entry">
+                    <div class="main-content">
+                        <header>
+                            @templates.prettyDate(article.createdAt)
+                            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+                        </header>
+                        <div class="body">
+                            <div class="content clearfix">@article.content</div>
+                        </div>
                     </div>
-                </div>
-                <footer>
-                    <ul class="footer-elements breadcrumb clearfix">
-                        <li>
-                            <i class="glyphicon glyphicon-user"></i>
-                            <strong>by </strong>
-                            <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
-                        </li>
-                        @for(tag <- article.tags) {
-                            <li class="pull-right">
-                                <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
+                    <footer>
+                        <ul class="footer-elements breadcrumb clearfix">
+                            <li>
+                                <i class="glyphicon glyphicon-user"></i>
+                                <strong>by </strong>
+                                <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
                             </li>
+                            @for(tag <- article.tags) {
+                                <li class="pull-right">
+                                    <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
+                                </li>
+                            }
+                        </ul>
+                    </footer>
+                </article>
+                <section class="comments" id="comments">
+                    <h3 class="comments-header">Comments</h3>
+                    @if(comments.isEmpty) {
+                        <div class="centralized-inputs">
+                            <h3>There are no comments yet</h3>
+                        </div>
+                    } else {
+                        @for(comment <- comments) {
+                            <article class="clearfix comment comment-other">
+                                <div class="comment-bubble comment-bubble-other">
+                                    <header>
+                                        <i class="glyphicon glyphicon-user"></i>
+                                        <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
+                                        <time class="pull-right">
+                                            <i class="glyphicon glyphicon-calendar"></i>  @comment.createdAt
+                                        </time>
+                                    </header>
+                                    <div>@comment.content</div>
+                                </div>
+                            </article>
                         }
-                    </ul>
-                </footer>
-            </article>
-            <section class="comments" id="comments">
-                <h3 style="border-bottom : 1px dashed #646464">Comments</h3>
-                <div class="centralized-inputs">
-                    <h3>There are no comments yet</h3>
-                </div>
-                <form class="clearfix comment-bubble comment-bubble-other" id="comments_form" method="post">
-                    <div class="form-group ">
-                        <label class="editor-hint">
-                            Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
-                            here</a>.
-                        </label>
-                        <textarea class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10">
-                        </textarea>
-                    </div>
-                    <input class="btn btn-primary pull-right" name="commit" type="submit" value="Post" />
-                </form>
-            </section>
+                    }
+                    <form class="clearfix comment-bubble comment-bubble-other" id="comment_form" action="@routes.CommentController.postNewComment" method="post">
+                        <div class="form-group">
+                            <input id="article_id" type="hidden" value="@article.id"/>
+                            <label class="editor-hint">
+                                Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
+                                here</a>.
+                            </label>
+                            <textarea id="comment_content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
+                        </div>
+                        <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
+                    </form>
+                </section>
+            </div>
         </div>
-    </div>
-}
+    }

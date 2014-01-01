@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Security, Action, Controller}
-import services.ArticlesServiceComponent
+import services.{CommentServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{Article, ArticleDetailsModel}
@@ -14,7 +14,7 @@ import Scalaz._
  * todo: handle 404
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent =>
+  this: Controller with ArticlesServiceComponent with CommentServiceComponent =>
 
   /**
    * Describes binding between Article model object and web-form

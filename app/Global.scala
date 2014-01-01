@@ -7,7 +7,7 @@ object Global extends play.api.GlobalSettings {
    */
   override def getControllerInstance[A](controllerClass: Class[A]): A = {
     try {
-      controllers.Application.asInstanceOf[A]
+      Application.asInstanceOf[A]
     } catch {
       case e: ClassCastException =>
         Logger.error(s"Controller ${controllerClass.getName} not mixed in into Application object")

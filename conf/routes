@@ -8,7 +8,6 @@ GET           /signin                 @controllers.AuthenticationController.sign
 POST          /signin                 @controllers.AuthenticationController.authenticate
 GET           /signout                @controllers.AuthenticationController.signout
 # Articles
-GET           /articles               @controllers.ArticleController.listAllArticles(page: Int ?= 0)
 GET           /articles/new           @controllers.ArticleController.getNewArticlePage
 POST          /articles/new           @controllers.ArticleController.postNewArticle
 GET           /articles/:id           @controllers.ArticleController.viewArticle(id:Int)

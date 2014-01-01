@@ -9,11 +9,11 @@
                     </div>
                     <div class="pull-right">
                         <ul class="user-stats">
-                            <li class="">Articles<strong>?</strong></li>
+                            <li class="">Articles<strong>@page.totalItems</strong></li>
                         </ul>
                     </div>
                 </header>
-                @templates.bareArticleList(page)
+                @templates.bareArticleList(page, routes.UserController.viewProfile(user, _))
                 <div class="centralized-inputs">
                 @if(page.totalPages == 0) {
                     <h3>User has no articles.</h3>

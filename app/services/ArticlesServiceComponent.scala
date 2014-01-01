@@ -97,7 +97,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         none = articlesRepository.count()
       )
       val totalPages = ceil(total / pageSize.toDouble).toInt
-      Page(page, totalPages, modelsList)
+      Page(page, totalPages, total, modelsList)
     }
 
     //TODO: Extract conversions and write tests for them

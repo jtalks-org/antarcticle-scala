@@ -1,3 +1,3 @@
 package models
 
-case class Page[T](currentPage: Int, totalPages: Int, list: Seq[T])
+case class Page[T](currentPage: Int, totalPages: Int, totalItems: Int, list: Seq[T])

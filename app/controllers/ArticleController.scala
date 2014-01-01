@@ -34,7 +34,7 @@ trait ArticleController {
   }
 
   def viewArticle(id: Int) = Action { implicit request =>
-    Ok(views.html.article(articlesService.get(id).get))
+    Ok(views.html.article(articlesService.get(id).get, commentService.getByArticle(id)))
   }
 
   def getNewArticlePage = Action { implicit request =>

@@ -17,26 +17,24 @@ trait CommentController {
    * Describes binding between Article model object and web-form
    */
   val commentForm = Form(
-    tuple (
+    tuple(
       "articleId" -> number,
       "content" -> nonEmptyText
     )
   )
 
   def postNewComment = Action {
-    implicit request =>
-      commentForm.bindFromRequest.fold(
-        formWithErrors => BadRequest,
-        comment => {
-          commentService.insert(comment._1, comment._2)
-          Ok
-        }
-      )
+    implicit request => commentForm.bindFromRequest.fold(
+      formWithErrors => BadRequest,
+      comment => {
+        commentService.insert(comment._1, comment._2)
+        Ok
+      }
+    )
   }
 
   def removeComment(id: Int) = Action {
-    implicit request =>
-      commentService.removeComment(id)
+    implicit request => commentService.removeComment(id)
       Redirect(routes.ArticleController.listAllArticles())
   }
 }

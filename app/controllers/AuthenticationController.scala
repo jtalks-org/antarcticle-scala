@@ -36,8 +36,7 @@ trait AuthenticationController {
   }
 
   def authenticate = Action {
-    implicit request =>
-      loginForm.bindFromRequest.fold(
+    implicit request => loginForm.bindFromRequest.fold(
         formWithErrors => BadRequest(html.signin(formWithErrors)),
         user => Redirect(routes.ArticleController.listAllArticles()).withSession(Security.username -> user._1)
       )

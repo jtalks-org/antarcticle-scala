@@ -6,7 +6,7 @@ import scala.slick.lifted.ForeignKeyAction
 case class CommentToInsert(userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp)
 
-case class CommentToUpdate(id: Option[Int], content: String, updatedAt: Timestamp)
+case class CommentToUpdate(content: String, updatedAt: Timestamp)
 
 case class CommentRecord(id: Option[Int], userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp, updatedAt: Option[Timestamp])
@@ -35,7 +35,7 @@ trait CommentsSchemaComponent {
 
     // projections
     def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt.? <> (CommentRecord.apply _, CommentRecord.unapply _)
-    def forUpdate = id.? ~ content ~ updatedAt <> (CommentToUpdate.apply _, CommentToUpdate.unapply _)
+    def forUpdate = content ~ updatedAt <> (CommentToUpdate.apply _, CommentToUpdate.unapply _)
     def forInsert = userId ~ articleId ~ content ~ createdAt <>
       (CommentToInsert.apply _, CommentToInsert.unapply _) returning id
   }

@@ -34,6 +34,12 @@ class ArticleValidatorSpec extends Specification with ValidationMatchers {
       validator.validate(article.copy(tags = tags)) must beFailing
     }
 
+    "fail with multiple failures" in {
+       validator.validate(article.copy(title = "", content = "d" * 65001)) must beFailing.like {
+        case nel => nel.size must_== 2
+       }
+    }
+
     "be successful when article is valid" in {
       validator.validate(article) must beSuccessful
     }

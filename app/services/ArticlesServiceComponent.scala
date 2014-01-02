@@ -61,13 +61,12 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
 
     def updateArticle(article: Article) = withTransaction { implicit s: Session =>
-      val result = articleValidator.validate(article)
-      if (result.isSuccess) {
+      articleValidator.validate(article).map { _ =>
         val modificationTime = DateTime.now
-        //TODO: handle id
+        //TODO: handle id, tags validation
         articlesRepository.update(article.id.get, articleToUpdate(article, modificationTime))
+        article
       }
-      result
     }
 
     def removeArticle(id: Int) = withTransaction { implicit s: Session =>

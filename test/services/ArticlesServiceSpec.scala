@@ -177,23 +177,33 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   "article update" should {
-    val article = Article(None, "", "", List())
+    val article = Article(Some(1), "", "", List("tag"))
 
     "update existing article" in {
       articleValidator.validate(any[Article]) returns article.successNel
-      articlesService.updateArticle(Article(Some(1), "title", "content", List("tag")))
+
+      articlesService.updateArticle(article)
 
       there was one(articlesRepository).update(
         Matchers.eq(1), any[ArticleToUpdate])(Matchers.eq(session))
     }
 
     "update modification time" in {
-      articleValidator.validate(any[Article]) returns article.successNel
       TimeFridge.withFrozenTime() { now =>
-        articlesService.updateArticle(Article(Some(1), "", "", List("")))
+        articleValidator.validate(any[Article]) returns article.successNel
+
+        articlesService.updateArticle(article)
 
         there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
       }
+    }
+
+    "not update article when validation failed" in {
+      articleValidator.validate(any[Article]) returns "".failNel
+
+      articlesService.updateArticle(article)
+
+      there was noMoreCallsTo(articlesRepository)
     }
   }
 }

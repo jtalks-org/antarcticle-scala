@@ -23,7 +23,7 @@ trait ArticlesServiceComponent {
     def getPageForUser(page: Int, userName : String): Page[ArticleListModel]
     def createArticle(article: Article): ValidationNel[String, ArticleDetailsModel]
     def get(id: Int): Option[ArticleDetailsModel]
-    def updateArticle(article: Article)
+    def updateArticle(article: Article): ValidationNel[String, Article]
     def removeArticle(id: Int)
   }
 }
@@ -61,9 +61,13 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
 
     def updateArticle(article: Article) = withTransaction { implicit s: Session =>
-      val modificationTime = DateTime.now
-      //TODO: handle id
-      articlesRepository.update(article.id.get, articleToUpdate(article, modificationTime))
+      val result = articleValidator.validate(article)
+      if (result.isSuccess) {
+        val modificationTime = DateTime.now
+        //TODO: handle id
+        articlesRepository.update(article.id.get, articleToUpdate(article, modificationTime))
+      }
+      result
     }
 
     def removeArticle(id: Int) = withTransaction { implicit s: Session =>

@@ -61,8 +61,12 @@ trait ArticleController {
       articleForm.bindFromRequest.fold(
         formWithErrors => BadRequest(html.editArticle(formWithErrors)),
         article => {
-          articlesService.updateArticle(article)
-          Redirect(routes.ArticleController.viewArticle(article.id.get))
+          articlesService.updateArticle(article).fold(
+            fail = nel => {
+              BadRequest(views.html.templates.formErrors(nel.list))
+            },
+            succ = created => Ok(routes.ArticleController.viewArticle(created.id.get).absoluteURL())
+          )
         }
       )
   }

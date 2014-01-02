@@ -28,7 +28,7 @@ trait CommentController {
       formWithErrors => BadRequest,
       comment => {
         commentService.insert(comment._1, comment._2)
-        Ok
+        Redirect(routes.ArticleController.viewArticle(comment._1))
       }
     )
   }

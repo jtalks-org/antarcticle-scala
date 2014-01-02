@@ -2,6 +2,9 @@
     @templates.main("New article") {
         <div class="row">
             <div class="col-md-7 col-md-offset-2 well2">
+                <header class="page-header">
+                    <h2><i class="glyphicon glyphicon-pencil"></i> New article</h2>
+                </header>
                 <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
                     @templates.articleEditor(form, "Create article")
                 </form>

@@ -62,14 +62,15 @@
                             </article>
                         }
                     }
-                    <form class="clearfix comment-bubble comment-bubble-other" id="comment_form" action="@routes.CommentController.postNewComment" method="post">
+                    <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment" method="post">
                         <div class="form-group">
-                            <input id="article_id" type="hidden" value="@article.id"/>
+                            <input name="articleId" type="hidden" value="@article.id"/>
+                            <i class="glyphicon glyphicon-info-sign"></i>
                             <label class="editor-hint">
                                 Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
                                 here</a>.
                             </label>
-                            <textarea id="comment_content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
+                            <textarea name="content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
                         </div>
                         <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
                     </form>

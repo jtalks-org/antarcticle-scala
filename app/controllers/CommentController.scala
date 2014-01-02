@@ -25,10 +25,10 @@ trait CommentController {
 
   def postNewComment = Action {
     implicit request => commentForm.bindFromRequest.fold(
-      formWithErrors => BadRequest,
+      formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
       comment => {
         commentService.insert(comment._1, comment._2)
-        Redirect(routes.ArticleController.viewArticle(comment._1))
+        Ok(routes.ArticleController.viewArticle(comment._1).absoluteURL())
       }
     )
   }

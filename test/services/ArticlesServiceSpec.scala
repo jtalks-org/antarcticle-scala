@@ -177,7 +177,10 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   "article update" should {
+    val article = Article(None, "", "", List())
+
     "update existing article" in {
+      articleValidator.validate(any[Article]) returns article.successNel
       articlesService.updateArticle(Article(Some(1), "title", "content", List("tag")))
 
       there was one(articlesRepository).update(
@@ -185,6 +188,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "update modification time" in {
+      articleValidator.validate(any[Article]) returns article.successNel
       TimeFridge.withFrozenTime() { now =>
         articlesService.updateArticle(Article(Some(1), "", "", List("")))
 

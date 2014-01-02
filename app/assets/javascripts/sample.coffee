@@ -12,13 +12,6 @@ jQuery(=>
       )
       return false
 
-    $('#comment_submit').click =>
-      $.post($('#comment_form').attr('action'),
-        {articleId: $('#article_id').val(), content: $('#comment_content').val() })
-          .done( => location.reload(true))
-          .fail( => alert('Error'))
-      return false
-
     # turn on highlighting
     prettyPrint()
     # custom tags input field

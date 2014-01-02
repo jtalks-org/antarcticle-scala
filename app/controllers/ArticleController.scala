@@ -1,13 +1,11 @@
 package controllers
 
-import play.api.mvc.{Security, Action, Controller}
+import play.api.mvc.{Action, Controller}
 import services.{CommentServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.{Article, ArticleDetailsModel}
+import models.ArticleModels.Article
 import views.html
-import scalaz._
-import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -22,10 +20,10 @@ trait ArticleController {
   val articleForm = Form(
     mapping(
       "id" -> optional(number),
-      "title" -> nonEmptyText,
-      "content" -> nonEmptyText,
+      "title" -> text,
+      "content" -> text,
       "tags" -> text
-    )((id, title, content, tags) => Article(id, title, content, tags.split(",")))
+    )((id, title, content, tags) => Article(id, title, content, tags.split(",").filter(!_.isEmpty)))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
@@ -43,11 +41,13 @@ trait ArticleController {
 
   def postNewArticle = Action { implicit request =>
       articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.createArticle(formWithErrors)),
+        formWithErrors => BadRequest(views.html.templates.formErrors(List("Invalid request"))),
         article => {
           articlesService.createArticle(article).fold(
-            fail = nel => BadRequest(nel.list.mkString(";")),
-            succ = created => Redirect(routes.ArticleController.viewArticle(created.id))
+            fail = nel => {
+              BadRequest(views.html.templates.formErrors(nel.list))
+            },
+            succ = created => Ok(routes.ArticleController.viewArticle(created.id).absoluteURL())
           )
         }
       )

@@ -1,0 +1,7 @@
+@(errors: List[String])
+@for(error <- errors) {
+    <div class="alert alert-danger clear-on-resubmit">
+        <a class="close" data-dismiss="alert" href="#">x</a>
+            @error
+    </div>
+}

@@ -2,9 +2,9 @@
     @templates.main("New article") {
         <div class="row">
             <div class="col-md-7 col-md-offset-2 well2">
-            @helper.form(routes.ArticleController.postNewArticle()) {
-                @templates.articleEditor(form, "Create article")
-            }
+                <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
+                    @templates.articleEditor(form, "Create article")
+                </form>
             </div>
         </div>
     }

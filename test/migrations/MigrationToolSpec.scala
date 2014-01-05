@@ -111,6 +111,29 @@ class MigrationToolSpec extends Specification
         there was no(mockMigration2).run(any[Session])
       }
 
+      "migrate from version 0 to 1" in withSession { implicit s: Session =>
+        mockMigration1.version returns 1
+        migrationsContainer.getMigrations returns Seq(mockMigration1)
+
+        tool.migrate // migrate to 0 version
+        tool.migrate
+
+        there was one(mockMigration1).run(any[Session])
+      }
+
+      "not do anything when no new migrations" in withSession { implicit s: Session =>
+        setupMocks
+
+        tool.migrate // migrate to 0 version
+        // artificially set schema version to 3
+        Q.updateNA(s"update schema_version set current_version=3").execute
+        tool.migrate
+
+        there was no(mockMigration1).run(any[Session])
+        there was no(mockMigration2).run(any[Session])
+        there was no(mockMigration3).run(any[Session])
+      }
+
       "update schema version" in withSession { implicit s: Session =>
         setupMocks
 

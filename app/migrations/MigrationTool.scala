@@ -50,11 +50,13 @@ trait MigrationTool {
         val migrations = migrationsContainer.getMigrations.toList.sortBy(_.version)
         val currentVersion = getCurrentVersion
         val notPerformedMigrations = migrations.drop(currentVersion)
-        val newVersion = notPerformedMigrations.last.version
-        Logger.info(s"Migrating database from version $currentVersion to $newVersion")
-        notPerformedMigrations.foreach(_.run)
-        updateVersion(newVersion)
-        Logger.info(s"Migration completed")
+        if (!notPerformedMigrations.isEmpty) {
+          val newVersion = notPerformedMigrations.last.version
+          Logger.info(s"Migrating database from version $currentVersion to $newVersion")
+          notPerformedMigrations.foreach(_.run)
+          updateVersion(newVersion)
+          Logger.info(s"Migration completed")
+        }
     }
   }
 

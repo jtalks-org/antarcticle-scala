@@ -44,10 +44,10 @@ trait MigrationTool {
         createSchemaVersionTable
         val ddls = schema.map(_.ddl)
         ddls.tail.fold(ddls.head)(_ ++ _).create
-        setInitialVersion
-        Logger.info(s"Migration completed")
+        val version = migrations.lastOption.map(_.version) getOrElse 0
+        setInitialVersion(version)
+        Logger.info(s"Migration completed (version: $version)")
       case xs =>
-        val migrations = migrationsContainer.getMigrations.toList.sortBy(_.version)
         val currentVersion = getCurrentVersion
         val notPerformedMigrations = migrations.drop(currentVersion)
         if (!notPerformedMigrations.isEmpty) {
@@ -60,12 +60,16 @@ trait MigrationTool {
     }
   }
 
+  private def migrations = {
+    migrationsContainer.getMigrations.toList.sortBy(_.version)
+  }
+
   def getCurrentVersion(implicit s: Session) = {
      Q.queryNA[Int](s"select $VERSION_COLUMN from $SCHEMA_VERSION_TABLE").first
   }
 
-  private def setInitialVersion(implicit s: Session) = {
-    Q.updateNA(s"insert into $SCHEMA_VERSION_TABLE ($VERSION_COLUMN) values (0)").execute
+  private def setInitialVersion(version: Int)(implicit s: Session) = {
+    Q.updateNA(s"insert into $SCHEMA_VERSION_TABLE ($VERSION_COLUMN) values ($version)").execute
   }
 
   private def updateVersion(version: Int)(implicit s: Session) = {

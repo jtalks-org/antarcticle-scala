@@ -59,12 +59,16 @@ class MigrationToolSpec extends Specification
 
     "new database migration" should {
       "create version table when not exists" in withSession { implicit s: Session =>
+        migrationsContainer.getMigrations returns Seq()
+
         tool.migrate
 
         MTable.getTables("schema_version").list must not be empty
       }
 
       "create schema" in withSession { implicit s: Session =>
+        migrationsContainer.getMigrations returns Seq()
+
         tool.migrate
 
         def tableExists(table: Table[_]) = !MTable.getTables(table.tableName).list.isEmpty
@@ -73,6 +77,8 @@ class MigrationToolSpec extends Specification
       }
 
       "set schema version to 0" in withSession { implicit s: Session =>
+        migrationsContainer.getMigrations returns Seq()
+
         tool.migrate
 
         tool.getCurrentVersion must_== 0
@@ -90,7 +96,9 @@ class MigrationToolSpec extends Specification
       "run all migrations in correct order when schema version is 0" in withSession { implicit s: Session =>
         setupMocks
 
-        tool.migrate // migrate to 0 version
+        tool.migrate // create schema
+        // artificially set schema version to 0
+        Q.updateNA(s"update schema_version set current_version=0").execute
         tool.migrate
 
         there was one(mockMigration1).run(any[Session]) andThen
@@ -101,7 +109,7 @@ class MigrationToolSpec extends Specification
       "run migrations starting from version 3 when schema version is 2" in withSession { implicit s: Session =>
         setupMocks
 
-        tool.migrate // migrate to 0 version
+        tool.migrate // create schema
         // artificially set schema version to 2
         Q.updateNA(s"update schema_version set current_version=2").execute
         tool.migrate
@@ -111,20 +119,20 @@ class MigrationToolSpec extends Specification
         there was no(mockMigration2).run(any[Session])
       }
 
-      "migrate from version 0 to 1" in withSession { implicit s: Session =>
+      "update schema version to 1 when db is new, but migration exists" in withSession { implicit s: Session =>
         mockMigration1.version returns 1
         migrationsContainer.getMigrations returns Seq(mockMigration1)
 
-        tool.migrate // migrate to 0 version
         tool.migrate
 
-        there was one(mockMigration1).run(any[Session])
+        tool.getCurrentVersion must_== 1
+        there was no(mockMigration1).run(any[Session])
       }
 
       "not do anything when no new migrations" in withSession { implicit s: Session =>
         setupMocks
 
-        tool.migrate // migrate to 0 version
+        tool.migrate // create schema
         // artificially set schema version to 3
         Q.updateNA(s"update schema_version set current_version=3").execute
         tool.migrate
@@ -137,7 +145,7 @@ class MigrationToolSpec extends Specification
       "update schema version" in withSession { implicit s: Session =>
         setupMocks
 
-        tool.migrate // migrate to 0 version
+        tool.migrate // create schema
         tool.migrate
 
         tool.getCurrentVersion must_== 3

@@ -25,6 +25,8 @@ trait Authentication {
     } yield AuthenticatedUser(userId, user.username)
   }
 
+  implicit def authUserToOption(authUser: AuthenticatedUser) = Some(authUser)
+
   def withUser(f: AuthenticatedUser => Request[AnyContent] => Result,
     onUnauthorized: RequestHeader => SimpleResult = defaultOnUnauthorized): EssentialAction = {
     Action { request =>
@@ -37,9 +39,11 @@ trait Authentication {
   def withUserAsync(f: AuthenticatedUser => Request[AnyContent] => Future[SimpleResult],
     onUnauthorized: RequestHeader => Future[SimpleResult] = defaultOnUnauthorizedAsync): EssentialAction = {
     Action.async { implicit request =>
-      currentUser.map { user =>
-        f(user)(request)
-      } getOrElse onUnauthorized(request)
+      Future(currentUser).flatMap { userO =>
+        userO.map { user =>
+          f(user)(request)
+        } getOrElse onUnauthorized(request)
+      }
     }
   }
 

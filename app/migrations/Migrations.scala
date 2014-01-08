@@ -7,12 +7,11 @@ import scala.slick.session.Session
 class Migrations(profile: ExtendedProfile) extends MigrationsContainer {
   import profile.simple._
 
-  // ---------EXAMPLE:
-  // val MigrateV1toV2 = new Migration {
-  //   val version: Int = 2
+  val addRememberMeTokenToUser = new Migration {
+    val version = 1
 
-  //   def run(implicit session: Session): Unit = {
-  //     Q.updateNA("create table test (id int not null)").execute
-  //   }
-  // }
+    def run(implicit session: Session): Unit = {
+      Q.updateNA("alter table users add remember_token varchar(64)").execute
+    }
+  }
 }

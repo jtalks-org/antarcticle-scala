@@ -26,13 +26,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
   import profile.simple._
 
   implicit class ArticlesExtension[E](val q: Query[Articles.type, E]) {
-    //TODO: simplify with slick 2.0
-    def withAuthor(u: Query[Users.type, UserRecord] = Query(Users)): Query[(Articles.type, Users.type), (E, UserRecord)] = {
-      q.leftJoin(u).on(_.authorId === _.id)
+    def withAuthor = {
+      q.leftJoin(Query(Users)).on(_.authorId === _.id)
     }
 
     def portion(offset: Int, portionSize: Int) = {
-      q.withAuthor()
+      q.withAuthor
         .drop(offset)
         .take(portionSize)
         .sortBy { case (article, _) => article.createdAt }

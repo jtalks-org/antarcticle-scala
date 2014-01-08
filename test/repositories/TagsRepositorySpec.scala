@@ -6,7 +6,6 @@ import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import models.database.{ArticleToInsert, UserToInsert, Schema}
 import util.TestDatabaseConfiguration
-import scala.slick.jdbc.meta.MTable
 import migrations.{MigrationTool, MigrationsContainer}
 
 class TagsRepositorySpec extends Specification with NoTimeConversions {

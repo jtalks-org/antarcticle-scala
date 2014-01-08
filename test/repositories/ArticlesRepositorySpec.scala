@@ -146,7 +146,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val userId = 2
       val newArticle = ArticleToInsert("test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
-      val insertedArticleId = articlesRepository.insert(newArticle)
+      val insertedArticleId: Int = articlesRepository.insert(newArticle)
       true
     }
   }

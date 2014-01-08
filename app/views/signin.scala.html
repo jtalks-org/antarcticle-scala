@@ -4,12 +4,6 @@
         <div class="col-md-4 col-md-offset-4 well2">
         @helper.form(routes.AuthenticationController.authenticate) {
             <legend>Please Sign In</legend>
-            @form.globalError.map { error =>
-                <div class="alert alert-danger">
-                    <a class="close" data-dismiss="alert" href="#">x</a>
-                    @error.message
-                </div>
-            }
             <div class="centralized-inputs">
                 <div class="form-group">
                     <div class="input-group">

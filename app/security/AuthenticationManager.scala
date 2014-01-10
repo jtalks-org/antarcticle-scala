@@ -28,7 +28,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
     val passwordHash = generateMd5Hash(password)
 
     for {
-      response <- sendRequest("http://qa.jtalks.org/poulpe", username, passwordHash)
+      response <- sendRequest(poulpeUrl, username, passwordHash)
       xmlResponseBody = response.xml
     } yield {
       //TODO: log error on malformed response

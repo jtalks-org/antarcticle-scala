@@ -1,21 +1,15 @@
-package controllers
+package security
 
 import play.api.mvc._
-import play.api.data._
+import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import views._
-import security.SecurityServiceComponent
+import views.html
+import play.api.mvc.Cookie
+import scala.Some
+import play.api.libs.concurrent.Execution.Implicits._
 
 /**
  *  Handles sign in and sign out user actions.
- *  After successful authentication current user name will be available in session,
- *  one can obtain it as follows:
- *  {{{
- *    request.session.get(Security.username)
- *  }}}
- *
  */
 trait AuthenticationController {
   this: Controller with SecurityServiceComponent =>
@@ -41,22 +35,19 @@ trait AuthenticationController {
     } yield {
       signInResult.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-        succ = _ match {
-          case (token, authUser) =>
-            Redirect(routes.ArticleController.listAllArticles())
-              .withSession(Security.username -> authUser.username)
-              // TODO: move this constant
-              .withCookies(Cookie("remember_token", token, Some(rememberMeExpirationTime)))
+        succ = { case (token, authUser) =>
+          Redirect(controllers.routes.ArticleController.listAllArticles())
+            // http only to prevent session hijacking with XSS
+            .withCookies(Cookie(Constants.RememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }
       )
     }
   }
 
   def signout = Action {
-    Redirect(routes.ArticleController.listAllArticles())
+    Redirect(controllers.routes.ArticleController.listAllArticles())
       .withNewSession
       // TODO: move this constant
-      .discardingCookies(DiscardingCookie("remember_token"))
+      .discardingCookies(DiscardingCookie(Constants.RememberMeCookie))
   }
 }
-

@@ -3,10 +3,10 @@ package security
 import play.api.mvc._
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
-import scala.slick.session.Session
-import controllers.routes
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
+import scalaz._
+import Scalaz._
 
 case class AuthenticatedUser(id: Int, username: String)
 
@@ -17,8 +17,7 @@ trait Authentication {
     def getUserByToken(token: String) = withSession(usersRepository.getByRemeberToken(token)(_))
 
     for {
-      // TODO: move this constant
-      tokenCookie <- request.cookies.get("remember_token")
+      tokenCookie <- request.cookies.get(Constants.RememberMeCookie)
       token = tokenCookie.value
       user <- getUserByToken(token)
       userId <- user.id
@@ -39,11 +38,10 @@ trait Authentication {
   def withUserAsync(f: AuthenticatedUser => Request[AnyContent] => Future[SimpleResult],
     onUnauthorized: RequestHeader => Future[SimpleResult] = defaultOnUnauthorizedAsync): EssentialAction = {
     Action.async { implicit request =>
-      Future(currentUser).flatMap { userO =>
-        userO.map { user =>
-          f(user)(request)
-        } getOrElse onUnauthorized(request)
-      }
+      Future(currentUser).flatMap(_.cata(
+        some = user => f(user)(request),
+        none = onUnauthorized(request)
+      ))
     }
   }
 

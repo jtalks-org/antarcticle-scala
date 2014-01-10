@@ -4,9 +4,9 @@
 
 GET           /                       @controllers.ArticleController.listAllArticles(page: Int ?= 0)
 # Authentication
-GET           /signin                 @controllers.AuthenticationController.signin
-POST          /signin                 @controllers.AuthenticationController.authenticate
-GET           /signout                @controllers.AuthenticationController.signout
+GET           /signin                 @security.AuthenticationController.signin
+POST          /signin                 @security.AuthenticationController.authenticate
+GET           /signout                @security.AuthenticationController.signout
 # Articles
 GET           /articles/new           @controllers.ArticleController.getNewArticlePage
 POST          /articles/new           @controllers.ArticleController.postNewArticle

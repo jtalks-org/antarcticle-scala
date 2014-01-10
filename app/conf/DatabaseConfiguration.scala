@@ -4,28 +4,32 @@ import models.database.Profile
 import services.SlickSessionProvider
 import scala.slick.driver.{H2Driver, MySQLDriver, PostgresDriver, ExtendedProfile}
 import scala.slick.session.Database
-import javax.naming.NamingException
+import play.api.Logger
 
 trait DatabaseConfiguration extends Profile with SlickSessionProvider {
-  import play.api.Logger
+  this: PropertiesProviderComponent =>
 
-  val DatabaseProperties(url, user, password, driver) = (new JndiDatabasePropertiesProvider).getProperties.recoverWith {
-    case ex: NamingException =>
-      Logger.info("JNDI configuration not found")
-      DefaultProvider.getProperties
-  }.get
+  private def driver = propertiesProvider("ANTARCTICLE_DB_DRIVER") getOrElse "org.h2.Driver"
 
-
-  override val profile: ExtendedProfile = driver match {
+  //lazy to preserve correct intialization order
+  override lazy val profile: ExtendedProfile = driver match {
     case "org.postgresql.Driver" => PostgresDriver
     case "com.mysql.jdbc.Driver" => MySQLDriver
     case "org.h2.Driver" => H2Driver
     case d => throw new RuntimeException(s"Unsupported JDBC driver: $d")
   }
 
-  override val db: Database = scala.slick.session.Database.forURL(
-    url = url,
-    user = user,
-    password = password,
-    driver = driver)
+  override val db: Database = {
+    val url = propertiesProvider("ANTARCTICLE_DB_URL")
+      .getOrElse("jdbc:h2:mem:test1;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1")
+
+    Logger.info(s"Using database: $url")
+
+    scala.slick.session.Database.forURL(
+      url = url,
+      user = propertiesProvider("ANTARCTICLE_DB_USER") getOrElse "sa",
+      password = propertiesProvider("ANTARCTICLE_DB_PASSWORD") getOrElse "",
+      driver = driver
+    )
+  }
 }

@@ -16,7 +16,9 @@ libraryDependencies ++= Seq(
   // markdown support
   "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2",
   "org.scalaz" %% "scalaz-core" % "7.0.5",
-  "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test"
+  "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
+  // production database
+  "mysql" % "mysql-connector-java" % "5.1.28"
 )
 
 playScalaSettings

@@ -23,7 +23,7 @@ trait DatabaseConfiguration extends Profile with SlickSessionProvider {
     val url = propertiesProvider("ANTARCTICLE_DB_URL")
       .getOrElse("jdbc:h2:mem:test1;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1")
 
-    Logger.info(s"Using database: $url")
+    Logger.info(s"Using database: $url with driver: $driver")
 
     scala.slick.session.Database.forURL(
       url = url,

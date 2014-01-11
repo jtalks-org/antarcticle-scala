@@ -11,7 +11,22 @@ class Migrations(profile: ExtendedProfile) extends MigrationsContainer {
     val version = 1
 
     def run(implicit session: Session): Unit = {
-      Q.updateNA("alter table users add remember_token varchar(64)").execute
+      try {
+        Q.updateNA("alter table users add remember_token varchar(64)").execute
+      }
+      catch {
+        case  e:Exception => // it seems that column is already in place, just skip this migration
+      }
+    }
+  }
+
+  val changeContentColumnTypes = new Migration {
+    val version = 2
+
+    def run(implicit session: Session): Unit = {
+      Q.updateNA("alter table articles modify content longtext").execute
+      Q.updateNA("alter table articles modify description longtext").execute
+      Q.updateNA("alter table comments modify content longtext").execute
     }
   }
 }

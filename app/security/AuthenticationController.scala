@@ -7,6 +7,8 @@ import views.html
 import play.api.mvc.Cookie
 import scala.Some
 import play.api.libs.concurrent.Execution.Implicits._
+import java.util.concurrent.TimeUnit
+import org.joda.time.{DateTimeConstants, Weeks}
 
 /**
  *  Handles sign in and sign out user actions.
@@ -14,8 +16,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 trait AuthenticationController {
   this: Controller with SecurityServiceComponent =>
 
-  val fourWeeks = 2419200
-  val rememberMeExpirationTime = fourWeeks
+  val rememberMeExpirationTime = DateTimeConstants.SECONDS_PER_WEEK * 4
 
   val loginForm = Form(
     tuple(

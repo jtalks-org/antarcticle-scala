@@ -15,7 +15,7 @@ trait PropertiesProviderComponent  {
 
 trait JndiPropertiesProviderComponent extends PropertiesProviderComponent {
   lazy val pp = new JndiPropertiesProvider
-  def propertiesProvider = pp // singletone
+  def propertiesProvider = pp // singleton
 
   class JndiPropertiesProvider extends PropertiesProvider{
     private lazy val ctx = new InitialContext()

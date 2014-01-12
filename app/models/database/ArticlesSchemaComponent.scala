@@ -20,10 +20,10 @@ trait ArticlesSchemaComponent  {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def title = column[String]("title", O.NotNull)
-    def content = column[String]("content", O.NotNull)
+    def content = column[String]("content", O.NotNull, O.DBType("text"))
     def createdAt = column[Timestamp]("created_at", O.NotNull)
     def updatedAt = column[Timestamp]("updated_at", O.Nullable)
-    def description = column[String]("description", O.NotNull)
+    def description = column[String]("description", O.NotNull, O.DBType("text"))
     def authorId = column[Int]("author_id", O.NotNull)
 
     // FKs

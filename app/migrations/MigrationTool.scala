@@ -44,7 +44,6 @@ trait MigrationTool {
         createSchemaVersionTable
         val ddls = schema.map(_.ddl)
         ddls.tail.fold(ddls.head)(_ ++ _).create
-        migrations.foreach(_.run)
         val version = migrations.lastOption.map(_.version) getOrElse 0
         setInitialVersion(version)
         Logger.info(s"Migration completed (version: $version)")

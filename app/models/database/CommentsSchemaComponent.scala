@@ -24,7 +24,7 @@ trait CommentsSchemaComponent {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)
     def articleId = column[Int]("article_id", O.NotNull)
-    def content = column[String]("content", O.NotNull)
+    def content = column[String]("content", O.NotNull, O.DBType("text"))
     def createdAt = column[Timestamp]("created_at", O.NotNull)
     def updatedAt = column[Timestamp]("updated_at", O.Nullable)
 

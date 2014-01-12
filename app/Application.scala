@@ -9,15 +9,14 @@ import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
 
 object Application
-  extends Controllers
-  with Services
-  with SecurityComponent
-  with Repositories
-  with MigrationTool
-  with Schema
+  extends JndiPropertiesProviderComponent
   with DatabaseConfiguration
-  with JndiPropertiesProviderComponent {
-
+  with Schema
+  with MigrationTool
+  with Repositories
+  with SecurityComponent
+  with Services
+  with Controllers {
 
   override val migrationsContainer = new Migrations(profile)
 

@@ -1,43 +1,57 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)
 <section class="articles-list">
-    @for(article <- page.list) {
-        <article id="@article.id" class="entry">
-            <div class="main-content">
-                <header>
-                    @templates.prettyDate(article.createdAt)
-                    <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
-                </header>
-                <div class="body">
-                    <div class="content">@article.description</div>
-                    <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
+  @for(article <- page.list) {
+    <article id="@article.id" class="entry">
+      <div class="main-content">
+        <header>
+          @templates.prettyDate(article.createdAt)
+        <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+        </header>
+        <div class="body">
+          <div class="content">@article.description</div>
+          <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
+          <div class="clearfix"></div>
+        </div>
+      </div>
 
-            <footer>
-                <ul class="footer-elements breadcrumb clearfix">
-                    <li>
-                        <i class="glyphicon glyphicon-user"></i>
-                        <strong>by </strong>
-                        <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
-                    </li>
-                    @for(tag <- article.tags) {
-                        <li class="pull-right">
-                            <i class="glyphicon glyphicon-tags"></i> <a href="#?tag=@tag"> @tag</a>
-                        </li>
-                    }
-                </ul>
-            </footer>
-        </article>
-    }
+      <footer>
+        <ul class="footer-elements breadcrumb clearfix">
+          <li>
+            <i class="glyphicon glyphicon-user"></i>
+            <strong>by </strong>
+            <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
+          </li>
+          @for(tag <- article.tags) {
+            <li class="pull-right">
+              <i class="glyphicon glyphicon-tags"></i> <a href="#?tag=@tag"> @tag</a>
+            </li>
+          }
+        </ul>
+      </footer>
+    </article>
+  }
+</section>
+<div>
+  <ul class="pagination">
     @if(page.currentPage > 0) {
-        <a href="@paginationHandler(page.currentPage - 1)">Prev page</a>
+      <li class="prev previous_page">
+        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-arrow-left"></i> Prev page</a>
+      </li>
     }
     @for(pageNum <- 0 to page.totalPages - 1) {
+      @if(pageNum == page.currentPage){
+        <li class="active">
+      } else {
+        <li>
+      }
         <a href="@paginationHandler(pageNum)">@pageNum</a>
+      </li>
     }
     @if(page.currentPage < page.totalPages - 1) {
-        <a href="@paginationHandler(page.currentPage + 1)">Next page</a>
+      <li class="next next_page">
+        <a href="@paginationHandler(page.currentPage + 1)">Next page <i class="glyphicon glyphicon-arrow-right"></i></a>
+      </li>
     }
-</section>
+  </ul>
+</div>
 

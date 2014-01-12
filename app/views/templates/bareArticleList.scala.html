@@ -35,7 +35,7 @@
   <ul class="pagination">
     @if(page.currentPage > 0) {
       <li class="prev previous_page">
-        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-arrow-left"></i> Prev page</a>
+        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-chevron-left"></i> Prev page</a>
       </li>
     }
     @for(pageNum <- 0 to page.totalPages - 1) {
@@ -49,7 +49,7 @@
     }
     @if(page.currentPage < page.totalPages - 1) {
       <li class="next next_page">
-        <a href="@paginationHandler(page.currentPage + 1)">Next page <i class="glyphicon glyphicon-arrow-right"></i></a>
+        <a href="@paginationHandler(page.currentPage + 1)">Next page <i class="glyphicon glyphicon-chevron-right"></i></a>
       </li>
     }
   </ul>

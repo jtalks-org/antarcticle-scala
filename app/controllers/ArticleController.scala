@@ -6,13 +6,14 @@ import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.Article
 import views.html
+import security.Authentication
 
 /**
  * Serves web-based operations on articles
  * todo: handle 404
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent with CommentServiceComponent =>
+  this: Controller with ArticlesServiceComponent with CommentServiceComponent with Authentication =>
 
   /**
    * Describes binding between Article model object and web-form

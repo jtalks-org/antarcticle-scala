@@ -6,12 +6,13 @@ import play.api.data.Form
 import play.api.data.Forms._
 import views.html
 import models.database.{CommentToInsert, CommentRecord}
+import security.Authentication
 
 /**
  *
  */
 trait CommentController {
-  this: Controller with CommentServiceComponent with ArticlesServiceComponent =>
+  this: Controller with CommentServiceComponent with ArticlesServiceComponent with Authentication  =>
 
   /**
    * Describes binding between Article model object and web-form

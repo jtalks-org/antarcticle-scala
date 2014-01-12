@@ -14,7 +14,7 @@ import org.joda.time.{DateTimeConstants, Weeks}
  *  Handles sign in and sign out user actions.
  */
 trait AuthenticationController {
-  this: Controller with SecurityServiceComponent =>
+  this: Controller with SecurityServiceComponent with Authentication  =>
 
   val rememberMeExpirationTime = DateTimeConstants.SECONDS_PER_WEEK * 4
 

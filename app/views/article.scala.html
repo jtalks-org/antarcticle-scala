@@ -1,18 +1,22 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-        comments: List[models.CommentModels.Comment])(implicit request: Request[AnyContent])
+        comments: List[models.CommentModels.Comment])(implicit request: Request[AnyContent], user: Option[security.AuthenticatedUser])
     @templates.main(article.title) {
-        <div class="row">
-            <div class="col-md-10 col-md-offset-1">
-                <div class="pull-right page-header">
-                    <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
-                        <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
-                    </a>
-                    <a class="btn btn-sm btn-danger" id="delete-article" href="@routes.ArticleController.removeArticle(article.id)">
-                        <i class="glyphicon glyphicon-remove icon-white"></i> Delete
-                    </a>
+        @if(user.isDefined) {
+            @if(user.get.id == article.author.id) {
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div class="pull-right page-header">
+                            <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
+                                <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
+                            </a>
+                            <a class="btn btn-sm btn-danger" id="delete-article" href="@routes.ArticleController.removeArticle(article.id)">
+                                <i class="glyphicon glyphicon-remove icon-white"></i> Delete
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            }
+        }
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <article id="@article.id" class="entry">
@@ -54,7 +58,7 @@
                                         <i class="glyphicon glyphicon-user"></i>
                                         <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
                                         <time class="pull-right">
-                                            <i class="glyphicon glyphicon-calendar"></i>  @comment.createdAt
+                                            <i class="glyphicon glyphicon-calendar"></i> @comment.createdAt
                                         </time>
                                     </header>
                                     <div>@comment.content</div>
@@ -62,18 +66,20 @@
                             </article>
                         }
                     }
-                    <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment" method="post">
-                        <div class="form-group">
-                            <input name="articleId" type="hidden" value="@article.id"/>
-                            <i class="glyphicon glyphicon-info-sign"></i>
-                            <label class="editor-hint">
-                                Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
-                                here</a>.
-                            </label>
-                            <textarea name="content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
-                        </div>
-                        <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
-                    </form>
+                    @if(user.isDefined) {
+                        <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment" method="post">
+                            <div class="form-group">
+                                <input name="articleId" type="hidden" value="@article.id"/>
+                                <i class="glyphicon glyphicon-info-sign"></i>
+                                <label class="editor-hint">
+                                    Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
+                                    here</a>.
+                                </label>
+                                <textarea name="content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
+                            </div>
+                            <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
+                        </form>
+                    }
                 </section>
             </div>
         </div>

@@ -1,5 +1,5 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit request: Request[AnyContent])
-@templates.main("Articles") {
+@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit request: Request[AnyContent], user: Option[security.AuthenticatedUser])
+@templates.main("Articles"){
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
             <div class="clearfix">
@@ -11,12 +11,14 @@
                         <button class="btn btn-sm btn-primary">Find</button>
                     </form>
                 </div>
-                <div class="pull-right">
-                    <a class="btn btn-sm btn-primary" href="@routes.ArticleController.getNewArticlePage">
-                        <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
-                    </a>
-                    <div class="clearfix"></div>
-                </div>
+                @if(user.isDefined) {
+                    <div class="pull-right">
+                        <a class="btn btn-sm btn-primary" href="@routes.ArticleController.getNewArticlePage">
+                            <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+                        </a>
+                        <div class="clearfix"></div>
+                    </div>
+                    }
             </div>
             @templates.bareArticleList(page, routes.ArticleController.listAllArticles)
         </div>

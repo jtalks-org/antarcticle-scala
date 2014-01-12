@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], user: String)(implicit request: Request[AnyContent])
+@(page: models.Page[models.ArticleModels.ArticleListModel], username: String)(implicit request: Request[AnyContent], user: Option[security.AuthenticatedUser])
 @templates.main("My articles") {
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -13,7 +13,7 @@
                         </ul>
                     </div>
                 </header>
-                @templates.bareArticleList(page, routes.UserController.viewProfile(user, _))
+                @templates.bareArticleList(page, routes.UserController.viewProfile(username, _))
                 <div class="centralized-inputs">
                 @if(page.totalPages == 0) {
                     <h3>User has no articles.</h3>

@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)(implicit request: Request[AnyContent])
+@(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)
 <section class="articles-list">
     @for(article <- page.list) {
         <article id="@article.id" class="entry">
@@ -33,10 +33,10 @@
     @if(page.currentPage > 0) {
         <a href="@paginationHandler(page.currentPage - 1)">Prev page</a>
     }
-    @for(pageNum <- 0 to page.totalPages) {
+    @for(pageNum <- 0 to page.totalPages - 1) {
         <a href="@paginationHandler(pageNum)">@pageNum</a>
     }
-    @if(page.currentPage < page.totalPages) {
+    @if(page.currentPage < page.totalPages - 1) {
         <a href="@paginationHandler(page.currentPage + 1)">Next page</a>
     }
 </section>

@@ -1,4 +1,4 @@
-@(form: Form[ArticleModels.Article], submitCaption: String)(implicit request: Request[AnyContent])
+@(form: Form[ArticleModels.Article], submitCaption: String)
 @form.globalError.map { error =>
     <div class="alert alert-danger">
         <a class="close" data-dismiss="alert" href="#">x</a>

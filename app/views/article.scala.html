@@ -1,5 +1,5 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-        comments: List[models.CommentModels.Comment])(implicit request: Request[AnyContent], user: Option[security.AuthenticatedUser])
+        comments: List[models.CommentModels.Comment])(implicit user: Option[security.AuthenticatedUser])
     @templates.main(article.title) {
         @if(user.isDefined) {
             @if(user.get.id == article.author.id) {

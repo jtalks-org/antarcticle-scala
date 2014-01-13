@@ -17,10 +17,10 @@ import scalaz._
 import Scalaz._
 
 class SecurityServiceSpec extends Specification with ValidationMatchers
-    with Mockito with BeforeExample {
+with Mockito with BeforeExample {
 
   object service extends SecurityServiceComponentImpl with UsersRepositoryComponent
-      with FakeSessionProvider {
+  with FakeSessionProvider {
     override val usersRepository = mock[UsersRepository]
     override val tokenProvider = mock[TokenProvider]
     override val authenticationManager = mock[AuthenticationManager]
@@ -44,32 +44,34 @@ class SecurityServiceSpec extends Specification with ValidationMatchers
       val generatedToken = "2314"
 
       "return remember me token and authenticated user" in {
-         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userFromDb.some
-         tokenProvider.generateToken returns generatedToken
+        authenticationManager.authenticate(username, password) returns future(userInfo.some)
+        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userFromDb.some
+        tokenProvider.generateToken returns generatedToken
 
-         securityService.signInUser(username, password) must beSuccessful((generatedToken, authUser)).await
+        securityService.signInUser(username, password) must beSuccessful((generatedToken, authUser)).await
       }
 
       "create new user when not exists" in {
-         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
-         tokenProvider.generateToken returns generatedToken
+        authenticationManager.authenticate(username, password) returns future(userInfo.some)
+        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
+        tokenProvider.generateToken returns generatedToken
 
-         securityService.signInUser(username, password)
+        securityService.signInUser(username, password)
 
-         there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
+        there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
       }
 
       "issue remember me token to authenticated user" in {
-         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
-         usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns 1
-         tokenProvider.generateToken returns generatedToken
+        val userId = 1
+        authenticationManager.authenticate(username, password) returns future(userInfo.some)
+        usersRepository.getByUsername(username)(FakeSessionValue) returns None
+        usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns userId
+        usersRepository.updateRememberToken(userId, generatedToken)(FakeSessionValue) returns true
+        tokenProvider.generateToken returns generatedToken
 
-         securityService.signInUser(username, password)
+        securityService.signInUser(username, password)
 
-         there was one(usersRepository).updateRememberToken(1, generatedToken)(FakeSessionValue)
+        there was one(usersRepository).updateRememberToken(userId, generatedToken)(FakeSessionValue)
       }
     }
 

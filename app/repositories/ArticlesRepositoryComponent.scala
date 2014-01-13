@@ -53,12 +53,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
   class SlickArticlesRepository extends ArticlesRepository {
 
     def getList(offset: Int, portionSize: Int)(implicit s: Session) = {
-      val q = for {
-        article <- articles.sortBy(_.createdAt).drop(offset).take(portionSize)
-        author <- article.author
-      } yield (article, author)
-      println(q.selectStatement)
-      // val q = articles.portion(offset, portionSize)
+      // val q = for {
+      //   article <- articles.sortBy(_.createdAt).drop(offset).take(portionSize)
+      //   author <- article.author
+      // } yield (article, author)
+      // println(q.selectStatement)
+      val q = articles.portion(offset, portionSize)
       q.list.map(fetchTags)
     }
 

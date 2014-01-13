@@ -1,8 +1,5 @@
 package models.database
 
-case class UserToInsert(username: String, admin: Boolean = false,
-                      firstName: Option[String] = None, lastName: Option[String] = None)
-
 case class UserRecord(id: Option[Int], username: String, admin: Boolean = false,
                 firstName: Option[String] = None, lastName: Option[String] = None, rememberToken: Option[String] = None)
 

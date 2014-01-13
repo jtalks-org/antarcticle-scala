@@ -12,8 +12,8 @@ import org.specs2.specification.BeforeExample
 import scala.None
 
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends TestDatabaseConfiguration with MigrationTool
-      with Schema with SlickArticlesRepositoryComponent {
+  object repository extends TestDatabaseConfiguration with Schema with MigrationTool
+      with SlickArticlesRepositoryComponent {
     override val migrationsContainer = new MigrationsContainer {}
   }
 
@@ -123,7 +123,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val oldCount = articlesCount
 
       val userId = 2
-      val newArticle = ArticleToInsert("test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
       articlesRepository.insert(newArticle)
 
@@ -132,7 +132,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
     "assigns id to new article" in withTestDb { implicit session: Session =>
       val userId = 2
-      val newArticle = ArticleToInsert("test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
       val insertedArticleId: Int = articlesRepository.insert(newArticle)
       true

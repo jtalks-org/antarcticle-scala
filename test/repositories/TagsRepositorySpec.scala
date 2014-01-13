@@ -4,14 +4,14 @@ import org.specs2.mutable.Specification
 import utils.DateImplicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
-import models.database.{ArticleToInsert, UserToInsert, Schema}
+import models.database._
 import util.TestDatabaseConfiguration
 import migrations.{MigrationTool, MigrationsContainer}
 import org.specs2.specification.BeforeExample
 
 class TagsRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends TagsRepositoryComponentImpl with MigrationTool
-      with Schema with TestDatabaseConfiguration  {
+  object repository extends TestDatabaseConfiguration with Schema
+              with MigrationTool with TagsRepositoryComponentImpl {
     val migrationsContainer = new MigrationsContainer {}
   }
 
@@ -25,13 +25,12 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
     val time = DateTime.now
     tags.map(_.name).insertAll("tag1", "tag2", "tag3")
-    users.map(_.username).insertAll("user1", "user2")
-    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId))
-      .insertAll(
-        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
-        ("New title 2", "<i>html text</i>", time, time, "description2", 2),
-        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
-        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
+    users.insertAll(UserRecord(None, "user1"), UserRecord(None, "user2"))
+    articles.insertAll(
+        ArticleRecord(None, "New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
+        ArticleRecord(None, "New title 2", "<i>html text</i>", time, time, "description2", 2),
+        ArticleRecord(None, "New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
+        ArticleRecord(None, "New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
       )
     articlesTags.map(at => (at.articleId, at.tagId)).insertAll(
       (1,1), (1,2), (2,1), (2,3)

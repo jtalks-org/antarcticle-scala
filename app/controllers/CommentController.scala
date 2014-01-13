@@ -5,7 +5,7 @@ import services.{CommentServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import views.html
-import models.database.{CommentToInsert, CommentRecord}
+import models.database.CommentRecord
 import security.Authentication
 
 /**

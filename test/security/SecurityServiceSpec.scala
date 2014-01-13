@@ -5,7 +5,7 @@ import util.FakeSessionProvider
 import repositories.UsersRepositoryComponent
 import util.FakeSessionProvider.FakeSessionValue
 import org.mockito.Matchers
-import models.database.{UserRecord, UserToInsert}
+import models.database.UserRecord
 import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.ArgumentCapture
@@ -58,13 +58,13 @@ class SecurityServiceSpec extends Specification with ValidationMatchers
 
          securityService.signInUser(username, password)
 
-         there was one(usersRepository).insert(UserToInsert(username, false, "fn".some, "ln".some))(FakeSessionValue)
+         there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
       }
 
       "issue remember me token to authenticated user" in {
          authenticationManager.authenticate(username, password) returns future(userInfo.some)
          usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
-         usersRepository.insert(any[UserToInsert])(Matchers.eq(FakeSessionValue)) returns 1
+         usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns 1
          tokenProvider.generateToken returns generatedToken
 
          securityService.signInUser(username, password)

@@ -2,7 +2,7 @@ package security
 
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
-import models.database.UserToInsert
+import models.database.UserRecord
 import scala.slick.jdbc.JdbcBackend.Session
 import scalaz._
 import Scalaz._
@@ -54,7 +54,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     private def getOrCreateAuthenticatedUser(userInfo: UserInfo) = withSession { implicit session: Session =>
       def createUser = {
-        val userToInsert = UserToInsert(userInfo.username, false, userInfo.firstName, userInfo.lastName)
+        val userToInsert = UserRecord(None, userInfo.username, false, userInfo.firstName, userInfo.lastName)
         usersRepository.insert(userToInsert)
       }
 

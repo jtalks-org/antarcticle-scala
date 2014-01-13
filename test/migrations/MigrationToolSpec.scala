@@ -51,7 +51,7 @@ class MigrationToolSpec extends Specification
   }
 
   "migrations tool" should {
-    object tool extends MigrationTool with Schema with TestDatabaseConfiguration {
+    object tool extends TestDatabaseConfiguration with Schema with MigrationTool {
       val migrationsContainer = mockContainer
     }
 

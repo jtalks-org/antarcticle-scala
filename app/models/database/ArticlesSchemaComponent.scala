@@ -5,9 +5,6 @@ import java.sql.Timestamp
 case class ArticleRecord(id: Option[Int], title: String, content: String,
                    createdAt: Timestamp, updatedAt: Timestamp, description: String, authorId: Int)
 
-case class ArticleToInsert(title: String, content: String, createdAt: Timestamp,
-                           updatedAt: Timestamp, description: String, authorId: Int)
-
 case class ArticleToUpdate(title: String, content: String,
                            updatedAt: Timestamp, description: String)
 
@@ -34,5 +31,4 @@ trait ArticlesSchemaComponent  {
   }
 
   val articles = TableQuery[Articles]
-
 }

@@ -3,7 +3,7 @@ package services
 import org.joda.time.DateTime
 import java.sql.Timestamp
 import repositories.ArticlesRepositoryComponent
-import models.database.{ArticleToInsert, ArticleToUpdate, UserRecord, ArticleRecord}
+import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.DateImplicits._
@@ -47,8 +47,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         _ <- articleValidator.validate(article)
         newRecord = createRecord
         id = articlesRepository.insert(newRecord)
-        _ <- tagsService.createTagsForArticle(id, article.tags)
-      } yield insertToDetailsModel(id, newRecord, UserRecord(Some(1), "")/*TODO: real user*/)
+        tags <- tagsService.createTagsForArticle(id, article.tags)
+      } yield recordToDetailsModel(newRecord.copy(id = Some(id)), UserRecord(Some(1), "")/*TODO: real user*/, tags)
 
       if (result.isFailure) {
         // article should not be persisted, when tags creation failed
@@ -106,17 +106,11 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     //TODO: Extract conversions and write tests for them
 
     private def articleToInsert(article: Article, creationTime: Timestamp, authorId: Int) = {
-      ArticleToInsert(article.title, article.content, creationTime, creationTime, article.description, authorId)
+      ArticleRecord(None, article.title, article.content, creationTime, creationTime, article.description, authorId)
     }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
       ArticleToUpdate(article.title, article.content, updatedAt, article.description)
-    }
-
-    private def insertToDetailsModel(id: Int, article: ArticleToInsert, authorRecord: UserRecord) = {
-      ArticleDetailsModel(id, article.title,
-        article.content, article.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username), List[String]())
     }
 
     private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {

@@ -4,7 +4,6 @@ import models.database._
 import models.database.ArticleToUpdate
 import models.database.UserRecord
 import models.database.ArticleRecord
-import models.database.ArticleToInsert
 
 trait ArticlesRepositoryComponent {
   import scala.slick.jdbc.JdbcBackend.Session
@@ -15,7 +14,7 @@ trait ArticlesRepositoryComponent {
     def getList(offset: Int, portionSize: Int)(implicit s: Session): List[(ArticleRecord, UserRecord, Seq[String])]
     def getListForUser(userId: Int, offset: Int, portionSize: Int)(implicit s: Session): Seq[(ArticleRecord, UserRecord, Seq[String])]
     def get(id: Int)(implicit s: Session): Option[(ArticleRecord, UserRecord, Seq[String])]
-    def insert(article: ArticleToInsert)(implicit s: Session): Int
+    def insert(article: ArticleRecord)(implicit s: Session): Int
     def update(id: Int, article: ArticleToUpdate)(implicit s: Session): Boolean
     def remove(id: Int)(implicit s: Session): Boolean
     def count()(implicit s: Session): Int
@@ -36,11 +35,14 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       q.leftJoin(users).on(_.authorId === _.id)
     }
 
+    // TODO: sorts incorrectly!!!
+    // slick has some issues with mixing sortBy with drop/take
+    // issue created: https://github.com/slick/slick/issues/607
     def portion(offset: Int, portionSize: Int) = {
       q.withAuthor
-        // .sortBy { case (article, _) => article.createdAt.desc }
         .drop(offset)
         .take(portionSize)
+        .sortBy { case (article, _) => article.createdAt.desc }
     }
 
     def byId(id: Column[Int]): Query[Articles, E] = {
@@ -51,10 +53,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
   class SlickArticlesRepository extends ArticlesRepository {
 
     def getList(offset: Int, portionSize: Int)(implicit s: Session) = {
-      val q = (for {
-        (article, author) <- articles.sortBy(_.createdAt).drop(offset).take(portionSize) innerJoin users on(_.authorId === _.id)
-      } yield (article, author))
+      val q = for {
+        article <- articles.sortBy(_.createdAt).drop(offset).take(portionSize)
+        author <- article.author
+      } yield (article, author)
       println(q.selectStatement)
+      // val q = articles.portion(offset, portionSize)
       q.list.map(fetchTags)
     }
 
@@ -66,9 +70,8 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.byId(id).withAuthor().firstOption.map(fetchTags)
     }
 
-    def insert(article: ArticleToInsert)(implicit s: Session) = {
-      articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId))
-      .returning(articles.map(_.id)) += ArticleToInsert.unapply(article).get
+    def insert(article: ArticleRecord)(implicit s: Session) = {
+      articles.returning(articles.map(_.id)) += article
     }
 
     def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: Session) = {
@@ -85,10 +88,6 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
 
     def countForUser(userId: Int)(implicit s: Session) = {
-      //TODO: replace count with something else in slick 2.0
-      // (for {
-      //   article <- articles if article.authorId === userId
-      // } yield article.id.count).first
       articles.filter(_.authorId === userId).length.run
     }
 

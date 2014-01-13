@@ -10,7 +10,7 @@ trait TagsServiceComponent {
   val tagsService: TagsService
 
   trait TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]): ValidationNel[String, Unit]
+    def createTagsForArticle(articleId: Int, tags: Seq[String]): ValidationNel[String, Seq[String]]
   }
 }
 
@@ -36,6 +36,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
         val articleTags = allTagsId.map((articleId, _))
 
         tagsRepository.insertArticleTags(articleTags)
+        trimmedTags
       }
     }
 

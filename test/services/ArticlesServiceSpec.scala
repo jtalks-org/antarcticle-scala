@@ -40,14 +40,14 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   val dbRecord = {
-    val article = ArticleRecord(Some(1), "", "", DateTime.now, DateTime.now, "", 1)
-    val user = UserRecord(Some(1), "")
+    val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1)
+    val user = UserRecord(1.some, "")
     val tags = List("tag1", "tag2")
     (article, user, tags)
   }
 
   "get article" should {
-    val article = Some(dbRecord)
+    val article = dbRecord.some
 
     "return model" in {
       articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
@@ -124,10 +124,10 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>
-        val record = ArticleToInsert("", "", dt, dt, "", 1)
-        articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(session)) returns 1
+        val record = ArticleRecord(None, "", "", dt, dt, "", 1)
+        articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
         articleValidator.validate(any[Article]) returns article.successNel
-        tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Success(Unit)
+        tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
 
         articlesService.createArticle(article)
 
@@ -136,9 +136,9 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "return model" in {
-      articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(session)) returns 1
+      articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Success(Unit)
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
 
       val model: ArticleDetailsModel = articlesService.createArticle(article).get
 
@@ -148,9 +148,9 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     "create tags" in {
       val tags = List("tag1", "tag2")
       val articleId = 1
-      articlesRepository.insert(any[ArticleToInsert])(Matchers.eq(session)) returns articleId
+      articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns articleId
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Success(Unit)
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns tags.success
 
       articlesService.createArticle(article.copy(tags = tags))
 
@@ -159,7 +159,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
     "not create article when validation failed" in {
       articleValidator.validate(any[Article]) returns "".failNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Success(Unit)
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
 
       articlesService.createArticle(article)
 
@@ -177,7 +177,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   "article update" should {
-    val article = Article(Some(1), "", "", List("tag"))
+    val article = Article(1.some, "", "", List("tag"))
 
     "update existing article" in {
       articleValidator.validate(any[Article]) returns article.successNel

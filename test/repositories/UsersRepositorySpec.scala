@@ -1,14 +1,14 @@
 package repositories
 
 import org.specs2.mutable.Specification
-import models.database.{UserToInsert, Schema, UserRecord}
+import models.database.{Schema, UserRecord}
 import util.TestDatabaseConfiguration
 import migrations.{MigrationTool, MigrationsContainer}
 import org.specs2.specification.BeforeExample
 
 class UsersRepositorySpec extends Specification {
-  object repository extends UsersRepositoryComponentImpl with MigrationTool
-                                with Schema with TestDatabaseConfiguration {
+  object repository extends TestDatabaseConfiguration with Schema
+            with MigrationTool with UsersRepositoryComponentImpl {
     val migrationsContainer = new MigrationsContainer {}
   }
 
@@ -37,7 +37,7 @@ class UsersRepositorySpec extends Specification {
 
       usersRepository.updateRememberToken(userId, token)
 
-      val actualToken = users.filter(_.id === userId).map(_.rememberToken).run
+      val actualToken = users.filter(_.id === userId).map(_.rememberToken).first
       actualToken must_== token
     }
   }
@@ -75,7 +75,7 @@ class UsersRepositorySpec extends Specification {
   }
 
   "user insertion" should {
-    val toInsert = UserToInsert("user_to_insert")
+    val toInsert = UserRecord(None, "user_to_insert")
 
     "create new user record" in withTestDb { implicit session: Session =>
       val oldCount = users.length.run

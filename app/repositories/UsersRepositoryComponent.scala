@@ -1,7 +1,6 @@
 package repositories
 
-import models.database.{Profile, UsersSchemaComponent, UserRecord}
-import models.database.UserToInsert
+import models.database._
 
 trait UsersRepositoryComponent {
   import scala.slick.jdbc.JdbcBackend.Session
@@ -12,7 +11,7 @@ trait UsersRepositoryComponent {
     def getByRemeberToken(token: String)(implicit session: Session): Option[UserRecord]
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: Session): Boolean
     def getByUsername(username: String)(implicit session: Session): Option[UserRecord]
-    def insert(userToInert: UserToInsert)(implicit session: Session): Int
+    def insert(userToInert: UserRecord)(implicit session: Session): Int
   }
 }
 
@@ -45,9 +44,8 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       users.filter(_.username === username).firstOption
     }
 
-    def insert(userToInsert: UserToInsert)(implicit session: Session) = {
-       users.map(u => (u.username, u.admin, u.firstName.?, u.lastName.?))
-         .insert(UserToInsert.unapply(userToInsert).get)
+    def insert(userToInsert: UserRecord)(implicit session: Session) = {
+       users.returning(users.map(_.id)).insert(userToInsert)
     }
 
   }

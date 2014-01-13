@@ -2,7 +2,7 @@ package services
 
 import scala.slick.jdbc.JdbcBackend.Session
 import repositories.CommentRepositoryComponent
-import models.database.{CommentToUpdate, CommentToInsert, CommentRecord}
+import models.database._
 import org.joda.time.DateTime
 import utils.DateImplicits._
 import models.CommentModels.Comment
@@ -16,11 +16,8 @@ trait CommentServiceComponent {
 
   trait CommentService {
     def getByArticle(id: Int): List[Comment]
-
     def insert(articleId: Int, content : String): CommentRecord
-
     def update(id: Int, comment: CommentToUpdate): Boolean
-
     def removeComment(id: Int): Boolean
   }
 }
@@ -32,25 +29,30 @@ trait CommentServiceComponentImpl extends CommentServiceComponent {
 
   class CommentServiceImpl extends CommentService {
 
-    //todo: real user
-    def getByArticle(articleId: Int) = withTransaction {
-      implicit s: Session => commentRepository.getByArticle(articleId).map(
-        (x : CommentRecord) => Comment(x.id.get, UserModel(1, "admin"), x.articleId, x.content, x.createdAt,x.updatedAt))
+    def getByArticle(articleId: Int) = withSession { implicit s: Session =>
+      commentRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
     // todo: real user
-    def insert(articleId: Int, content : String) = withTransaction {
-      implicit s: Session => val userId = 1
-        val id = commentRepository.insert(CommentToInsert(userId, articleId, content, DateTime.now))
-        CommentRecord(Some(id), userId, articleId, content, DateTime.now, null)
+    def insert(articleId: Int, content : String) = withTransaction { implicit s: Session =>
+        val userId = 1
+        val toInsert = CommentRecord(None, userId, articleId, content, DateTime.now)
+        val id = commentRepository.insert(toInsert)
+        toInsert.copy(id = Some(id))
     }
 
-    def update(id: Int, comment: CommentToUpdate) = withTransaction {
-      implicit s: Session => commentRepository.update(id, comment)
+    def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit s: Session =>
+      commentRepository.update(id, comment)
     }
 
-    def removeComment(id: Int) = withTransaction {
-      implicit s: Session => commentRepository.delete(id)
+    def removeComment(id: Int) = withTransaction { implicit s: Session =>
+      commentRepository.delete(id)
+    }
+
+    //TODO: remove UserRecord to UserModel duplication with article service
+    private def toComment(record: CommentRecord, user: UserRecord) = {
+      Comment(record.id.get, UserModel(user.id.get, user.username), record.articleId,
+        record.content, record.createdAt, record.updatedAt)
     }
   }
 }

@@ -3,13 +3,10 @@ package models.database
 import java.sql.Timestamp
 import scala.slick.model.ForeignKeyAction
 
-case class CommentToInsert(userId: Int, articleId: Int,
-                   content: String, createdAt: Timestamp)
-
 case class CommentToUpdate(content: String, updatedAt: Timestamp)
 
 case class CommentRecord(id: Option[Int], userId: Int, articleId: Int,
-                   content: String, createdAt: Timestamp, updatedAt: Option[Timestamp])
+       content: String, createdAt: Timestamp, updatedAt: Option[Timestamp] = None)
 
 trait CommentsSchemaComponent {
   this: Profile with UsersSchemaComponent with ArticlesSchemaComponent =>

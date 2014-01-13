@@ -1,14 +1,13 @@
 package migrations
 
 import models.database.{Schema, Profile}
-import scala.slick.session.Session
 import scala.slick.jdbc.meta.MTable
 import scala.slick.jdbc.{StaticQuery => Q}
 import play.api.Logger //tmp
 
 trait Migration {
   val version: Int
-  def run(implicit session: Session)
+  def run(implicit session: scala.slick.jdbc.JdbcBackend.Session)
 }
 
 trait MigrationsContainer {
@@ -37,7 +36,7 @@ trait MigrationTool {
   private val SCHEMA_VERSION_TABLE = "schema_version"
   private val VERSION_COLUMN = "current_version"
 
-  def migrate(implicit session: Session) = {
+  def migrate(implicit session: scala.slick.jdbc.JdbcBackend.Session) = {
     MTable.getTables(SCHEMA_VERSION_TABLE).list match {
       case Nil =>
         Logger.info("Migrating new database")

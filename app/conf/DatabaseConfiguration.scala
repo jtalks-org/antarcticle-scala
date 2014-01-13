@@ -2,8 +2,8 @@ package conf
 
 import models.database.Profile
 import services.SlickSessionProvider
-import scala.slick.driver.{H2Driver, MySQLDriver, PostgresDriver, ExtendedProfile}
-import scala.slick.session.Database
+import scala.slick.driver._
+import scala.slick.jdbc.JdbcBackend.Database
 import play.api.Logger
 
 trait DatabaseConfiguration extends Profile with SlickSessionProvider {
@@ -12,7 +12,7 @@ trait DatabaseConfiguration extends Profile with SlickSessionProvider {
   private def driver = propertiesProvider("ANTARCTICLE_DB_DRIVER") getOrElse "org.h2.Driver"
 
   //lazy to preserve correct intialization order
-  override lazy val profile: ExtendedProfile = driver match {
+  override lazy val profile: JdbcProfile = driver match {
     case "org.postgresql.Driver" => PostgresDriver
     case "com.mysql.jdbc.Driver" => MySQLDriver
     case "org.h2.Driver" => H2Driver
@@ -25,7 +25,7 @@ trait DatabaseConfiguration extends Profile with SlickSessionProvider {
 
     Logger.info(s"Using database: $url with driver: $driver")
 
-    scala.slick.session.Database.forURL(
+    Database.forURL(
       url = url,
       user = propertiesProvider("ANTARCTICLE_DB_USER") getOrElse "sa",
       password = propertiesProvider("ANTARCTICLE_DB_PASSWORD") getOrElse "",

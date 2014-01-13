@@ -3,7 +3,7 @@ package security
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
 import models.database.UserToInsert
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import scalaz._
 import Scalaz._
 import scala.concurrent.Future

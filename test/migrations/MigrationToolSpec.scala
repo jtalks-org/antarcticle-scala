@@ -5,10 +5,11 @@ import org.mockito.Matchers
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import scala.slick.jdbc.meta.MTable
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import util.TestDatabaseConfiguration
 import scala.slick.jdbc.{StaticQuery => Q}
 import models.database.Schema
+import scala.slick.lifted.AbstractTable
 
 class MigrationToolSpec extends Specification
               with Mockito with BeforeExample {
@@ -56,6 +57,7 @@ class MigrationToolSpec extends Specification
 
     import tool._
     import profile.simple._
+    import scala.slick.jdbc.JdbcBackend.Session
 
     "new database migration" should {
       "create version table when not exists" in withSession { implicit s: Session =>
@@ -71,7 +73,7 @@ class MigrationToolSpec extends Specification
 
         tool.migrate
 
-        def tableExists(table: Table[_]) = !MTable.getTables(table.tableName).list.isEmpty
+        def tableExists(table: TableQuery[_]) = !MTable.getTables(table.baseTableRow.asInstanceOf[AbstractTable[_]].tableName).list.isEmpty
         val allCreated = schema.forall(tableExists)
         allCreated must beTrue
       }

@@ -1,10 +1,11 @@
 package repositories
 
 import models.database.{Profile, UsersSchemaComponent, UserRecord}
-import scala.slick.session.Session
 import models.database.UserToInsert
 
 trait UsersRepositoryComponent {
+  import scala.slick.jdbc.JdbcBackend.Session
+
   val usersRepository: UsersRepository
 
   trait UsersRepository {
@@ -21,9 +22,10 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   val usersRepository = new SlickUsersRepository
 
   import profile.simple._
+  import scala.slick.jdbc.JdbcBackend.Session
 
-  implicit class UsersExtension[C](val q: Query[Users.type, C]) {
-    def byId(id: Column[Int]): Query[Users.type, C] = {
+  implicit class UsersExtension[C](val q: Query[Users, C]) {
+    def byId(id: Column[Int]): Query[Users, C] = {
       q.filter(_.id === id)
     }
   }
@@ -31,20 +33,21 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   class SlickUsersRepository extends UsersRepository {
     def getByRemeberToken(token: String)(implicit session: Session) = {
       (for {
-        user <- Users if user.rememberToken === token
+        user <- users if user.rememberToken === token
       } yield user).firstOption
     }
 
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: Session) = {
-      Query(Users).byId(id).map(_.rememberToken).update(tokenValue) > 0
+      users.byId(id).map(_.rememberToken).update(tokenValue) > 0
     }
 
     def getByUsername(username: String)(implicit session: Session) = {
-      Query(Users).filter(_.username === username).firstOption
+      users.filter(_.username === username).firstOption
     }
 
     def insert(userToInsert: UserToInsert)(implicit session: Session) = {
-       Users.forInsert.insert(userToInsert)
+       users.map(u => (u.username, u.admin, u.firstName.?, u.lastName.?))
+         .insert(UserToInsert.unapply(userToInsert).get)
     }
 
   }

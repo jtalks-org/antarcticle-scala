@@ -1,6 +1,7 @@
 package services
 
-import scala.slick.session.{Database, Session}
+import scala.slick.jdbc.JdbcBackend.Database
+import scala.slick.jdbc.JdbcBackend.Session
 
 trait SessionProvider {
   def withSession[T](f: Session => T): T

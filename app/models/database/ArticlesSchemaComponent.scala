@@ -16,7 +16,7 @@ trait ArticlesSchemaComponent  {
 
   import profile.simple._
 
-  object Articles extends Table[ArticleRecord]("articles") {
+  class Articles(tag: Tag) extends Table[ArticleRecord](tag, "articles") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def title = column[String]("title", O.NotNull)
@@ -27,14 +27,12 @@ trait ArticlesSchemaComponent  {
     def authorId = column[Int]("author_id", O.NotNull)
 
     // FKs
-    def author = foreignKey("article_author_fk", authorId, Users)(_.id)
+    def author = foreignKey("article_author_fk", authorId, users)(_.id)
 
     // projections
-    def * = id.? ~ title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleRecord.apply _, ArticleRecord.unapply _)
-    def forUpdate = title ~ content ~ updatedAt ~ description <> (ArticleToUpdate.apply _, ArticleToUpdate.unapply _)
-    def forInsert = title ~ content ~ createdAt ~ updatedAt ~ description ~ authorId <> (ArticleToInsert.apply _, ArticleToInsert.unapply _) returning id
-
-    //def authorIdx = index("index_articles_on_user_id", authorId)
+    def * = (id.?, title, content, createdAt, updatedAt, description, authorId) <> (ArticleRecord.tupled, ArticleRecord.unapply)
   }
+
+  val articles = TableQuery[Articles]
 
 }

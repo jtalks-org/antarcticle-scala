@@ -14,7 +14,7 @@ trait UsersSchemaComponent {
   /**
    * Antarcticle users
    */
-  object Users extends Table[UserRecord]("users") {
+  class Users(tag: Tag) extends Table[UserRecord](tag, "users") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username", O.NotNull)
@@ -24,10 +24,9 @@ trait UsersSchemaComponent {
     def rememberToken = column[String]("remember_token", O.Nullable)
 
     // projections
-    def * = id.? ~ username ~ admin ~ firstName.? ~ lastName.? ~ rememberToken.? <> (UserRecord.apply _, UserRecord.unapply _)
-    def forInsert = username ~ admin ~ firstName.? ~ lastName.? <> (UserToInsert.apply _, UserToInsert.unapply _) returning id
-
-    //def usernameIdx = index("index_users_on_username", username, unique = true)
+    def * = (id.?, username, admin, firstName.?, lastName.?, rememberToken.?) <> (UserRecord.tupled, UserRecord.unapply)
   }
+
+  val users = TableQuery[Users]
 }
 

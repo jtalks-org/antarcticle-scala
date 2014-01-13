@@ -1,11 +1,12 @@
 package repositories
 
-import scala.slick.session.Session
 import models.database.{Profile, Tag, TagsSchemaComponent}
 import scala.slick.jdbc.{GetResult, StaticQuery => Q}
 import Q.interpolation
 
 trait TagsRepositoryComponent {
+  import scala.slick.jdbc.JdbcBackend.Session
+
   val tagsRepository: TagsRepository
 
   trait TagsRepository {
@@ -20,12 +21,14 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
 
   val tagsRepository = new TagsRepositoryImpl
 
-  class TagsRepositoryImpl extends TagsRepository {
-    import profile.simple._
+  import profile.simple._
+  import scala.slick.jdbc.JdbcBackend.Session
 
+  class TagsRepositoryImpl extends TagsRepository {
     implicit val getTagResult = GetResult(r => Tag(r.<<, r.<<))
 
     def getByNames(names: Seq[String])(implicit session: Session) = {
+      import models.database.Tag
       if (names.isEmpty) {
         Vector[Tag]()
       } else {
@@ -35,11 +38,11 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
     }
 
     def insertAll(names: Seq[String])(implicit session: Session) = {
-      Tags.forInsert.insertAll(names : _*)
+      tags.map(t => t.name).returning(tags.map(_.id)).insertAll(names : _*)
     }
 
     def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: Session) = {
-      ArticlesTags.insertAll(articleTags : _*)
+      articlesTags.insertAll(articleTags : _*)
     }
   }
 }

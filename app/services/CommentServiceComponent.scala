@@ -1,6 +1,6 @@
 package services
 
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import repositories.CommentRepositoryComponent
 import models.database.{CommentToUpdate, CommentToInsert, CommentRecord}
 import org.joda.time.DateTime

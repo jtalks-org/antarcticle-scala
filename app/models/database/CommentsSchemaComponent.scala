@@ -1,7 +1,7 @@
 package models.database
 
 import java.sql.Timestamp
-import scala.slick.lifted.ForeignKeyAction
+import scala.slick.model.ForeignKeyAction
 
 case class CommentToInsert(userId: Int, articleId: Int,
                    content: String, createdAt: Timestamp)
@@ -19,7 +19,7 @@ trait CommentsSchemaComponent {
   /**
    * Comments to articles
    */
-  object Comments extends Table[CommentRecord]("comments") {
+  class Comments(tag: Tag) extends Table[CommentRecord](tag, "comments") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)
@@ -29,14 +29,13 @@ trait CommentsSchemaComponent {
     def updatedAt = column[Timestamp]("updated_at", O.Nullable)
 
     // FKs
-    def author = foreignKey("comment_author_fk", userId, Users)(_.id)
+    def author = foreignKey("comment_author_fk", userId, users)(_.id)
     // remove comments on article deletion
-    def article = foreignKey("comment_article_fk", articleId, Articles)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def article = foreignKey("comment_article_fk", articleId, articles)(_.id, onDelete = ForeignKeyAction.Cascade)
 
     // projections
-    def * = id.? ~ userId ~ articleId ~ content ~ createdAt ~ updatedAt.? <> (CommentRecord.apply _, CommentRecord.unapply _)
-    def forUpdate = content ~ updatedAt <> (CommentToUpdate.apply _, CommentToUpdate.unapply _)
-    def forInsert = userId ~ articleId ~ content ~ createdAt <>
-      (CommentToInsert.apply _, CommentToInsert.unapply _) returning id
+    def * = (id.?, userId, articleId, content, createdAt, updatedAt.?) <> (CommentRecord.tupled, CommentRecord.unapply)
   }
+
+  val comments = TableQuery[Comments]
 }

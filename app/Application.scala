@@ -7,6 +7,7 @@ import models.database._
 import conf.{JndiPropertiesProviderComponent, DatabaseConfiguration}
 import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
+import scala.slick.jdbc.JdbcBackend.Session
 
 object Application
   extends JndiPropertiesProviderComponent
@@ -20,7 +21,7 @@ object Application
 
   override val migrationsContainer = new Migrations(profile)
 
-  withSession { implicit s: scala.slick.session.Session =>
+  withSession { implicit s: Session =>
     migrate
   }
 }

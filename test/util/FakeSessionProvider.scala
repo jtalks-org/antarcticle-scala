@@ -1,6 +1,6 @@
 package util
 
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import services.SessionProvider
 
 object FakeSessionProvider {

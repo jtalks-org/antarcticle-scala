@@ -7,7 +7,7 @@ import models.database.{ArticleToInsert, ArticleToUpdate, UserRecord, ArticleRec
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.DateImplicits._
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import scala.math.ceil
 import conf.Constants
 import models.Page
@@ -119,13 +119,13 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         UserModel(authorRecord.id.get, authorRecord.username), List[String]())
     }
 
-    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: List[String]) = {
+    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {
       ArticleDetailsModel(articleRecord.id.get, articleRecord.title,
         articleRecord.content, articleRecord.createdAt,
         UserModel(authorRecord.id.get, authorRecord.username), tags)
     }
 
-    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: List[String]) = {
+    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {
       ArticleListModel(articleRecord.id.get, articleRecord.title,
         articleRecord.description, articleRecord.createdAt,
         UserModel(authorRecord.id.get, authorRecord.username), tags)

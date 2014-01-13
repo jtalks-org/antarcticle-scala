@@ -8,7 +8,7 @@ version := "0.1"
 scalaVersion := "2.10.3"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick" % "1.0.1",
+  "com.typesafe.slick" %% "slick" % "2.0.0-RC1",
   // Joda time wrapper for scala
   "com.github.nscala-time" %% "nscala-time" % "0.6.0",
   "com.h2database" % "h2" % "1.3.174",

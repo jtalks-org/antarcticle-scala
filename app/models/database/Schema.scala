@@ -1,7 +1,5 @@
 package models.database
 
-import scala.slick.jdbc.meta.MTable
-
 /**
  * Database schema layer
  */
@@ -13,8 +11,5 @@ trait Schema
 
   this: Profile =>
 
-  import profile.simple._
-
-  lazy val schema = Vector(Users, Articles, Comments, Tags,
-    ArticlesTags)
+  lazy val schema = Vector(users, articles, comments, tags, articlesTags)
 }

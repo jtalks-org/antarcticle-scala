@@ -1,7 +1,7 @@
 package services
 
 import repositories.TagsRepositoryComponent
-import scala.slick.session.Session
+import scala.slick.jdbc.JdbcBackend.Session
 import validators.Validator
 import scalaz._
 import Scalaz._

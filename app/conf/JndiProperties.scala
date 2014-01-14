@@ -6,24 +6,6 @@ import scala.util.Try
 import conf.Keys._
 import com.typesafe.config.Config
 
-trait PropertiesProviderComponent  {
-  // should be def to be independent of initialization order
-  def propertiesProvider: PropertiesProvider
-}
-
-trait PropertiesProviderComponentImpl extends PropertiesProviderComponent {
-  val propsProviderInstance = {
-    def jndi = Option(new JndiPropertiesProvider).filter(_.isAvailable)
-    def typesafe = Option(new TypesafeConfigPropertiesProvider(play.api.Play.current.configuration.underlying)).filter(_.isAvailable)
-    def notFound = throw new RuntimeException("No available configuration providers")
-
-    jndi orElse typesafe getOrElse notFound
-  }
-
-  // should be def to be independent of initialization order
-  def propertiesProvider: PropertiesProvider = propsProviderInstance // singleton
-}
-
 trait PropertiesProvider {
   def apply[T : TypeTag](property: ConfigurationKey): Option[T]
   def get[T : TypeTag](property: ConfigurationKey): Option[T] = apply[T](property)
@@ -64,7 +46,7 @@ class TypesafeConfigPropertiesProvider(config: Config) extends PropertiesProvide
       case t if t =:= typeOf[Boolean] =>
         Try(config.getBoolean(translatedKey).asInstanceOf[T]).toOption
       case ut =>
-        throw new RuntimeException(s"Unsupported by Typesafe config properties provider type: $ut")
+        throw new RuntimeException(s"Type $ut is unsupported by Typesafe config provider.")
     }
   }
 

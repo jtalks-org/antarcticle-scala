@@ -15,16 +15,22 @@ trait SecurityComponent extends SecurityServiceComponentImpl with Authentication
 
   override val tokenProvider = new UUIDTokenProvider
 
-  override val authenticationManager =
-    propertiesProvider.get[String](Keys.PoulpeUrl).cata(
-      some = { poulpeUrl =>
-        Logger.warn(s"Using poulpe authentication manager with Poulpe at $poulpeUrl")
-        new PoulpeAuthenticationManager(poulpeUrl)
-      },
-      none = {
-        Logger.warn("Using fake authentication manager. DON'T USE IN PRODUCTION!!!")
-        new FakeAuthenticationManager
-      }
+  override val authenticationManager = {
+    def fake = {
+      Logger.warn("Using fake authentication manager. DON'T USE IN PRODUCTION!!!")
+      new FakeAuthenticationManager
+    }
+    def poulpe = {
+      val poulpeUrl = propertiesProvider.get[String](Keys.PoulpeUrl)
+        .getOrElse(throw new RuntimeException("Poulpe url not found. Check your configuration file."))
+      Logger.warn(s"Using poulpe authentication manager with Poulpe at $poulpeUrl")
+      new PoulpeAuthenticationManager(poulpeUrl)
+    }
+
+    propertiesProvider.get[Boolean](Keys.UseFakeAuthentication).cata(
+      some = useFake => if (useFake) fake else poulpe,
+      none = poulpe
     )
+  }
 }
 

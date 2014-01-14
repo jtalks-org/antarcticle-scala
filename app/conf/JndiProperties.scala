@@ -49,6 +49,7 @@ class JndiPropertiesProvider extends PropertiesProvider{
     case DbUser     => "ANTARCTICLE_DB_USER"
     case DbPassword => "ANTARCTICLE_DB_PASSWORD"
     case PoulpeUrl  => "ANTARCTICLE_POULPE_URL"
+    case UseFakeAuthentication => "ANTARCTICLE_USE_FAKE_AUTHENTICATION"
     case k => throw new RuntimeException(s"Key $k can't be translated to JNDI property key")
   }
 }
@@ -57,8 +58,11 @@ class TypesafeConfigPropertiesProvider(config: Config) extends PropertiesProvide
   def apply[T : TypeTag](key: ConfigurationKey): Option[T] = {
     val translatedKey = translateKey(key)
     typeOf[T] match {
+      //TODO: remove duplication
       case t if t =:= typeOf[String] =>
         Try(config.getString(translatedKey).asInstanceOf[T]).toOption
+      case t if t =:= typeOf[Boolean] =>
+        Try(config.getBoolean(translatedKey).asInstanceOf[T]).toOption
       case ut =>
         throw new RuntimeException(s"Unsupported by Typesafe config properties provider type: $ut")
     }
@@ -72,7 +76,8 @@ class TypesafeConfigPropertiesProvider(config: Config) extends PropertiesProvide
     case DbUrl      => "db.default.url"
     case DbUser     => "db.default.user"
     case DbPassword => "db.default.password"
-    case PoulpeUrl  => "poulpe.url"
+    case PoulpeUrl  => "security.authentication.poulpe.url"
+    case UseFakeAuthentication => "security.authentication.useFake"
     case k => throw new RuntimeException(s"Key $k can't be translated to Typesafe config key")
   }
 }

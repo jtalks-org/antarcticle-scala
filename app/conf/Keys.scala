@@ -7,4 +7,5 @@ object Keys {
   case object DbUser extends ConfigurationKey
   case object DbPassword extends ConfigurationKey
   case object PoulpeUrl extends ConfigurationKey
+  case object UseFakeAuthentication extends ConfigurationKey
 }

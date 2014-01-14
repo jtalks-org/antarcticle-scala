@@ -4,14 +4,13 @@ import security._
 import services._
 import repositories._
 import models.database._
-import conf.{JndiPropertiesProviderComponent, DatabaseConfiguration}
+import conf.ConfigurationComponent
 import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
 import scala.slick.jdbc.JdbcBackend.Session
 
 object Application
-  extends JndiPropertiesProviderComponent
-  with DatabaseConfiguration
+  extends ConfigurationComponent
   with Schema
   with MigrationTool
   with Repositories

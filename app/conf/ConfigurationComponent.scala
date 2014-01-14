@@ -1,0 +1,3 @@
+package conf
+
+trait ConfigurationComponent extends PropertiesProviderComponentImpl with DatabaseConfiguration

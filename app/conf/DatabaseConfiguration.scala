@@ -9,10 +9,7 @@ import play.api.Logger
 trait DatabaseConfiguration extends Profile with SlickSessionProvider {
   this: PropertiesProviderComponent =>
 
-  private def driver = propertiesProvider("ANTARCTICLE_DB_DRIVER") getOrElse "org.h2.Driver"
-
-  //lazy to preserve correct intialization order
-  override lazy val profile: JdbcProfile = driver match {
+  override val profile: JdbcProfile = propertiesProvider[String](Keys.DbDriver).get match {
     case "org.postgresql.Driver" => PostgresDriver
     case "com.mysql.jdbc.Driver" => MySQLDriver
     case "org.h2.Driver" => H2Driver
@@ -20,16 +17,22 @@ trait DatabaseConfiguration extends Profile with SlickSessionProvider {
   }
 
   override val db: Database = {
-    val url = propertiesProvider("ANTARCTICLE_DB_URL")
-      .getOrElse("jdbc:h2:mem:test1;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1")
-
-    Logger.info(s"Using database: $url with driver: $driver")
-
-    Database.forURL(
-      url = url,
-      user = propertiesProvider("ANTARCTICLE_DB_USER") getOrElse "sa",
-      password = propertiesProvider("ANTARCTICLE_DB_PASSWORD") getOrElse "",
-      driver = driver
-    )
+    (for {
+      driver <- propertiesProvider[String](Keys.DbDriver)
+      url <- propertiesProvider[String](Keys.DbUrl)
+      user <- propertiesProvider[String](Keys.DbUser)
+      password <- propertiesProvider[String](Keys.DbPassword)
+    } yield {
+      Logger.info(s"Using database: $url with driver: $driver")
+      Database.forURL(
+        url = url,
+        user = user,
+        password = password,
+        driver = driver
+      )
+    }) getOrElse {
+      throw new RuntimeException("Incorrect database configuration. " +
+        "Some properties not found.")
+    }
   }
 }

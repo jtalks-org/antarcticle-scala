@@ -5,6 +5,7 @@ import repositories.UsersRepositoryComponent
 import services.SessionProvider
 import conf.PropertiesProviderComponent
 import play.api.Logger
+import conf.Keys
 import scalaz._
 import Scalaz._
 
@@ -15,7 +16,7 @@ trait SecurityComponent extends SecurityServiceComponentImpl with Authentication
   override val tokenProvider = new UUIDTokenProvider
 
   override val authenticationManager =
-    propertiesProvider.get[String]("ANTARCTICLE_POULPE_URL").cata(
+    propertiesProvider.get[String](Keys.PoulpeUrl).cata(
       some = { poulpeUrl =>
         Logger.warn(s"Using poulpe authentication manager with Poulpe at $poulpeUrl")
         new PoulpeAuthenticationManager(poulpeUrl)

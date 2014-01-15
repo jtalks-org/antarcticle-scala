@@ -3,11 +3,11 @@ package security
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
 import models.database.UserRecord
-import scala.slick.jdbc.JdbcBackend.Session
 import scalaz._
 import Scalaz._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.slick.jdbc.JdbcBackend
 
 trait SecurityServiceComponent {
   val securityService: SecurityService
@@ -46,23 +46,25 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     private def issueRememberMeTokenTo(userId: Int) = {
       val token = tokenProvider.generateToken
-      withSession { implicit session: Session =>
+      withSession { implicit session: JdbcBackend#Session =>
         usersRepository.updateRememberToken(userId, token)
       }
       token
     }
 
-    private def getOrCreateAuthenticatedUser(userInfo: UserInfo) = withSession { implicit session: Session =>
-      def createUser = {
-        val userToInsert = UserRecord(None, userInfo.username, false, userInfo.firstName, userInfo.lastName)
-        usersRepository.insert(userToInsert)
-      }
+    private def getOrCreateAuthenticatedUser(userInfo: UserInfo) =
+      withSession { implicit s: JdbcBackend#Session =>
+        def createUser = {
+          val userToInsert = UserRecord(None, userInfo.username, false,
+            userInfo.firstName, userInfo.lastName)
+          usersRepository.insert(userToInsert)
+        }
 
-      usersRepository.getByUsername(userInfo.username).cata(
-        some = user => AuthenticatedUser(user.id.get, user.username),
-        none = AuthenticatedUser(createUser, userInfo.username)
-      )
-    }
+        usersRepository.getByUsername(userInfo.username).cata(
+          some = user => AuthenticatedUser(user.id.get, user.username),
+          none = AuthenticatedUser(createUser, userInfo.username)
+        )
+      }
   }
 }
 

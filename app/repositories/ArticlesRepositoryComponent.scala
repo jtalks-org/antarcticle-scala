@@ -4,21 +4,20 @@ import models.database._
 import models.database.ArticleToUpdate
 import models.database.UserRecord
 import models.database.ArticleRecord
+import scala.slick.jdbc.JdbcBackend
 
 trait ArticlesRepositoryComponent {
-  import scala.slick.jdbc.JdbcBackend.Session
-
   val articlesRepository: ArticlesRepository
 
   trait ArticlesRepository {
-    def getList(offset: Int, portionSize: Int)(implicit s: Session): List[(ArticleRecord, UserRecord, Seq[String])]
-    def getListForUser(userId: Int, offset: Int, portionSize: Int)(implicit s: Session): Seq[(ArticleRecord, UserRecord, Seq[String])]
-    def get(id: Int)(implicit s: Session): Option[(ArticleRecord, UserRecord, Seq[String])]
-    def insert(article: ArticleRecord)(implicit s: Session): Int
-    def update(id: Int, article: ArticleToUpdate)(implicit s: Session): Boolean
-    def remove(id: Int)(implicit s: Session): Boolean
-    def count()(implicit s: Session): Int
-    def countForUser(userId: Int)(implicit s: Session): Int
+    def getList(offset: Int, portionSize: Int)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
+    def getListForUser(userId: Int, offset: Int, portionSize: Int)(implicit s: JdbcBackend#Session): Seq[(ArticleRecord, UserRecord, Seq[String])]
+    def get(id: Int)(implicit s: JdbcBackend#Session): Option[(ArticleRecord, UserRecord, Seq[String])]
+    def insert(article: ArticleRecord)(implicit s: JdbcBackend#Session): Int
+    def update(id: Int, article: ArticleToUpdate)(implicit s: JdbcBackend#Session): Boolean
+    def remove(id: Int)(implicit s: JdbcBackend#Session): Boolean
+    def count()(implicit s: JdbcBackend#Session): Int
+    def countForUser(userId: Int)(implicit s: JdbcBackend#Session): Int
   }
 }
 
@@ -28,21 +27,18 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
   val articlesRepository = new SlickArticlesRepository
 
   import profile.simple._
-  import scala.slick.jdbc.JdbcBackend.Session
+
 
   implicit class ArticlesExtension[E](val q: Query[Articles, E]) {
     def withAuthor = {
       q.leftJoin(users).on(_.authorId === _.id)
     }
 
-    // TODO: sorts incorrectly!!!
-    // slick has some issues with mixing sortBy with drop/take
-    // issue created: https://github.com/slick/slick/issues/607
     def portion(offset: Int, portionSize: Int) = {
-      q.withAuthor
+      q.sortBy(_.createdAt.desc)
         .drop(offset)
         .take(portionSize)
-        .sortBy { case (article, _) => article.createdAt.desc }
+        .withAuthor
     }
 
     def byId(id: Column[Int]): Query[Articles, E] = {
@@ -52,21 +48,15 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
   class SlickArticlesRepository extends ArticlesRepository {
 
-    def getList(offset: Int, portionSize: Int)(implicit s: Session) = {
-      // val q = for {
-      //   article <- articles.sortBy(_.createdAt).drop(offset).take(portionSize)
-      //   author <- article.author
-      // } yield (article, author)
-      // println(q.selectStatement)
-      val q = articles.portion(offset, portionSize)
-      q.list.map(fetchTags)
+    def getList(offset: Int, portionSize: Int)(implicit s: JdbcBackend#Session) = {
+      articles.portion(offset, portionSize).list.map(fetchTags)
     }
 
-    def getListForUser(userId: Int, offset: Int, portionSize: Int)(implicit s: Session) = {
+    def getListForUser(userId: Int, offset: Int, portionSize: Int)(implicit s: JdbcBackend#Session) = {
       articles.filter(_.authorId === userId).portion(offset, portionSize).list.map(fetchTags)
     }
 
-    def get(id: Int)(implicit s: Session) = {
+    def get(id: Int)(implicit s: JdbcBackend#Session) = {
       articles.byId(id).withAuthor().firstOption.map(fetchTags)
     }
 
@@ -74,12 +64,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.returning(articles.map(_.id)) += article
     }
 
-    def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: Session) = {
+    def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: JdbcBackend#Session) = {
       articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description))
         .update(ArticleToUpdate.unapply(articleToUpdate).get) > 0
     }
 
-    def remove(id: Int)(implicit s: Session) = {
+    def remove(id: Int)(implicit s: JdbcBackend#Session) = {
       articles.byId(id).delete > 0
     }
 
@@ -87,11 +77,11 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.length.run
     }
 
-    def countForUser(userId: Int)(implicit s: Session) = {
+    def countForUser(userId: Int)(implicit s: JdbcBackend#Session) = {
       articles.filter(_.authorId === userId).length.run
     }
 
-    private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: Session) = t match {
+    private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {
       case (article, author) => (article, author, articleTags(article.id.get).list)
     }
 

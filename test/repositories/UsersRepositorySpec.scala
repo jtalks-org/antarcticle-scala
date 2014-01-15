@@ -5,6 +5,7 @@ import models.database.{Schema, UserRecord}
 import util.TestDatabaseConfiguration
 import migrations.{MigrationTool, MigrationsContainer}
 import org.specs2.specification.BeforeExample
+import scala.slick.jdbc.JdbcBackend
 
 class UsersRepositorySpec extends Specification {
   object repository extends TestDatabaseConfiguration with Schema
@@ -14,9 +15,8 @@ class UsersRepositorySpec extends Specification {
 
   import repository._
   import profile.simple._
-  import scala.slick.jdbc.JdbcBackend.Session
 
-  def populateDb(implicit session: Session) = {
+  def populateDb(implicit session: JdbcBackend#Session) = {
     migrate
 
     users ++= Seq(
@@ -25,13 +25,13 @@ class UsersRepositorySpec extends Specification {
     )
   }
 
-  def withTestDb[T](f: Session => T) = withSession { implicit s: Session =>
+  def withTestDb[T](f: Session => T) = withSession { implicit s =>
     populateDb
     f(s)
   }
 
   "update remember me token" should {
-    "be updated" in withTestDb { implicit s: Session =>
+    "be updated" in withTestDb { implicit s =>
       val userId = 1
       val token = "4534"
 
@@ -43,13 +43,13 @@ class UsersRepositorySpec extends Specification {
   }
 
   "get by username" should {
-    "return user user1" in withTestDb { implicit session: Session =>
+    "return user user1" in withTestDb { implicit session =>
       val user = usersRepository.getByUsername("user1")
 
       user must beSome
     }
 
-    "return None when user not found" in withTestDb { implicit session: Session =>
+    "return None when user not found" in withTestDb { implicit session =>
       val user = usersRepository.getByUsername("user124234")
 
       user must beNone
@@ -57,7 +57,7 @@ class UsersRepositorySpec extends Specification {
   }
 
   "get by token" should {
-    "return user with token 1234" in withTestDb { implicit session: Session =>
+    "return user with token 1234" in withTestDb { implicit session =>
       val token = "1234"
       val userId = 1
       usersRepository.updateRememberToken(userId, token)
@@ -67,7 +67,7 @@ class UsersRepositorySpec extends Specification {
       user must beSome
     }
 
-    "return None when user not found" in withTestDb { implicit session: Session =>
+    "return None when user not found" in withTestDb { implicit session =>
       val user = usersRepository.getByRemeberToken("user124234")
 
       user must beNone
@@ -77,7 +77,7 @@ class UsersRepositorySpec extends Specification {
   "user insertion" should {
     val toInsert = UserRecord(None, "user_to_insert")
 
-    "create new user record" in withTestDb { implicit session: Session =>
+    "create new user record" in withTestDb { implicit session =>
       val oldCount = users.length.run
 
       usersRepository.insert(toInsert)
@@ -86,7 +86,7 @@ class UsersRepositorySpec extends Specification {
       newCount must_== oldCount + 1
     }
 
-    "assign id to new user" in withTestDb { implicit session: Session =>
+    "assign id to new user" in withTestDb { implicit session =>
       val id: Int = usersRepository.insert(toInsert)
       true
     }

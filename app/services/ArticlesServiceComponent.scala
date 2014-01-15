@@ -7,13 +7,13 @@ import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.DateImplicits._
-import scala.slick.jdbc.JdbcBackend.Session
 import scala.math.ceil
 import conf.Constants
 import models.Page
 import scalaz._
 import Scalaz._
 import validators.Validator
+import scala.slick.jdbc.JdbcBackend
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
@@ -36,7 +36,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
   val articleValidator: Validator[Article]
 
   class ArticlesServiceImpl extends ArticlesService {
-    def createArticle(article: Article) = withTransaction { implicit session: Session =>
+    def createArticle(article: Article) = withTransaction { implicit session =>
       def createRecord = {
         val creationTime = DateTime.now
         val currentUserId = 1 //TODO
@@ -60,7 +60,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
 
-    def updateArticle(article: Article) = withTransaction { implicit s: Session =>
+    def updateArticle(article: Article) = withTransaction { implicit session =>
       articleValidator.validate(article).map { _ =>
         val modificationTime = DateTime.now
         //TODO: handle id, tags validation
@@ -69,25 +69,25 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       }
     }
 
-    def removeArticle(id: Int) = withTransaction { implicit s: Session =>
+    def removeArticle(id: Int) = withTransaction { implicit session =>
       articlesRepository.remove(id)
     }
 
-    def get(id: Int) = withSession { implicit s: Session =>
+    def get(id: Int) = withSession { implicit session =>
       articlesRepository.get(id).map((recordToDetailsModel _).tupled)
     }
 
-    def getPage(page: Int) = withSession { implicit s: Session =>
+    def getPage(page: Int) = withSession { implicit session =>
       fetchPageFromDb(page)
     }
 
     //TODO: Fetch articles for given user only
-    def getPageForUser(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit s: Session =>
+    def getPageForUser(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit session =>
       val userId = 1 // TODO
       fetchPageFromDb(page, Some(userId))
     }
 
-    private def fetchPageFromDb(page: Int, userId: Option[Int] = None)(implicit s: Session) = {
+    private def fetchPageFromDb(page: Int, userId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * page
       val list = userId.cata(

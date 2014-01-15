@@ -3,16 +3,16 @@ package repositories
 import models.database.{Profile, Tag, TagsSchemaComponent}
 import scala.slick.jdbc.{GetResult, StaticQuery => Q}
 import Q.interpolation
+import scala.slick.jdbc.JdbcBackend
 
 trait TagsRepositoryComponent {
-  import scala.slick.jdbc.JdbcBackend.Session
 
   val tagsRepository: TagsRepository
 
   trait TagsRepository {
-    def getByNames(names: Seq[String])(implicit session: Session): Seq[Tag]
-    def insertAll(names: Seq[String])(implicit session: Session): Seq[Int]
-    def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: Session)
+    def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session): Seq[Tag]
+    def insertAll(names: Seq[String])(implicit session: JdbcBackend#Session): Seq[Int]
+    def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session)
   }
 }
 
@@ -22,12 +22,11 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
   val tagsRepository = new TagsRepositoryImpl
 
   import profile.simple._
-  import scala.slick.jdbc.JdbcBackend.Session
 
   class TagsRepositoryImpl extends TagsRepository {
     implicit val getTagResult = GetResult(r => Tag(r.<<, r.<<))
 
-    def getByNames(names: Seq[String])(implicit session: Session) = {
+    def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       import models.database.Tag
       if (names.isEmpty) {
         Vector[Tag]()
@@ -37,11 +36,11 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
       }
     }
 
-    def insertAll(names: Seq[String])(implicit session: Session) = {
+    def insertAll(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       tags.map(t => t.name).returning(tags.map(_.id)).insertAll(names : _*)
     }
 
-    def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: Session) = {
+    def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) = {
       articlesTags.insertAll(articleTags : _*)
     }
   }

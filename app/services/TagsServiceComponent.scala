@@ -1,7 +1,7 @@
 package services
 
 import repositories.TagsRepositoryComponent
-import scala.slick.jdbc.JdbcBackend.Session
+import scala.slick.jdbc.JdbcBackend
 import validators.Validator
 import scalaz._
 import Scalaz._
@@ -21,7 +21,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
   val tagValidator: Validator[String]
 
   class TagsServiceImpl extends TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]) = withTransaction { implicit s: Session =>
+    def createTagsForArticle(articleId: Int, tags: Seq[String]) = withTransaction { implicit session =>
       val trimmedTags = tags.map(_.trim)
 
       validateTags(trimmedTags).map { _ =>

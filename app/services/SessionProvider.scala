@@ -1,16 +1,15 @@
 package services
 
-import scala.slick.jdbc.JdbcBackend.Database
-import scala.slick.jdbc.JdbcBackend.Session
+import scala.slick.jdbc.JdbcBackend
 
 trait SessionProvider {
-  def withSession[T](f: Session => T): T
-  def withTransaction[T](f: Session => T): T
+  def withSession[T](f: JdbcBackend#Session => T): T
+  def withTransaction[T](f: JdbcBackend#Session => T): T
 }
 
 trait SlickSessionProvider extends SessionProvider {
-  val db: Database
+  val db: JdbcBackend#Database
 
-  override def withSession[T](f: Session => T): T = db.withSession(session => f(session))
-  override def withTransaction[T](f: Session => T): T = db.withTransaction(session => f(session))
+  override def withSession[T](f: JdbcBackend#Session => T): T = db.withSession(session => f(session))
+  override def withTransaction[T](f: JdbcBackend#Session => T): T = db.withTransaction(session => f(session))
 }

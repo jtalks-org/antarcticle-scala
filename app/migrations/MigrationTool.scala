@@ -4,10 +4,11 @@ import models.database.{Schema, Profile}
 import scala.slick.jdbc.meta.MTable
 import scala.slick.jdbc.{StaticQuery => Q}
 import play.api.Logger //tmp
+import scala.slick.jdbc.JdbcBackend
 
 trait Migration {
   val version: Int
-  def run(implicit session: scala.slick.jdbc.JdbcBackend.Session)
+  def run(implicit session: JdbcBackend#Session)
 }
 
 trait MigrationsContainer {
@@ -36,7 +37,7 @@ trait MigrationTool {
   private val SCHEMA_VERSION_TABLE = "schema_version"
   private val VERSION_COLUMN = "current_version"
 
-  def migrate(implicit session: scala.slick.jdbc.JdbcBackend.Session) = {
+  def migrate(implicit session: JdbcBackend#Session) = {
     MTable.getTables(SCHEMA_VERSION_TABLE).list match {
       case Nil =>
         Logger.info("Migrating new database")
@@ -63,19 +64,19 @@ trait MigrationTool {
     migrationsContainer.getMigrations.toList.sortBy(_.version)
   }
 
-  def getCurrentVersion(implicit s: Session) = {
+  def getCurrentVersion(implicit s: JdbcBackend#Session) = {
      Q.queryNA[Int](s"select $VERSION_COLUMN from $SCHEMA_VERSION_TABLE").first
   }
 
-  private def setInitialVersion(version: Int)(implicit s: Session) = {
+  private def setInitialVersion(version: Int)(implicit s: JdbcBackend#Session) = {
     Q.updateNA(s"insert into $SCHEMA_VERSION_TABLE ($VERSION_COLUMN) values ($version)").execute
   }
 
-  private def updateVersion(version: Int)(implicit s: Session) = {
+  private def updateVersion(version: Int)(implicit s: JdbcBackend#Session) = {
     Q.updateNA(s"update $SCHEMA_VERSION_TABLE set $VERSION_COLUMN=$version").execute
   }
 
-  private def createSchemaVersionTable(implicit s: Session) = {
+  private def createSchemaVersionTable(implicit s: JdbcBackend#Session) = {
     Q.updateNA(s"create table $SCHEMA_VERSION_TABLE(" +
       s"$VERSION_COLUMN int not null)").execute
   }

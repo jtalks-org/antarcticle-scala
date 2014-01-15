@@ -20,7 +20,7 @@ object Application
 
   override val migrationsContainer = new Migrations(profile)
 
-  withSession { implicit s: Session =>
+  withSession { implicit session =>
     migrate
   }
 }

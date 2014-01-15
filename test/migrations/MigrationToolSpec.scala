@@ -5,7 +5,7 @@ import org.mockito.Matchers
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import scala.slick.jdbc.meta.MTable
-import scala.slick.jdbc.JdbcBackend.Session
+import scala.slick.jdbc.JdbcBackend
 import util.TestDatabaseConfiguration
 import scala.slick.jdbc.{StaticQuery => Q}
 import models.database.Schema
@@ -31,12 +31,12 @@ class MigrationToolSpec extends Specification
       object migrationsContainer extends MigrationsContainer {
         val m1 = new Migration {
           val version = 1
-          def run(implicit session: Session): Unit = {}
+          def run(implicit session: JdbcBackend#Session): Unit = {}
         }
 
         val m2 = new Migration {
           val version = 2
-          def run(implicit session: Session): Unit = {}
+          def run(implicit session: JdbcBackend#Session): Unit = {}
         }
       }
 
@@ -57,10 +57,9 @@ class MigrationToolSpec extends Specification
 
     import tool._
     import profile.simple._
-    import scala.slick.jdbc.JdbcBackend.Session
 
     "new database migration" should {
-      "create version table when not exists" in withSession { implicit s: Session =>
+      "create version table when not exists" in withSession { implicit session =>
         migrationsContainer.getMigrations returns Seq()
 
         tool.migrate
@@ -68,7 +67,7 @@ class MigrationToolSpec extends Specification
         MTable.getTables("schema_version").list must not be empty
       }
 
-      "create schema" in withSession { implicit s: Session =>
+      "create schema" in withSession { implicit session =>
         migrationsContainer.getMigrations returns Seq()
 
         tool.migrate
@@ -78,7 +77,7 @@ class MigrationToolSpec extends Specification
         allCreated must beTrue
       }
 
-      "set schema version to 0" in withSession { implicit s: Session =>
+      "set schema version to 0" in withSession { implicit session =>
         migrationsContainer.getMigrations returns Seq()
 
         tool.migrate
@@ -95,7 +94,7 @@ class MigrationToolSpec extends Specification
         migrationsContainer.getMigrations returns Seq(mockMigration1, mockMigration3, mockMigration2)
       }
 
-      "run all migrations in correct order when schema version is 0" in withSession { implicit s: Session =>
+      "run all migrations in correct order when schema version is 0" in withSession { implicit session =>
         setupMocks
 
         tool.migrate // create schema
@@ -103,12 +102,12 @@ class MigrationToolSpec extends Specification
         Q.updateNA(s"update schema_version set current_version=0").execute
         tool.migrate
 
-        there was one(mockMigration1).run(any[Session]) andThen
-                  one(mockMigration2).run(any[Session]) andThen
-                  one(mockMigration3).run(any[Session])
+        there was one(mockMigration1).run(any[JdbcBackend#Session]) andThen
+                  one(mockMigration2).run(any[JdbcBackend#Session]) andThen
+                  one(mockMigration3).run(any[JdbcBackend#Session])
       }
 
-      "run migrations starting from version 3 when schema version is 2" in withSession { implicit s: Session =>
+      "run migrations starting from version 3 when schema version is 2" in withSession { implicit session =>
         setupMocks
 
         tool.migrate // create schema
@@ -116,12 +115,12 @@ class MigrationToolSpec extends Specification
         Q.updateNA(s"update schema_version set current_version=2").execute
         tool.migrate
 
-        there was one(mockMigration3).run(any[Session])
-        there was no(mockMigration1).run(any[Session])
-        there was no(mockMigration2).run(any[Session])
+        there was one(mockMigration3).run(any[JdbcBackend#Session])
+        there was no(mockMigration1).run(any[JdbcBackend#Session])
+        there was no(mockMigration2).run(any[JdbcBackend#Session])
       }
 
-      "update schema version to 1 when db is new, but migration exists" in withSession { implicit s: Session =>
+      "update schema version to 1 when db is new, but migration exists" in withSession { implicit session =>
         mockMigration1.version returns 1
         migrationsContainer.getMigrations returns Seq(mockMigration1)
 
@@ -131,7 +130,7 @@ class MigrationToolSpec extends Specification
         there was no(mockMigration1).run(any[Session])
       }
 
-      "not do anything when no new migrations" in withSession { implicit s: Session =>
+      "not do anything when no new migrations" in withSession { implicit session =>
         setupMocks
 
         tool.migrate // create schema
@@ -144,7 +143,7 @@ class MigrationToolSpec extends Specification
         there was no(mockMigration3).run(any[Session])
       }
 
-      "update schema version" in withSession { implicit s: Session =>
+      "update schema version" in withSession { implicit session =>
         setupMocks
 
         tool.migrate // create schema

@@ -3,12 +3,12 @@ package repositories
 import org.specs2.mutable._
 
 import models.database._
+import scala.slick.jdbc.JdbcBackend
 import utils.DateImplicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import util.TestDatabaseConfiguration
 import migrations.{MigrationTool, MigrationsContainer}
-import org.specs2.specification.BeforeExample
 import scala.None
 
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
@@ -20,9 +20,8 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
   import repository._
   import profile.simple._
-  import scala.slick.jdbc.JdbcBackend.Session
 
-  def populateDb(implicit session: Session) = {
+  def populateDb(implicit session: JdbcBackend#Session) = {
     migrate
 
     val time = DateTime.now
@@ -40,9 +39,9 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     )
   }
 
-  def withTestDb[T](f: Session => T) = withSession { implicit s: Session =>
+  def withTestDb[T](f: JdbcBackend#Session => T) = withSession { implicit session =>
     populateDb
-    f(s)
+    f(session)
   }
 
   def asArticle(t: (ArticleRecord, UserRecord, Seq[String])) = t._1
@@ -50,7 +49,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   def asTags(t: (ArticleRecord, UserRecord, Seq[String])) = t._3
 
   "list portion" should {
-    "return portion with size 2" in withTestDb { implicit session: Session =>
+    "return portion with size 2" in withTestDb { implicit session =>
       val offset = 0
       val portionSize = 2
 
@@ -59,7 +58,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       portion must have size 2
     }
 
-    "return portion with offset 1" in withTestDb { implicit session: Session =>
+    "return portion with offset 1" in withTestDb { implicit session =>
       val thirdArticleId = 3
 
       val offset = 1
@@ -71,47 +70,45 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       firstArticleInPortion.id must beSome(thirdArticleId)
     }
 
-    "be sorted by creation time" in withTestDb { implicit session: Session =>
+    "be sorted by creation time" in withTestDb { implicit session =>
       val portion = articlesRepository.getList(0, 4)
 
       portion.map(asArticle(_).id.get) must contain(allOf(4, 3, 1, 2).inOrder)
     }
 
-    "return article tags" in withTestDb { implicit session: Session =>
-      val portion = articlesRepository.getList(0, 2)
+    "return article tags" in withTestDb { implicit session =>
+      val portion = articlesRepository.getList(0, 4)
 
-      asTags(portion(0)) must have size 2
-      asTags(portion(1)) must have size 2
+      portion.map(asTags(_).length) must_== Seq(0, 0, 2, 2)
     }
 
-    "return article author" in withTestDb { implicit session: Session =>
-      val portion = articlesRepository.getList(0, 2)
+    "return article author" in withTestDb { implicit session =>
+      val portion = articlesRepository.getList(0, 4)
 
-      asAuthor(portion(0)).id must beSome(2)
-      asAuthor(portion(1)).id must beSome(2)
+      portion.map(asAuthor(_).id.get) must_== Seq(2, 2, 1, 2)
     }
   }
 
-  "list portion for user" should {
-    "return articles created by user2" in withTestDb { implicit session: Session =>
-      val userId = 2
+ "list portion for user" should {
+   "return articles created by user2" in withTestDb { implicit session =>
+     val userId = 2
 
-      val portion = articlesRepository.getListForUser(userId, 0, 10)
+     val portion = articlesRepository.getListForUser(userId, 0, 10)
 
-      portion.map(asAuthor(_).id) must contain((id: Option[Int]) => id must beSome(userId))
-    }
-  }
+     portion.map(asAuthor(_).id) must contain((id: Option[Int]) => id must beSome(userId))
+   }
+ }
 
 
   "article by id" should {
-    "return article with id 2" in withTestDb { implicit session: Session =>
+    "return article with id 2" in withTestDb { implicit session =>
       val article = articlesRepository.get(2)
 
       article must beSome
       asArticle(article.get).id must beSome(2)
     }
 
-    "return None when there are no article with id 2000" in withTestDb { implicit session: Session =>
+    "return None when there are no article with id 2000" in withTestDb { implicit session =>
       val article = articlesRepository.get(2000)
 
       article must beNone
@@ -119,7 +116,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "inserting new article" should {
-    "inserts new article record" in withTestDb { implicit session: Session =>
+    "inserts new article record" in withTestDb { implicit session =>
       val oldCount = articlesCount
 
       val userId = 2
@@ -130,7 +127,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       articlesCount must_== (oldCount + 1)
     }
 
-    "assigns id to new article" in withTestDb { implicit session: Session =>
+    "assigns id to new article" in withTestDb { implicit session =>
       val userId = 2
       val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
 
@@ -140,7 +137,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "updating article" should {
-    "update existing article" in withTestDb { implicit session: Session =>
+    "update existing article" in withTestDb { implicit session =>
       val updatedArticleId = 2
       val articleToBeUpdated = articles.filter(_.id === updatedArticleId).first
 
@@ -154,7 +151,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       actualContent must_== newContent
     }
 
-    "return false when updating not existing article" in withTestDb { implicit session: Session =>
+    "return false when updating not existing article" in withTestDb { implicit session =>
       val upd = ArticleToUpdate("title", "content", DateTime.now, "desc")
 
       articlesRepository.update(2000, upd) must beFalse
@@ -162,14 +159,14 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "removing article" should {
-    "remove article" in withTestDb { implicit session: Session =>
+    "remove article" in withTestDb { implicit session =>
       val oldCount = articlesCount
 
       articlesRepository.remove(2) must beTrue
       articlesCount must_== (oldCount - 1)
     }
 
-    "remove associated tags" in withTestDb { implicit session: Session =>
+    "remove associated tags" in withTestDb { implicit session =>
       val articleId = 1
 
       articlesRepository.remove(articleId)
@@ -177,7 +174,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       articlesTags.filter(_.articleId === articleId).list must be empty
     }
 
-    "remove expected article" in withTestDb { implicit session: Session =>
+    "remove expected article" in withTestDb { implicit session =>
       val articleId = 2
 
       articlesRepository.remove(articleId)
@@ -185,7 +182,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       articles.filter(_.id === articleId).list must be empty
     }
 
-    "return false when article not exists" in withTestDb { implicit session: Session =>
+    "return false when article not exists" in withTestDb { implicit session =>
       articlesRepository.remove(1000) must beFalse
     }
   }
@@ -200,7 +197,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "articles count by author" should {
-    "return articles count for user2" in withTestDb { implicit session: Session =>
+    "return articles count for user2" in withTestDb { implicit session =>
       val userId = 2
 
       val count = articlesRepository.countForUser(userId)

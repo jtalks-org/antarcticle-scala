@@ -7,7 +7,7 @@ import com.github.nscala_time.time.Imports._
 import models.database._
 import util.TestDatabaseConfiguration
 import migrations.{MigrationTool, MigrationsContainer}
-import org.specs2.specification.BeforeExample
+import scala.slick.jdbc.JdbcBackend
 
 class TagsRepositorySpec extends Specification with NoTimeConversions {
   object repository extends TestDatabaseConfiguration with Schema
@@ -17,10 +17,9 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
   import repository._
   import profile.simple._
-  import scala.slick.jdbc.JdbcBackend.Session
 
-  //TODO: get rid of this copypaste
-  def populateDb(implicit session: Session) = {
+  //TODO: get rid of this copypaste from articles repo spec
+  def populateDb(implicit session: JdbcBackend#Session) = {
     migrate
 
     val time = DateTime.now
@@ -37,26 +36,26 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
     )
   }
 
-  def withTestDb[T](f: Session => T) = withSession { implicit s: Session =>
+  def withTestDb[T](f: Session => T) = withSession { implicit session =>
     populateDb
-    f(s)
+    f(session)
   }
 
   "get tags by names" should {
-    "return existing tags" in withTestDb { implicit session: Session =>
+    "return existing tags" in withTestDb { implicit session =>
       val tags = tagsRepository.getByNames(List("tag1", "tag2"))
 
       tags(0).name must_== "tag1"
       tags(1).name must_== "tag2"
     }
 
-    "return empty list when tags not found in db" in withTestDb { implicit session: Session =>
+    "return empty list when tags not found in db" in withTestDb { implicit session =>
       val tags = tagsRepository.getByNames(List("tag123", "tag2312"))
 
       tags must be empty
     }
 
-    "return empty list when empty names list passed" in withTestDb { implicit session: Session =>
+    "return empty list when empty names list passed" in withTestDb { implicit session =>
       val tags = tagsRepository.getByNames(Vector())
 
       tags must be empty

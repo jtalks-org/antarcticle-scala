@@ -1,6 +1,5 @@
 package services
 
-import scala.slick.jdbc.JdbcBackend.Session
 import repositories.CommentRepositoryComponent
 import models.database._
 import org.joda.time.DateTime
@@ -29,23 +28,23 @@ trait CommentServiceComponentImpl extends CommentServiceComponent {
 
   class CommentServiceImpl extends CommentService {
 
-    def getByArticle(articleId: Int) = withSession { implicit s: Session =>
+    def getByArticle(articleId: Int) = withSession { implicit session =>
       commentRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
     // todo: real user
-    def insert(articleId: Int, content : String) = withTransaction { implicit s: Session =>
+    def insert(articleId: Int, content : String) = withTransaction { implicit session =>
         val userId = 1
         val toInsert = CommentRecord(None, userId, articleId, content, DateTime.now)
         val id = commentRepository.insert(toInsert)
         toInsert.copy(id = Some(id))
     }
 
-    def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit s: Session =>
+    def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit session =>
       commentRepository.update(id, comment)
     }
 
-    def removeComment(id: Int) = withTransaction { implicit s: Session =>
+    def removeComment(id: Int) = withTransaction { implicit session =>
       commentRepository.delete(id)
     }
 

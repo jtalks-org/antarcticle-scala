@@ -11,7 +11,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "2.0.0-RC1",
   // Joda time wrapper for scala
   "com.github.nscala-time" %% "nscala-time" % "0.6.0",
-  "com.h2database" % "h2" % "1.3.174",
+  // 1.3.174 has problem fixed in trunk:
+  // https://code.google.com/p/h2database/source/detail?r=5363
+  "com.h2database" % "h2" % "1.3.173",
   "org.mockito" % "mockito-all" % "1.9.0",
   // markdown support
   "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2",
@@ -25,6 +27,8 @@ playScalaSettings
 
 // Coffee Script compilation options
 coffeescriptOptions := Seq("bare")
+
+scalacOptions ++= Seq("-feature")
 
 // WAR packaging
 

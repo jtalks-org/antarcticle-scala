@@ -8,16 +8,17 @@ import org.mockito.Matchers
 import models.database.UserRecord
 import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
-import org.specs2.mock.mockito.ArgumentCapture
 import org.specs2.scalaz.ValidationMatchers
-import util.ScalazValidationTestUtils._
 import scala.concurrent.future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
+import org.specs2.time.NoTimeConversions
 
-class SecurityServiceSpec extends Specification with ValidationMatchers
-with Mockito with BeforeExample {
+class SecurityServiceSpec extends Specification
+    with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
 
   object service extends SecurityServiceComponentImpl with UsersRepositoryComponent
   with FakeSessionProvider {
@@ -34,6 +35,7 @@ with Mockito with BeforeExample {
     org.mockito.Mockito.reset(authenticationManager)
   }
 
+  //TODO: don't use await somehow?
   "sign in" should {
     "success" should {
       val username = "userdfsd"
@@ -56,7 +58,7 @@ with Mockito with BeforeExample {
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
         tokenProvider.generateToken returns generatedToken
 
-        securityService.signInUser(username, password)
+        Await.result(securityService.signInUser(username, password), 10 seconds)
 
         there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
       }
@@ -69,7 +71,7 @@ with Mockito with BeforeExample {
         usersRepository.updateRememberToken(userId, generatedToken)(FakeSessionValue) returns true
         tokenProvider.generateToken returns generatedToken
 
-        securityService.signInUser(username, password)
+        Await.result(securityService.signInUser(username, password), 10 seconds)
 
         there was one(usersRepository).updateRememberToken(userId, generatedToken)(FakeSessionValue)
       }

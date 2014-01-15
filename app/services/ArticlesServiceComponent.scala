@@ -6,7 +6,7 @@ import repositories.ArticlesRepositoryComponent
 import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
-import utils.DateImplicits._
+import utils.Implicits._
 import scala.math.ceil
 import conf.Constants
 import models.Page

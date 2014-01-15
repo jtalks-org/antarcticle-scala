@@ -14,10 +14,9 @@ private[security] trait AuthenticationManager {
 class FakeAuthenticationManager extends AuthenticationManager {
   def authenticate(username: String, password: String) = {
     future {
-      if (username == "admin" && password == "admin") {
-        UserInfo("admin", "firstName".some, "lastName".some).some
-      } else {
-        None
+      (username, password) match {
+        case ("admin", "admin") => UserInfo("admin", "firstName".some, "lastName".some).some
+        case _ => none[UserInfo]
       }
     }
   }

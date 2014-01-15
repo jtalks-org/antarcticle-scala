@@ -3,7 +3,7 @@ package services
 import repositories.CommentRepositoryComponent
 import models.database._
 import org.joda.time.DateTime
-import utils.DateImplicits._
+import utils.Implicits._
 import models.CommentModels.Comment
 import models.UserModels.UserModel
 

@@ -1,7 +1,7 @@
 package repositories
 
 import org.specs2.mutable.Specification
-import utils.DateImplicits._
+import utils.Implicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import models.database._

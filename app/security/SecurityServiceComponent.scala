@@ -2,12 +2,13 @@ package security
 
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
-import models.database.UserRecord
 import scalaz._
 import Scalaz._
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.slick.jdbc.JdbcBackend
+import scala.Predef._
+import models.database.UserRecord
+import utils.Implicits._
 
 trait SecurityServiceComponent {
   val securityService: SecurityService
@@ -29,19 +30,14 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
   class SecurityServiceImpl extends SecurityService {
     def signInUser(username: String, password: String) = {
-      for {
-        rawResult <- authenticationManager.authenticate(username, password)
-        authenticationResult = rawResult.cata(
-          some = _.successNel,
-          none = "Invalid username or password".failNel
-        )
-      } yield {
-        for {
-          userInfo <- authenticationResult
-          authenticatedUser = getOrCreateAuthenticatedUser(userInfo)
-          token = issueRememberMeTokenTo(authenticatedUser.id)
-        } yield (token, authenticatedUser)
-      }
+      (for {
+        userInfo <- OptionT(authenticationManager.authenticate(username, password))
+        authenticatedUser = getOrCreateAuthenticatedUser(userInfo)
+        token = issueRememberMeTokenTo(authenticatedUser.id)
+      } yield (token, authenticatedUser)).fold(
+        some = _.successNel,
+        none = "Invalid username or password".failNel
+      )
     }
 
     private def issueRememberMeTokenTo(userId: Int) = {

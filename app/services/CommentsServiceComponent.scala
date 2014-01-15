@@ -1,6 +1,6 @@
 package services
 
-import repositories.CommentRepositoryComponent
+import repositories.CommentsRepositoryComponent
 import models.database._
 import org.joda.time.DateTime
 import utils.Implicits._
@@ -10,10 +10,10 @@ import models.UserModels.UserModel
 /**
  *
  */
-trait CommentServiceComponent {
-  val commentService: CommentService
+trait CommentsServiceComponent {
+  val commentsService: CommentsService
 
-  trait CommentService {
+  trait CommentsService {
     def getByArticle(id: Int): List[Comment]
     def insert(articleId: Int, content : String): CommentRecord
     def update(id: Int, comment: CommentToUpdate): Boolean
@@ -21,31 +21,31 @@ trait CommentServiceComponent {
   }
 }
 
-trait CommentServiceComponentImpl extends CommentServiceComponent {
-  this: SessionProvider with CommentRepositoryComponent =>
+trait CommentsServiceComponentImpl extends CommentsServiceComponent {
+  this: SessionProvider with CommentsRepositoryComponent =>
 
-  val commentService = new CommentServiceImpl
+  val commentsService = new CommentsServiceImpl
 
-  class CommentServiceImpl extends CommentService {
+  class CommentsServiceImpl extends CommentsService {
 
     def getByArticle(articleId: Int) = withSession { implicit session =>
-      commentRepository.getByArticle(articleId).map((toComment _).tupled)
+      commentsRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
     // todo: real user
     def insert(articleId: Int, content : String) = withTransaction { implicit session =>
         val userId = 1
         val toInsert = CommentRecord(None, userId, articleId, content, DateTime.now)
-        val id = commentRepository.insert(toInsert)
+        val id = commentsRepository.insert(toInsert)
         toInsert.copy(id = Some(id))
     }
 
     def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit session =>
-      commentRepository.update(id, comment)
+      commentsRepository.update(id, comment)
     }
 
     def removeComment(id: Int) = withTransaction { implicit session =>
-      commentRepository.delete(id)
+      commentsRepository.delete(id)
     }
 
     //TODO: remove UserRecord to UserModel duplication with article service

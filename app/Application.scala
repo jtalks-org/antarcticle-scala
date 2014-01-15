@@ -37,7 +37,7 @@ trait Controllers
 trait Services
   extends ArticlesServiceComponentImpl
   with TagsServiceComponentImpl
-  with CommentServiceComponentImpl {
+  with CommentsServiceComponentImpl {
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator
@@ -47,7 +47,7 @@ trait Services
 trait Repositories
   extends SlickArticlesRepositoryComponent
   with TagsRepositoryComponentImpl
-  with CommentRepositoryComponentImpl
+  with CommentsRepositoryComponentImpl
   with UsersRepositoryComponentImpl {
   this: Schema with Profile =>
 }

@@ -7,42 +7,16 @@ import scala.slick.jdbc.JdbcBackend
 import utils.Implicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
-import util.TestDatabaseConfiguration
-import migrations.{MigrationTool, MigrationsContainer}
-import scala.None
+import util.TestDatabaseConfigurationWithFixtures
 
+import migrations.{MigrationTool, MigrationsContainer}
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends TestDatabaseConfiguration with Schema with MigrationTool
-      with SlickArticlesRepositoryComponent {
-    override val migrationsContainer = new MigrationsContainer {}
-  }
+  object repository extends TestDatabaseConfigurationWithFixtures with Schema
+    with SlickArticlesRepositoryComponent
 
 
   import repository._
   import profile.simple._
-
-  def populateDb(implicit session: JdbcBackend#Session) = {
-    migrate
-
-    val time = DateTime.now
-    tags.map(_.name).insertAll("tag1", "tag2", "tag3")
-    users.insertAll(UserRecord(None, "user1"), UserRecord(None, "user2"))
-    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId))
-      .insertAll(
-        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
-        ("New title 2", "<i>html text</i>", time, time, "description2", 2),
-        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
-        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
-      )
-    articlesTags.map(at => (at.articleId, at.tagId)).insertAll(
-       (1,1), (1,2), (2,1), (2,3)
-    )
-  }
-
-  def withTestDb[T](f: JdbcBackend#Session => T) = withSession { implicit session =>
-    populateDb
-    f(session)
-  }
 
   def asArticle(t: (ArticleRecord, UserRecord, Seq[String])) = t._1
   def asAuthor(t: (ArticleRecord, UserRecord, Seq[String])) = t._2

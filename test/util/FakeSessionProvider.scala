@@ -7,6 +7,10 @@ object FakeSessionProvider {
   val FakeSessionValue: JdbcBackend#Session = null
 }
 
+/**
+ * Provider with predefined constant value for session.
+ * Useful when you don't need to assert something on Session object.
+ **/
 trait FakeSessionProvider extends SessionProvider {
   import FakeSessionProvider._
   def withSession[T](f: JdbcBackend#Session => T): T = f(FakeSessionValue)
@@ -15,6 +19,10 @@ trait FakeSessionProvider extends SessionProvider {
 
 import org.specs2.mock.Mockito
 
+/**
+ * Provides MockSessionProvider trait to extend, for cases when you need
+ * expectations on Session object.
+ **/
 trait MockSession {
   this: Mockito =>
 

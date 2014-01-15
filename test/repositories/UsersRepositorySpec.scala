@@ -2,33 +2,24 @@ package repositories
 
 import org.specs2.mutable.Specification
 import models.database.{Schema, UserRecord}
-import util.TestDatabaseConfiguration
-import migrations.{MigrationTool, MigrationsContainer}
-import org.specs2.specification.BeforeExample
+import util.TestDatabaseConfigurationWithFixtures
 import scala.slick.jdbc.JdbcBackend
 
 class UsersRepositorySpec extends Specification {
-  object repository extends TestDatabaseConfiguration with Schema
-            with MigrationTool with UsersRepositoryComponentImpl {
-    val migrationsContainer = new MigrationsContainer {}
+  object repository extends TestDatabaseConfigurationWithFixtures with Schema
+    with UsersRepositoryComponentImpl {
+
+    import profile.simple._
+    override def fixtures(implicit session: JdbcBackend#Session): Unit = {
+      users ++= Seq(
+        UserRecord(None, "user1", false, Some("fn"), Some("ln"), None),
+        UserRecord(None, "user2", false, None, None, None)
+      )
+    }
   }
 
   import repository._
   import profile.simple._
-
-  def populateDb(implicit session: JdbcBackend#Session) = {
-    migrate
-
-    users ++= Seq(
-      UserRecord(None, "user1", false, Some("fn"), Some("ln"), None),
-      UserRecord(None, "user2", false, None, None, None)
-    )
-  }
-
-  def withTestDb[T](f: Session => T) = withSession { implicit s =>
-    populateDb
-    f(s)
-  }
 
   "update remember me token" should {
     "be updated" in withTestDb { implicit s =>

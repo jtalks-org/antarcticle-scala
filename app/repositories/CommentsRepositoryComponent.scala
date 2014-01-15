@@ -6,11 +6,11 @@ import scala.slick.jdbc.JdbcBackend
 /**
   * Provides persistence for article comments
  */
-trait CommentRepositoryComponent {
+trait CommentsRepositoryComponent {
 
-  val commentRepository: CommentRepository
+  val commentsRepository: CommentsRepository
 
-  trait CommentRepository {
+  trait CommentsRepository {
     def getByArticle(id: Int)(implicit session: JdbcBackend#Session): List[(CommentRecord, UserRecord)]
     def insert(comment: CommentRecord)(implicit session: JdbcBackend#Session): Int
     def update(id: Int, comment: CommentToUpdate)(implicit session: JdbcBackend#Session): Boolean
@@ -18,12 +18,12 @@ trait CommentRepositoryComponent {
   }
 }
 
-trait CommentRepositoryComponentImpl extends CommentRepositoryComponent {
+trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
   this: CommentsSchemaComponent with UsersSchemaComponent with Profile =>
 
-  val commentRepository = new SlickCommentRepository
+  val commentsRepository = new SlickCommentsRepository
 
-  class SlickCommentRepository extends CommentRepository {
+  class SlickCommentsRepository extends CommentsRepository {
 
     import profile.simple._
 

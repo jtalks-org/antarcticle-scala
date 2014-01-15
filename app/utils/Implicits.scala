@@ -9,16 +9,13 @@ import scala.concurrent.Future
 
 
 object Implicits {
-  /**
-   * Impicit conversions between date and time formats
-   */
   // convert java.sql.Timestamp to joda
   implicit def timestampToDateTime(ts: Timestamp): DateTime = new DateTime(ts.getTime)
   // convert joda to java.sql.Timestamp
   implicit def dateTimeToTimestamp(dt: DateTime): Timestamp = new Timestamp(dt.getMillis)
 
   /**
-   * Monad for future
+   * Scalaz monad instance for Future
    */
   implicit val futureMonad = new Monad[Future] {
     override def point[A](a: => A): Future[A] =

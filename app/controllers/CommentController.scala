@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{CommentServiceComponent, ArticlesServiceComponent}
+import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import views.html
@@ -12,7 +12,7 @@ import security.Authentication
  *
  */
 trait CommentController {
-  this: Controller with CommentServiceComponent with ArticlesServiceComponent with Authentication  =>
+  this: Controller with CommentsServiceComponent with Authentication  =>
 
   /**
    * Describes binding between Article model object and web-form
@@ -24,18 +24,18 @@ trait CommentController {
     )
   )
 
-  def postNewComment = Action {
-    implicit request => commentForm.bindFromRequest.fold(
+  def postNewComment = Action { implicit request =>
+    commentForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
       comment => {
-        commentService.insert(comment._1, comment._2)
+        commentsService.insert(comment._1, comment._2)
         Ok(routes.ArticleController.viewArticle(comment._1).absoluteURL())
       }
     )
   }
 
-  def removeComment(id: Int) = Action {
-    implicit request => commentService.removeComment(id)
-      Redirect(routes.ArticleController.listAllArticles())
+  def removeComment(id: Int) = Action { implicit request =>
+    commentsService.removeComment(id)
+    Redirect(routes.ArticleController.listAllArticles())
   }
 }

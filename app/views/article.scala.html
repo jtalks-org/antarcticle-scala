@@ -1,5 +1,7 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
    comments: List[models.CommentModels.Comment])(implicit user: Option[security.AuthenticatedUser])
+@import views.helpers.Markdown
+
 @templates.main(article.title) {
   @if(user.isDefined) {
     @if(user.get.id == article.author.id) {
@@ -26,7 +28,7 @@
             <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
           </header>
           <div class="body">
-            <div class="content clearfix">@article.content</div>
+            <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
           </div>
         </div>
         <footer>
@@ -61,7 +63,7 @@
                     <i class="glyphicon glyphicon-calendar"></i> @comment.createdAt
                   </time>
                 </header>
-                <div>@comment.content</div>
+                <div>@Html(Markdown.toHtml(comment.content))</div>
               </div>
             </article>
           }

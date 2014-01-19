@@ -28,10 +28,11 @@ trait Authentication {
 
   def withUser(f: AuthenticatedUser => Request[AnyContent] => Result,
     onUnauthorized: RequestHeader => SimpleResult = defaultOnUnauthorized): EssentialAction = {
-    Action { request =>
-      currentUser(request).map { user =>
-        f(user)(request)
-      }.getOrElse(onUnauthorized(request))
+    Action { implicit request =>
+      currentUser.cata(
+        some = user => f(user)(request),
+        none = onUnauthorized(request)
+      )
     }
   }
 

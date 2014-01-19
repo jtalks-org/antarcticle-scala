@@ -1,6 +1,7 @@
 package models
 
 import models.UserModels.UserModel
+import scala.language.implicitConversions
 
 object ArticleModels {
 

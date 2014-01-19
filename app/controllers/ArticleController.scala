@@ -28,7 +28,7 @@ trait ArticleController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
-  def listAllArticles(page: Int = 0) = Action { implicit request =>
+  def listAllArticles(page: Int) = Action { implicit request =>
     Ok(views.html.articles(articlesService.getPage(page)))
   }
 

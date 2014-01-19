@@ -3,7 +3,7 @@ package utils
 import java.sql.Timestamp
 import org.joda.time.DateTime
 import scalaz._
-import Scalaz._
+import scala.language.implicitConversions
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

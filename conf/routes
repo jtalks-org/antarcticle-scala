@@ -2,7 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET           /                       @controllers.ArticleController.listAllArticles(page: Int ?= 0)
+GET           /                       @controllers.ArticleController.listAllArticles(page: Int ?= 1)
 # Authentication
 GET           /signin                 @security.AuthenticationController.signin
 POST          /signin                 @security.AuthenticationController.authenticate

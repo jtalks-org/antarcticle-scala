@@ -7,6 +7,7 @@ import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import scalaz._
 import Scalaz._
+import scala.language.implicitConversions
 
 case class AuthenticatedUser(id: Int, username: String)
 

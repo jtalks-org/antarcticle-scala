@@ -88,7 +88,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
       articlesService.getPage(2)
 
-      there was one(articlesRepository).getList(6, 3)(session)
+      there was one(articlesRepository).getList(3, 3)(session)
     }
 
     "contain list models" in {

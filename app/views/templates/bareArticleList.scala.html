@@ -31,27 +31,5 @@
     </article>
   }
 </section>
-<div>
-  <ul class="pagination">
-    @if(page.currentPage > 0) {
-      <li class="prev previous_page">
-        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-chevron-left"></i> Prev page</a>
-      </li>
-    }
-    @for(pageNum <- 0 to page.totalPages - 1) {
-      @if(pageNum == page.currentPage){
-        <li class="active">
-      } else {
-        <li>
-      }
-        <a href="@paginationHandler(pageNum)">@pageNum</a>
-      </li>
-    }
-    @if(page.currentPage < page.totalPages - 1) {
-      <li class="next next_page">
-        <a href="@paginationHandler(page.currentPage + 1)">Next page <i class="glyphicon glyphicon-chevron-right"></i></a>
-      </li>
-    }
-  </ul>
-</div>
+@templates.pagination(page, paginationHandler)
 

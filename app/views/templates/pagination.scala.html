@@ -1,0 +1,26 @@
+@(page: models.Page[_], paginationHandler: Int => Call)
+<div>
+  <ul class="pagination">
+  @if(page.totalPages > 1) {
+    @if(page.currentPage > 1) {
+      <li class="prev previous_page">
+        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-chevron-left"></i> Prev page</a>
+      </li>
+    }
+    @for(pageNum <- 1 to page.totalPages) {
+      @if(pageNum == page.currentPage){
+        <li class="active">
+        } else {
+        <li>
+        }
+      <a href="@paginationHandler(pageNum)">@pageNum</a>
+    </li>
+    }
+    @if(page.currentPage < page.totalPages) {
+      <li class="next next_page">
+        <a href="@paginationHandler(page.currentPage + 1)">Next page <i class="glyphicon glyphicon-chevron-right"></i></a>
+      </li>
+    }
+  }
+  </ul>
+</div>

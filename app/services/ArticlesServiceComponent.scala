@@ -7,7 +7,6 @@ import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
 import utils.Implicits._
-import scala.math.ceil
 import conf.Constants
 import models.Page
 import scalaz._
@@ -89,7 +88,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
-      val offset = pageSize * page
+      val offset = pageSize * (page - 1)
       val list = userId.cata(
         some = articlesRepository.getListForUser(_, offset, pageSize),
         none = articlesRepository.getList(offset, pageSize)
@@ -99,8 +98,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         some = articlesRepository.countForUser(_),
         none = articlesRepository.count()
       )
-      val totalPages = ceil(total / pageSize.toDouble).toInt
-      Page(page, totalPages, total, modelsList)
+      Page(page, total, modelsList)
     }
 
     //TODO: Extract conversions and write tests for them

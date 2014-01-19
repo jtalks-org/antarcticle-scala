@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], username: String)(implicit user: Option[security.AuthenticatedUser])
+@(page: models.Page[models.ArticleModels.ArticleListModel], username: String)(implicit user: Principal)
 @templates.main("My articles") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">

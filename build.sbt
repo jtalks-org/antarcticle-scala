@@ -25,6 +25,14 @@ libraryDependencies ++= Seq(
 
 playScalaSettings
 
+
+// global imports for templates
+templatesImport ++= Seq(
+  "security.Entities._",
+  "security.Permissions._",
+  "security.Principal"
+)
+
 // Coffee Script compilation options
 coffeescriptOptions := Seq("bare")
 

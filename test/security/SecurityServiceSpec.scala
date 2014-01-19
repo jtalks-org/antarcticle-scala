@@ -41,7 +41,7 @@ class SecurityServiceSpec extends Specification
       val username = "userdfsd"
       val password = "rerfev"
       val userInfo = UserInfo(username, "fn".some, "ln".some)
-      val authUser = AuthenticatedUser(1, username)
+      val authUser = AuthenticatedUser(1, username, Authorities.User)
       val userFromDb = UserRecord(Some(1), username)
       val generatedToken = "2314"
 
@@ -53,6 +53,16 @@ class SecurityServiceSpec extends Specification
         securityService.signInUser(username, password) must beSuccessful((generatedToken, authUser)).await
       }
 
+      "authenticated admin should have Admin authority" in {
+        authenticationManager.authenticate(username, password) returns future(userInfo.some)
+        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userFromDb.copy(admin=true).some
+        tokenProvider.generateToken returns generatedToken
+
+        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+          case (_, user) if user.authority == Authorities.Admin => ok
+        }
+      }
+
       "create new user when not exists" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
@@ -61,6 +71,16 @@ class SecurityServiceSpec extends Specification
         Await.result(securityService.signInUser(username, password), 10 seconds)
 
         there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
+      }
+
+      "created user should have User authority" in {
+        authenticationManager.authenticate(username, password) returns future(userInfo.some)
+        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
+        tokenProvider.generateToken returns generatedToken
+
+        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+          case (_, user) if user.authority == Authorities.User => ok
+        }
       }
 
       "issue remember me token to authenticated user" in {

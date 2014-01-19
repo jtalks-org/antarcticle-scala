@@ -33,7 +33,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
       (for {
         userInfo <- OptionT(authenticationManager.authenticate(username, password))
         authenticatedUser = getOrCreateAuthenticatedUser(userInfo)
-        token = issueRememberMeTokenTo(authenticatedUser.id)
+        token = issueRememberMeTokenTo(authenticatedUser.userId)
       } yield (token, authenticatedUser)).fold(
         some = _.successNel,
         none = "Invalid username or password".failNel
@@ -57,8 +57,11 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         }
 
         usersRepository.getByUsername(userInfo.username).cata(
-          some = user => AuthenticatedUser(user.id.get, user.username),
-          none = AuthenticatedUser(createUser, userInfo.username)
+          some =  { user =>
+            val authority = if (user.admin) Authorities.Admin else Authorities.User
+            AuthenticatedUser(user.id.get, user.username, authority)
+          },
+          none = AuthenticatedUser(createUser, userInfo.username, Authorities.User)
         )
       }
   }

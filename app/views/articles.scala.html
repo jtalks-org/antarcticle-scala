@@ -1,4 +1,5 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit user: Option[security.AuthenticatedUser])
+@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit user: Principal)
+
 @templates.main("Articles") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
@@ -11,7 +12,7 @@
             <button class="btn btn-sm btn-primary">Find</button>
           </form>
         </div>
-        @if(user.isDefined) {
+        @if(user.can(Create, Article)) {
           <div class="pull-right">
             <a class="btn btn-sm btn-primary" href="@routes.ArticleController.getNewArticlePage">
               <i class="glyphicon glyphicon-pencil icon-white"></i> Write article

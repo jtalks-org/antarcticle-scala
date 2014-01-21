@@ -29,6 +29,24 @@ class MarkdownSpec extends Specification{
     }
   }
 
+
+  "markdown" should {
+    val textWithBlockQuotes = "> The overriding design goal for Markdown's"
+
+    "transform blockquotes" in {
+      Markdown.toHtml(textWithBlockQuotes) mustEqual("<blockquote>\n<p>The overriding design goal for Markdown's</p>\n</blockquote>")
+    }
+  }
+
+
+  "markdown" should {
+    val textWithStrikeThroughText = "~~Mistaken text.~~"
+
+    "transform strike through text" in {
+      Markdown.toHtml(textWithStrikeThroughText) mustEqual("<del>Mistaken text.</del>")
+    }
+  }
+
   "markdown" should  {
     val textWithListsMarkdown = "+ Red\n+ Green\n+ Blue"
     "transform lists" in {

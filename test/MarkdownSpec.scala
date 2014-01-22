@@ -54,7 +54,12 @@ class MarkdownSpec extends Specification{
     }
   }
 
+
   "markdown" should {
-    ""
+    val textWithSyntaxHighlight = "```ruby\nrequire 'redcarpet'\nmarkdown = Redcarpet.new(\"Hello World!\")\nputs markdown.to_html\n```"
+
+    "transform syntax highlighting" in {
+      Markdown.toHtml(textWithSyntaxHighlight) mustEqual("<code class=\"lang-ruby\"><span class=\"keyword\">require</span> <span class=\"string\">'redcarpet'</span>\nmarkdown = <span class=\"constant\">Redcarpet</span>.new(<span class=\"string\">\"Hello World!\"</span>)\nputs markdown.to_html</code>")
+    }.pendingUntilFixed("Current implementation doesn't support syntax highlighting")
   }
 }

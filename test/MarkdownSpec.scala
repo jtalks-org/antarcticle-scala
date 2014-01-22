@@ -9,7 +9,7 @@ class MarkdownSpec extends Specification{
     val textWithFirstLevelHeader = "# First level header"
     
     "transform first level header" in {
-      Markdown.toHtml(textWithFirstLevelHeader) mustEqual("<h1> First level header</h1>");
+      Markdown.toHtml(textWithFirstLevelHeader) mustEqual("<h1>First level header</h1>");
     }
   }
 
@@ -17,7 +17,7 @@ class MarkdownSpec extends Specification{
     val textWithSecondLevelHeader = "## Second level header"
 
     "transform second level header" in {
-      Markdown.toHtml(textWithSecondLevelHeader) mustEqual("<h2> Second level header</h2>");
+      Markdown.toHtml(textWithSecondLevelHeader) mustEqual("<h2>Second level header</h2>");
     }
   }
 
@@ -25,7 +25,7 @@ class MarkdownSpec extends Specification{
     val textWithThirdLevelHeader = "### Third level header"
 
     "transform third level header" in {
-      Markdown.toHtml(textWithThirdLevelHeader) mustEqual("<h3> Third level header</h3>")
+      Markdown.toHtml(textWithThirdLevelHeader) mustEqual("<h3>Third level header</h3>")
     }
   }
 
@@ -34,7 +34,7 @@ class MarkdownSpec extends Specification{
     val textWithBlockQuotes = "> The overriding design goal for Markdown's"
 
     "transform blockquotes" in {
-      Markdown.toHtml(textWithBlockQuotes) mustEqual("<blockquote>\n<p>The overriding design goal for Markdown's</p>\n</blockquote>")
+      Markdown.toHtml(textWithBlockQuotes) mustEqual("<blockquote><p>The overriding design goal for Markdown's</p>\n</blockquote>")
     }
   }
 
@@ -50,7 +50,7 @@ class MarkdownSpec extends Specification{
   "markdown" should  {
     val textWithListsMarkdown = "+ Red\n+ Green\n+ Blue"
     "transform lists" in {
-      Markdown.toHtml(textWithListsMarkdown) mustEqual("<ul>\n<li>Red</li>\n<li>Green</li>\n<li>Blue</li>\n</ul>");
+      Markdown.toHtml(textWithListsMarkdown) mustEqual("<ul>\n  <li>Red</li>\n  <li>Green</li>\n  <li>Blue</li>\n</ul>");
     }
   }
 
@@ -59,7 +59,7 @@ class MarkdownSpec extends Specification{
     val textWithSyntaxHighlight = "```ruby\nrequire 'redcarpet'\nmarkdown = Redcarpet.new(\"Hello World!\")\nputs markdown.to_html\n```"
 
     "transform syntax highlighting" in {
-      Markdown.toHtml(textWithSyntaxHighlight) mustEqual("<code class=\"lang-ruby\"><span class=\"keyword\">require</span> <span class=\"string\">'redcarpet'</span>\nmarkdown = <span class=\"constant\">Redcarpet</span>.new(<span class=\"string\">\"Hello World!\"</span>)\nputs markdown.to_html</code>")
-    }.pendingUntilFixed("Current implementation doesn't support syntax highlighting")
+      Markdown.toHtml(textWithSyntaxHighlight) mustEqual("<p><code>ruby\nrequire &#39;redcarpet&#39;\nmarkdown = Redcarpet.new(&quot;Hello World!&quot;)\nputs markdown.to_html\n</code></p>")
+    }
   }
 }

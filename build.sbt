@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.3.173",
   "org.mockito" % "mockito-all" % "1.9.0",
   // markdown support
-  "org.tautua.markdownpapers" % "markdownpapers-core" % "1.4.2",
+  "org.pegdown" % "pegdown" % "1.4.2",
+  // scalaz
   "org.scalaz" %% "scalaz-core" % "7.0.5",
   "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
   // production database

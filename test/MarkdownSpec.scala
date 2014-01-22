@@ -38,14 +38,14 @@ class MarkdownSpec extends Specification{
     }
   }
 
-
   "markdown" should {
-    val textWithStrikeThroughText = "~~Mistaken text.~~"
+    val textWithLinks = "This is [an example](http://example.com/ \"Title\") inline link.[This link](http://example.net/) has no title attribute."
 
-    "transform strike through text" in {
-      Markdown.toHtml(textWithStrikeThroughText) mustEqual("<del>Mistaken text.</del>")
+    "transform links" in {
+      Markdown.toHtml(textWithLinks) mustEqual("<p>This is <a href=\"http://example.com/\" title=\"Title\">an example</a> inline link.<a href=\"http://example.net/\">This link</a> has no title attribute.</p>")
     }
   }
+
 
   "markdown" should  {
     val textWithListsMarkdown = "+ Red\n+ Green\n+ Blue"

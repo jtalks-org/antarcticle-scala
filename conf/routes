@@ -18,7 +18,7 @@ GET           /articles/remove/:id    @controllers.ArticleController.removeArtic
 POST          /comments/new           @controllers.CommentController.postNewComment
 GET           /comments/remove/:id    @controllers.CommentController.removeComment(id:Int)
 # Users
-GET           /users/:name            @controllers.UserController.viewProfile(name: String, page: Int ?= 0)
+GET           /users/:name            @controllers.UserController.viewProfile(name: String, page: Int ?= 1)
 # Static resources: styles, scripts, images, fonts, etc
 GET           /*file                  controllers.Assets.at(path="/public", file)
 

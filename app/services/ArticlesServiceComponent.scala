@@ -2,7 +2,7 @@ package services
 
 import org.joda.time.DateTime
 import java.sql.Timestamp
-import repositories.ArticlesRepositoryComponent
+import repositories.{TagsRepositoryComponent, UsersRepositoryComponent, ArticlesRepositoryComponent}
 import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
 import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
 import models.UserModels.UserModel
@@ -18,8 +18,8 @@ trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
-    def getPage(page: Int): Page[ArticleListModel]
-    def getPageForUser(page: Int, userName : String): Page[ArticleListModel]
+    def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
+    def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
     def createArticle(article: Article): ValidationNel[String, ArticleDetailsModel]
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article): ValidationNel[String, Article]
@@ -28,13 +28,14 @@ trait ArticlesServiceComponent {
 }
 
 trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
-  this: ArticlesRepositoryComponent with TagsServiceComponent
+  this: ArticlesRepositoryComponent with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent
     with SessionProvider =>
 
   val articlesService = new ArticlesServiceImpl
   val articleValidator: Validator[Article]
 
   class ArticlesServiceImpl extends ArticlesService {
+
     def createArticle(article: Article) = withTransaction { implicit session =>
       def createRecord = {
         val creationTime = DateTime.now
@@ -76,27 +77,27 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       articlesRepository.get(id).map((recordToDetailsModel _).tupled)
     }
 
-    def getPage(page: Int) = withSession { implicit session =>
-      fetchPageFromDb(page)
+    def getPage(page: Int, tag : Option[String] = None) = withSession { implicit session =>
+      fetchPageFromDb(page, None, tag)
     }
 
-    //TODO: Fetch articles for given user only
-    def getPageForUser(page: Int, userName: String): Page[ArticleListModel] = withSession { implicit session =>
-      val userId = 1 // TODO
-      fetchPageFromDb(page, Some(userId))
+    def getPageForUser(page: Int, userName: String, tag : Option[String] = None): Page[ArticleListModel] = withSession { implicit session =>
+      val userId = usersRepository.getByUsername(userName).get.id
+      fetchPageFromDb(page, userId, tag)
     }
 
-    private def fetchPageFromDb(page: Int, userId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
+    private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tag : Option[String] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * (page - 1)
+      val tagId = tagsRepository.getByName(tag).map(_.id)
       val list = userId.cata(
-        some = articlesRepository.getListForUser(_, offset, pageSize),
-        none = articlesRepository.getList(offset, pageSize)
+        some = articlesRepository.getListForUser(_, offset, pageSize, tagId),
+        none = articlesRepository.getList(offset, pageSize, tagId)
       )
       val modelsList = list.map((recordToListModel _).tupled)
       val total = userId.cata(
-        some = articlesRepository.countForUser(_),
-        none = articlesRepository.count()
+        some = articlesRepository.countForUser(_, tagId),
+        none = articlesRepository.count(tagId)
       )
       Page(page, total, modelsList)
     }

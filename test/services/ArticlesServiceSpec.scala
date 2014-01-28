@@ -6,7 +6,7 @@ import utils.Implicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
-import repositories.ArticlesRepositoryComponent
+import repositories.{UsersRepositoryComponent, TagsRepositoryComponent, ArticlesRepositoryComponent}
 import org.mockito.Matchers
 import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
 import util.{TimeFridge, MockSession}
@@ -24,10 +24,12 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
   object service extends ArticlesServiceComponentImpl
       with ArticlesRepositoryComponent
-      with TagsServiceComponent with MockSessionProvider {
+      with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent with MockSessionProvider {
     override val articlesRepository = mock[ArticlesRepository]
     override val tagsService = mock[TagsService]
     override val articleValidator = mock[Validator[Article]]
+    override val usersRepository = mock[UsersRepository]
+    override val tagsRepository = mock[TagsRepository]
   }
 
   import service._

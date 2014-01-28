@@ -164,7 +164,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   "articles count" should {
     "return articles count" in withTestDb { implicit session: Session =>
 
-      val count = articlesRepository.count
+      val count = articlesRepository.count(None)
 
       count must_== 4
     }

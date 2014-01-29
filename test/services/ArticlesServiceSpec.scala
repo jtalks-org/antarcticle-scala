@@ -120,7 +120,7 @@ with BeforeExample with ValidationMatchers with MockSession {
     "contain total pages count" in {
       val count = 5
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
-      articlesRepository.count(None)(Matchers.eq(session)) returns count
+      articlesRepository.count(any)(Matchers.eq(session)) returns count
 
       val model = articlesService.getPage(1)
 

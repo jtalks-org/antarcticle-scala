@@ -119,6 +119,7 @@ with BeforeExample with ValidationMatchers with MockSession {
 
     "contain total pages count" in {
       val count = 5
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 

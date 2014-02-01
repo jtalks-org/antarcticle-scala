@@ -31,14 +31,37 @@ object Authorities {
   case object Anonymous extends Authority
 }
 
-case class Principal(id: Option[Int], authority: Authority) {
+trait Principal {
+  // check permissions for "collection of objects" or "objects in general"
+  def can(permission: Permission, entity: Entity): Boolean
+  // check permissions for specific object
+  def can(permission: Permission, obj: AnyRef): Boolean
 
-  if (authority != Anonymous && !id.isDefined) {
-    throw new RuntimeException("Authenticated user doesn't have identity")
+  def isAuthenticated: Boolean
+}
+
+case object AnonymousPrincipal extends Principal {
+  override def can(permission: Permission, entity: Entity): Boolean = {
+    permission match {
+      // anonymous have read-only rights
+      case Read => true
+      case _ => false
+    }
   }
 
-  // check permissions for "collection of objects" or "objects in general"
-  def can(permission: Permission, entity: Entity): Boolean = {
+  override def can(permission: Permission, obj: AnyRef): Boolean = {
+    permission match {
+      // anonymous have read-only rights on all objects
+      case Read => true
+      case _ => false
+    }
+  }
+
+  override def isAuthenticated = false
+}
+
+case class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
+  override def can(permission: Permission, entity: Entity): Boolean = {
     (authority, permission) match {
       // admin can do everything with anything
       case (Admin, _) => true
@@ -47,16 +70,11 @@ case class Principal(id: Option[Int], authority: Authority) {
       case (User, Read | Create) => true
       case (User, _) => false
 
-      // anonymous have read-only rights
-      case (Anonymous, Read) => true
-      case (Anonymous, _) => false
-
-      case t => throw new RuntimeException(s"Authorization not configured for $t")
+      case t => notConfigured(t)
     }
   }
 
-  // check permissions for specific object
-  def can(permission: Permission, obj: AnyRef): Boolean = {
+  override def can(permission: Permission, obj: AnyRef): Boolean = {
     (authority, permission, obj) match {
       // admin can do everything with anything
       case (Admin, _, _) => true
@@ -64,15 +82,16 @@ case class Principal(id: Option[Int], authority: Authority) {
       // user can do anything with comments and articles written by him
       // and read any others
       case (User, Read, _) => true
-      case (User, _, article: ArticleListModel) => article.author.id == id.get
-      case (User, _, article: ArticleDetailsModel) => article.author.id == id.get
-      case (User, _, comment: Comment) => comment.author.id == id.get
+      case (User, _, article: ArticleListModel) => article.author.id == sid
+      case (User, _, article: ArticleDetailsModel) => article.author.id == sid
+      case (User, _, comment: Comment) => comment.author.id == sid
 
-      // anonymous have read-only rights on all objects
-      case (Anonymous, Read, _) => true
-      case (Anonymous, _, _) => false
-
-      case t => throw new RuntimeException(s"Authorization not configured for $t")
+      case t => notConfigured(t)
     }
   }
+
+  override def isAuthenticated = true
+
+  private def notConfigured(t: Any) =
+    throw new RuntimeException(s"Authenticated principal authorization is not configured for $t")
 }

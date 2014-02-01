@@ -7,13 +7,16 @@ import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import scalaz._
 import Scalaz._
+import Authorities.Authority
 
-case class AuthenticatedUser(id: Int, username: String)
+case class AuthenticatedUser(userId: Int, username: String, authority: Authority)
+              extends AuthenticatedPrincipal(userId, authority)
 
 trait Authentication {
   this: Controller with UsersRepositoryComponent with SessionProvider =>
 
-  implicit def currentUser(implicit request: RequestHeader): Option[AuthenticatedUser] = {
+  // TODO: move AuthenticatedUser creation to sec. service
+  def currentUser(implicit request: RequestHeader): Option[AuthenticatedUser] = {
     def getUserByToken(token: String) = withSession(usersRepository.getByRemeberToken(token)(_))
 
     for {
@@ -21,10 +24,16 @@ trait Authentication {
       token = tokenCookie.value
       user <- getUserByToken(token)
       userId <- user.id
-    } yield AuthenticatedUser(userId, user.username)
+    } yield  {
+      val authority = if (user.admin) Authorities.Admin else Authorities.User
+      AuthenticatedUser(userId, user.username, authority)
+    }
   }
 
-  implicit def authUserToOption(authUser: AuthenticatedUser) = Some(authUser)
+  implicit def currentPrincipal(implicit request: RequestHeader): Principal =
+    currentUser getOrElse AnonymousPrincipal
+
+  // implicit def authUserToOption(authUser: AuthenticatedUser) = Some(authUser)
 
   def withUser(f: AuthenticatedUser => Request[AnyContent] => Result,
     onUnauthorized: RequestHeader => SimpleResult = defaultOnUnauthorized): EssentialAction = {

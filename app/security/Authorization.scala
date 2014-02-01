@@ -18,17 +18,18 @@ object Permissions {
   case object Manage extends Permission // ALL
 }
 
+// class of objects (collection of objects)
 object Entities {
   sealed trait Entity
   case object Article extends Entity
   case object Comment extends Entity
 }
 
+// user "roles"
 object Authorities {
   sealed trait Authority
   case object Admin extends Authority
   case object User extends Authority
-  case object Anonymous extends Authority
 }
 
 trait Principal {
@@ -40,6 +41,7 @@ trait Principal {
   def isAuthenticated: Boolean
 }
 
+// principal for not authenticated users
 case object AnonymousPrincipal extends Principal {
   override def can(permission: Permission, entity: Entity): Boolean = {
     permission match {
@@ -60,7 +62,8 @@ case object AnonymousPrincipal extends Principal {
   override def isAuthenticated = false
 }
 
-case class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
+// principal for authenticated user
+class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
   override def can(permission: Permission, entity: Entity): Boolean = {
     (authority, permission) match {
       // admin can do everything with anything
@@ -80,7 +83,7 @@ case class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Princi
       case (Admin, _, _) => true
 
       // user can do anything with comments and articles written by him
-      // and read any others
+      // and read any other objects
       case (User, Read, _) => true
       case (User, _, article: ArticleListModel) => article.author.id == sid
       case (User, _, article: ArticleDetailsModel) => article.author.id == sid

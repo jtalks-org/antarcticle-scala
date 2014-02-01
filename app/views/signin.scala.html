@@ -1,4 +1,4 @@
-@(form: Form[(String, String)])(implicit user: Option[security.AuthenticatedUser])
+@(form: Form[(String, String)])(implicit user: security.Principal)
 @templates.main("Sign In") {
   <div class="row">
     <div class="col-md-4 col-md-offset-4 well2">

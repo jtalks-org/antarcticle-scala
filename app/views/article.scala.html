@@ -1,8 +1,6 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-   comments: List[models.CommentModels.Comment])(implicit user: security.Principal)
+   comments: List[models.CommentModels.Comment])(implicit user: Principal)
 @import views.helpers.Markdown
-@import security.Permissions._
-@import security.Entities._
 
 @templates.main(article.title) {
   @if(user.can(Manage, article)) {

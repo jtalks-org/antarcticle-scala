@@ -1,6 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit user: security.Principal)
-@import security.Permissions._
-@import security.Entities._
+@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit user: Principal)
 
 @templates.main("Articles") {
   <div class="row">

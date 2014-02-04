@@ -12,7 +12,8 @@ At the moment the only way to get Antarticle executable is to build it from the 
 3. Navigate to root project folder and execute the following:
 ```
      sbt packageBin
-``` to create an application deployment archive (WAR).
+``` 
+to create an application deployment archive (WAR).
 4. Once you have the WAR file assembled proceed to **configuration** section to prepare the application environment.
 5. When done with configuration deploy WAR file to the servlet container of your choice (e.g. Apache Tomcat) and enjoy application running.   
 

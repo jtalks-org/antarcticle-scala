@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-all" % "1.9.0",
   // markdown support
   "org.pegdown" % "pegdown" % "1.4.2",
-  // scalaz
   "org.scalaz" %% "scalaz-core" % "7.0.5",
   "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
   // production database
@@ -25,6 +24,14 @@ libraryDependencies ++= Seq(
 )
 
 playScalaSettings
+
+
+// global imports for templates
+templatesImport ++= Seq(
+  "security.Entities._",
+  "security.Permissions._",
+  "security.Principal"
+)
 
 // Coffee Script compilation options
 coffeescriptOptions := Seq("bare")

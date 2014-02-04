@@ -30,13 +30,11 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
       response <- sendRequest(poulpeUrl, username, passwordHash)
       xmlResponseBody = response.xml
     } yield {
-      //TODO: log error on malformed response
-      val status = (xmlResponseBody \\ "status").headOption.map(_.text)
-      status.filter(_ == "success").map { _ =>
-        val firstName = (xmlResponseBody \\ "firstName").headOption.map(_.text)
-        val lastName = (xmlResponseBody \\ "lastName").headOption.map(_.text)
-        UserInfo(username, firstName, lastName).some
-      } getOrElse None
+      for {
+         status <- (xmlResponseBody \\ "status").headOption.map(_.text) if status == "success"
+         firstName = (xmlResponseBody \\ "firstName").headOption.map(_.text)
+         lastName = (xmlResponseBody \\ "lastName").headOption.map(_.text)
+      } yield UserInfo(username, firstName, lastName)
     }
   }
 

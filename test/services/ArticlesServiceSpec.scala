@@ -6,7 +6,7 @@ import utils.Implicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
-import repositories.ArticlesRepositoryComponent
+import repositories.{UsersRepositoryComponent, TagsRepositoryComponent, ArticlesRepositoryComponent}
 import org.mockito.Matchers
 import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
 import util.{TimeFridge, MockSession}
@@ -20,14 +20,16 @@ import org.specs2.scalaz.ValidationMatchers
 
 
 class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito
-  with BeforeExample with ValidationMatchers with MockSession {
+with BeforeExample with ValidationMatchers with MockSession {
 
   object service extends ArticlesServiceComponentImpl
-      with ArticlesRepositoryComponent
-      with TagsServiceComponent with MockSessionProvider {
+  with ArticlesRepositoryComponent
+  with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent with MockSessionProvider {
     override val articlesRepository = mock[ArticlesRepository]
     override val tagsService = mock[TagsService]
     override val articleValidator = mock[Validator[Article]]
+    override val usersRepository = mock[UsersRepository]
+    override val tagsRepository = mock[TagsRepository]
   }
 
   import service._
@@ -37,6 +39,8 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     org.mockito.Mockito.reset(articlesRepository)
     org.mockito.Mockito.reset(articleValidator)
     org.mockito.Mockito.reset(session)
+    org.mockito.Mockito.reset(usersRepository)
+    org.mockito.Mockito.reset(tagsRepository)
   }
 
   val dbRecord = {
@@ -50,6 +54,7 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     val article = dbRecord.some
 
     "return model" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
 
       val model = articlesService.get(1)
@@ -83,16 +88,19 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
   }
 
   "paginated articles list" should {
+
     "request second page with correct parameters" in {
-      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(session)) returns List()
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List()
 
       articlesService.getPage(2)
 
-      there was one(articlesRepository).getList(3, 3)(session)
+      there was one(articlesRepository).getList(3, 3, None)(session)
     }
 
     "contain list models" in {
-      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(session)) returns List(dbRecord)
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
 
       val model: Page[ArticleListModel] = articlesService.getPage(1)
 
@@ -101,7 +109,8 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "contain current page" in {
-      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(session)) returns List(dbRecord)
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
 
       val model = articlesService.getPage(1)
 
@@ -110,8 +119,9 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
 
     "contain total pages count" in {
       val count = 5
-      articlesRepository.getList(anyInt, anyInt)(Matchers.eq(session)) returns List(dbRecord)
-      articlesRepository.count()(Matchers.eq(session)) returns count
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns count
 
       val model = articlesService.getPage(1)
 
@@ -123,15 +133,16 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     val article = Article(None, "", "", List())
 
     "insert new article" in {
-      TimeFridge.withFrozenTime() { dt =>
-        val record = ArticleRecord(None, "", "", dt, dt, "", 1)
-        articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
-        articleValidator.validate(any[Article]) returns article.successNel
-        tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      TimeFridge.withFrozenTime() {
+        dt =>
+          val record = ArticleRecord(None, "", "", dt, dt, "", 1)
+          articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
+          articleValidator.validate(any[Article]) returns article.successNel
+          tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
 
-        articlesService.createArticle(article)
+          articlesService.createArticle(article)
 
-        there was one(articlesRepository).insert(record)(session)
+          there was one(articlesRepository).insert(record)(session)
       }
     }
 
@@ -189,12 +200,13 @@ class ArticlesServiceSpec extends Specification with NoTimeConversions with Mock
     }
 
     "update modification time" in {
-      TimeFridge.withFrozenTime() { now =>
-        articleValidator.validate(any[Article]) returns article.successNel
+      TimeFridge.withFrozenTime() {
+        now =>
+          articleValidator.validate(any[Article]) returns article.successNel
 
-        articlesService.updateArticle(article)
+          articlesService.updateArticle(article)
 
-        there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
+          there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
       }
     }
 

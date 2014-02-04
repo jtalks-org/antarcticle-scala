@@ -2,7 +2,7 @@ Antarcticle-scala
 =================
 
 Antarcticle is an article engine for [JTalks](http://jtalks.org/) community project.
-Please report all the bugs and feature requests [here](http://jira.jtalks.org/Antarcticle).
+Please report all the bugs and feature requests [here](http://jira.jtalks.org/browse/ANTARCTICLE).
 
 ##Installation
 At the moment the only way to get Antarticle executable is to build it from the source code:
@@ -11,10 +11,10 @@ At the moment the only way to get Antarticle executable is to build it from the 
 2. Install [SBT 0.13+](http://www.scala-sbt.org/0.13.0/docs/Getting-Started/Setup).
 3. Navigate to root project folder and execute the following to create an application deployment archive (WAR):
 ```
-     sbt packageBin
+     sbt war
 ``` 
 
-4. Once you have the WAR file assembled proceed to **configuration** section to prepare the application environment.
+4. Once you have the WAR file (**/target/antarcticle-scala-X.X.war**) assembled proceed to **configuration** section to prepare the application environment.
 5. When done with configuration deploy WAR file to the servlet container of your choice (e.g. Apache Tomcat) and enjoy application running.   
 
 ##Configuration
@@ -65,7 +65,7 @@ To configure fake authentication manager (contains only admin/admin user) set pr
 - Play Framework 2.0+ 
 
 ###Useful links
-- Bug tracker: [http://jira.jtalks.org/Antarcticle](http://jira.jtalks.org/Antarcticle)
+- Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)
 - Continious Integration server : [http://ci.jtalks.org/view/Antarcticle](http://ci.jtalks.org/view/Antarcticle/)  
 - Test application instance: [http://qa.jtalks.org/antarcticle](http://qa.jtalks.org/antarcticle/)
 - Staging application instance: [http://preprod.jtalks.org/antarcticle](http://preprod.jtalks.org/antarcticle)

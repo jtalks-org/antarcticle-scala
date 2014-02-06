@@ -18,6 +18,7 @@ import validators.Validator
 import util.ScalazValidationTestUtils._
 import org.specs2.scalaz.ValidationMatchers
 import conf.Constants._
+import security._
 
 
 class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito
@@ -132,14 +133,22 @@ with BeforeExample with ValidationMatchers with MockSession {
 
   "creating new article" should {
     val article = Article(None, "", "", List())
+    implicit def getCurrentUser = {
+      val usr = mock[AuthenticatedUser]
+      usr.userId returns 1
+      usr.username returns "user"
+      usr.can(Permissions.Create, Entities.Article) returns true
+      usr
+    }
+    val userRecord = UserRecord(1.some, "user").some
 
     "insert new article" in {
-      TimeFridge.withFrozenTime() {
-        dt =>
+      TimeFridge.withFrozenTime() { dt =>
           val record = ArticleRecord(None, "", "", dt, dt, "", 1)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
           tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+          usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
           articlesService.createArticle(article)
 
@@ -151,6 +160,7 @@ with BeforeExample with ValidationMatchers with MockSession {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
       val model: ArticleDetailsModel = articlesService.createArticle(article).get
 
@@ -162,6 +172,7 @@ with BeforeExample with ValidationMatchers with MockSession {
       val articleId = 1
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns articleId
       articleValidator.validate(any[Article]) returns article.successNel
+      usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
       tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns tags.success
 
       articlesService.createArticle(article.copy(tags = tags))
@@ -186,6 +197,24 @@ with BeforeExample with ValidationMatchers with MockSession {
 
       there was one(session).rollback()
     }
+
+    "set author as current user" in {
+      articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
+      articleValidator.validate(any[Article]) returns article.successNel
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
+
+      val model: ArticleDetailsModel = articlesService.createArticle(article).get
+
+      model.author.id must_== getCurrentUser.userId
+    }
+
+    "not create article when user is not authorized to do it" in {
+      val currentUser = mock[AuthenticatedUser]
+      currentUser.can(Permissions.Create, Entities.Article) returns false
+
+      articlesService.createArticle(article)(AnonymousPrincipal) must beFailing
+    }
   }
 
   "article update" should {
@@ -201,8 +230,7 @@ with BeforeExample with ValidationMatchers with MockSession {
     }
 
     "update modification time" in {
-      TimeFridge.withFrozenTime() {
-        now =>
+      TimeFridge.withFrozenTime() { now =>
           articleValidator.validate(any[Article]) returns article.successNel
 
           articlesService.updateArticle(article)

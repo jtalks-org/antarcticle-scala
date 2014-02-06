@@ -13,6 +13,10 @@ import scalaz._
 import Scalaz._
 import validators.Validator
 import scala.slick.jdbc.JdbcBackend
+import security.Principal
+import security.Entities
+import security.Permissions._
+import security.AuthenticatedUser
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
@@ -20,7 +24,7 @@ trait ArticlesServiceComponent {
   trait ArticlesService {
     def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
-    def createArticle(article: Article): ValidationNel[String, ArticleDetailsModel]
+    def createArticle(article: Article)(implicit principal: Principal): ValidationNel[String, ArticleDetailsModel]
     def get(id: Int): Option[ArticleDetailsModel]
     def updateArticle(article: Article): ValidationNel[String, Article]
     def removeArticle(id: Int)
@@ -36,27 +40,32 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
   class ArticlesServiceImpl extends ArticlesService {
 
-    def createArticle(article: Article) = withTransaction { implicit session =>
-      def createRecord = {
-        val creationTime = DateTime.now
-        val currentUserId = 1 //TODO
-        articleToInsert(article, creationTime, currentUserId)
-      }
+    def createArticle(article: Article)(implicit principal: Principal) = principal match {
+      case currentUser: AuthenticatedUser if currentUser.can(Create, Entities.Article) =>
+        withTransaction { implicit session =>
+          def createRecord = {
+            val creationTime = DateTime.now
+            articleToInsert(article, creationTime, currentUser.userId)
+          }
 
-      val result = for {
-        _ <- articleValidator.validate(article)
-        newRecord = createRecord
-        id = articlesRepository.insert(newRecord)
-        tags <- tagsService.createTagsForArticle(id, article.tags)
-      } yield recordToDetailsModel(newRecord.copy(id = Some(id)), UserRecord(Some(1), "")/*TODO: real user*/, tags)
+          val result = for {
+            _ <- articleValidator.validate(article)
+            newRecord = createRecord
+            id = articlesRepository.insert(newRecord)
+            tags <- tagsService.createTagsForArticle(id, article.tags)
+            user = usersRepository.getByUsername(currentUser.username).get
+          } yield recordToDetailsModel(newRecord.copy(id = Some(id)), user, tags)
 
-      if (result.isFailure) {
-        // article should not be persisted, when tags creation failed
-        // reason: tags creation requires article id which is auto-increment column
-        session.rollback()
-      }
+          if (result.isFailure) {
+            // article should not be persisted, when tags creation failed
+            // reason: tags creation requires article id which is auto-increment column
+            session.rollback()
+          }
 
-      result
+          result
+        }
+
+      case _ => "Authorization failure".failureNel
     }
 
 

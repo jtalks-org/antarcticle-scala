@@ -1,5 +1,5 @@
 package conf
 
 object Constants {
-    val PAGE_SIZE = 3
+    val PAGE_SIZE = 10
 }

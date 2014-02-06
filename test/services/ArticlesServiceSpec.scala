@@ -17,6 +17,7 @@ import Scalaz._
 import validators.Validator
 import util.ScalazValidationTestUtils._
 import org.specs2.scalaz.ValidationMatchers
+import conf.Constants._
 
 
 class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito
@@ -95,7 +96,7 @@ with BeforeExample with ValidationMatchers with MockSession {
 
       articlesService.getPage(2)
 
-      there was one(articlesRepository).getList(3, 3, None)(session)
+      there was one(articlesRepository).getList(PAGE_SIZE, PAGE_SIZE, None)(session)
     }
 
     "contain list models" in {
@@ -118,7 +119,7 @@ with BeforeExample with ValidationMatchers with MockSession {
     }
 
     "contain total pages count" in {
-      val count = 5
+      val count = 3 * PAGE_SIZE/2
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count

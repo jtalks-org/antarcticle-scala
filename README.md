@@ -5,17 +5,23 @@ Antarcticle is an article engine for [JTalks](http://jtalks.org/) community proj
 Please report all the bugs and feature requests [here](http://jira.jtalks.org/browse/ANTARCTICLE).
 
 ##Installation
-At the moment the only way to get Antarticle executable is to build it from the source code:
+As no downloadable release binaries are available yet, start from clonning source code from this repo. You will probably need to install GIT for that. The following two deployment alternatives are supported:
+### Native Play Framework deployment
 
-1. Clone this repository. You will probably need to install GIT for that.
-2. Install [SBT 0.13+](http://www.scala-sbt.org/0.13.0/docs/Getting-Started/Setup).
-3. Navigate to root project folder and execute the following to create an application deployment archive (WAR):
-```
-     sbt war
-``` 
+1. Install [Java 1.7](http://www.oracle.com/technetwork/java/javase/downloads/java-se-jre-7-download-432155.html), [Scala 2.10](http://www.scala-lang.org/download/2.10.3.html) and [Play Framework 2.2](http://downloads.typesafe.com/play/2.2.0/play-2.2.0.zip)
+2. Navigate to clonned source code root and try ```play``` console command. It should open Play console if evething has been installed in a correct way
+3. Perform application configuration via **conf/application.conf** as described in **Configuration** section below
+4. Excecute ```play run <port>``` command to launch an application
 
-4. Once you have the WAR file (**/target/antarcticle-scala-X.X.war**) assembled proceed to **configuration** section to prepare the application environment.
-5. When done with configuration deploy WAR file to the servlet container of your choice (e.g. Apache Tomcat) and enjoy application running.   
+### Traditional war-file deployment
+
+War file may be deployed to any servlet container or application server on your choice (e.g. Apache Tomcat).
+
+1. Install [SBT 0.13](http://www.scala-sbt.org/0.13.0/docs/Getting-Started/Setup)
+3. Navigate to root project folder and execute the following to create an application deployment archive: ```sbt war``` 
+
+4. Once you have the WAR file (**/target/antarcticle-scala-X.X.war**) assembled, proceed to **configuration** section to prepare the application environment. For war-based deployment model application configuration should be performed via JNDI. Consult your server documentation on how to set JNDI properties fro an application
+5. When done with configuration deploy WAR file to the servlet container and enjoy application running   
 
 ##Configuration
 
@@ -58,11 +64,16 @@ To configure fake authentication manager (contains only admin/admin user) set pr
     security.authentication.useFake=true
 
 ##Development
+
+It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).
+
 ###Necessary software
 - IDE or text editor on your choice
 - GIT client
-- SBT 0.13+
-- Play Framework 2.0+ 
+- JDK 1.7
+- Scala 2.10
+- SBT 0.13
+- Play Framework 2.2 
 
 ###Useful links
 - Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)

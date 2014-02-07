@@ -72,6 +72,34 @@ To configure fake authentication manager (contains only admin/admin user) set pr
 
     security.authentication.useFake=true
 
+###Examples
+
+The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 in **context.xml** configuration file:
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <Environment name="db.default.driver" 
+         value="com.mysql.jdbc.Driver"
+         type="java.lang.String"/>
+    <Environment name="db.default.url" 
+         value="jdbc:mysql://localhost:3306/antarcticle?characterEncoding=UTF-8"
+         type="java.lang.String"/>
+    <Environment name="db.default.user" 
+         value="root"
+         type="java.lang.String"/>
+    <Environment name="db.default.password" 
+         value="root"
+         type="java.lang.String"/>
+    <Environment name="security.authentication.useFake" 
+         value="false"
+         type="java.lang.Boolean"/>
+    <Environment name="security.authentication.poulpe.url" 
+         value="http://mydomain.com/poulpeContext"
+         type="java.lang.String"/>    
+</Context>
+```
 ##Development
 
 It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).

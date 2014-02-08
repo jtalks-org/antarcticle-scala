@@ -129,6 +129,28 @@ with BeforeExample with ValidationMatchers with MockSession {
 
       model.totalPages must_== 2
     }
+
+    "filter articles by tag" in {
+      val count = 3 * PAGE_SIZE/2
+      tagsRepository.getByName(Some("tag"))(session) returns Some(new Tag(1, "tag"))
+      articlesRepository.getList(0, PAGE_SIZE, Some(1))(session) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns count
+
+      val model: Page[ArticleListModel] = articlesService.getPage(1, Some("tag"))
+
+      model.list.nonEmpty must beTrue
+      model.currentPage must_== 1
+      model.totalItems must_== count
+    }
+
+    "handle nonexistent tags" in {
+      tagsRepository.getByName(Some("tag"))(session) returns None
+      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
+
+      val model: Page[ArticleListModel] = articlesService.getPage(1, Some("tag"))
+
+      model.list.nonEmpty must beTrue
+    }
   }
 
   "creating new article" should {

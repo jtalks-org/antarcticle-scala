@@ -60,7 +60,7 @@ It's also possible to perform a data migration from an [old Antarticle version](
 
 ###Authentication
 
-Authentication is performed via [JTalks Poulpe|https://github.com/jtalks-org/poulpe] instance which is an authentication service or using fake internal authenticator. The latter is mostly intended for testing purposes and should not be be used in production.
+Authentication is performed via [JTalks Poulpe](https://github.com/jtalks-org/poulpe) instance which is an authentication service or using fake internal authenticator. The latter is mostly intended for testing purposes and should not be be used in production.
 
 To setup antarcticle to use Poulpe ensure the following properties are set:
 

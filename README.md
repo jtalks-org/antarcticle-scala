@@ -29,7 +29,7 @@ War file may be deployed to any servlet container or application server on your 
 
 ####Installing the war file
 
-1. First, proceed to **configuration** section to prepare the application environment. For war-based deployment model application configuration should be performed via JNDI. Consult your server documentation on how to set JNDI properties fro an application
+1. First, proceed to **configuration** section to prepare the application environment. For war-based deployment model application configuration should be performed via JNDI. Consult your server documentation on how to set JNDI properties fro an application. You can find Tomcat configuration below in Examples section.
 2. When done with configuration deploy WAR file to the servlet container and enjoy application running   
 
 ##Configuration
@@ -60,9 +60,9 @@ It's also possible to perform a data migration from an [old Antarticle version](
 
 ###Authentication
 
-Authentication is performed via Poulpe instance or using fake internal authenticator. The later one is mostly intended for testing purposes and should not be be used in production.
+Authentication is performed via [JTalks Poulpe|https://github.com/jtalks-org/poulpe] instance which is an authentication service or using fake internal authenticator. The latter is mostly intended for testing purposes and should not be be used in production.
 
-To setup antarcticle for using Poulpe ensure the following properties are set:
+To setup antarcticle to use Poulpe ensure the following properties are set:
 
 
     security.authentication.useFake=false

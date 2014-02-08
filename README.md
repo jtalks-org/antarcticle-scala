@@ -18,7 +18,7 @@ Please report all the bugs and feature requests [here](http://jira.jtalks.org/br
 
 ### Traditional war-file deployment
 
-War file may be deployed to any servlet container or application server on your choice (e.g. Apache Tomcat). You can download an assemnled war from our [repository](http://repo.jtalks.org/content/repositories/deployment-pipeline/deployment-pipeline/antarcticle/) or build one yourself from the source code.
+War file may be deployed to any servlet container or application server on your choice (e.g. Apache Tomcat). You can download an assemnled war from our [repository](http://repo.jtalks.org/content/repositories/deployment-pipeline/deployment-pipeline/antarcticle/) (usually you'd want the latest version) or build one yourself from the source code.
 
 ####Building war file from a source code (optional)
 
@@ -114,6 +114,5 @@ It's possible to generate project files for Intellij Idea with ```sbt idea``` co
 
 ###Useful links
 - Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)
-- Continious Integration server : [http://ci.jtalks.org/view/Antarcticle](http://ci.jtalks.org/view/Antarcticle/)  
+- Continuous Integration server : [http://ci.jtalks.org/view/Antarcticle](http://ci.jtalks.org/view/Antarcticle/)  
 - Test application instance: [http://qa.jtalks.org/antarcticle](http://qa.jtalks.org/antarcticle/)
-- Staging application instance: [http://preprod.jtalks.org/antarcticle](http://preprod.jtalks.org/antarcticle)

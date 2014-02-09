@@ -12,7 +12,7 @@ import security.{Entities, AuthenticatedUser, Principal}
 import security.Permissions.Create
 
 /**
- *
+ *  Performs transactional operations upon articles' comments
  */
 trait CommentsServiceComponent {
   val commentsService: CommentsService
@@ -20,7 +20,7 @@ trait CommentsServiceComponent {
   trait CommentsService {
     def getByArticle(id: Int): List[Comment]
     def insert(articleId: Int, content : String)(implicit principal: Principal): ValidationNel[String, CommentRecord]
-    def update(id: Int, comment: CommentToUpdate): Boolean
+    def update(id: Int, content: String)(implicit principal: Principal): ValidationNel[String, Boolean]
     def removeComment(id: Int): Boolean
   }
 }
@@ -46,8 +46,12 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
       case _ => "Authorization failure".failureNel
     }
 
-    def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit session =>
-      commentsRepository.update(id, comment)
+    def update(id: Int, content: String) (implicit principal: Principal) = principal match {
+      case currentUser: AuthenticatedUser if currentUser.can(Create, Entities.Comment) =>
+        withTransaction { implicit session =>
+          commentsRepository.update(id, new CommentToUpdate(content, DateTime.now)).successNel
+        }
+      case _ => "Authorization failure".failureNel
     }
 
     def removeComment(id: Int) = withTransaction { implicit session =>

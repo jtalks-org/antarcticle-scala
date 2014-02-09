@@ -65,16 +65,16 @@
               </div>
               <div class="toolb">
               <a id="@comment.id" class="btn btn-default btn-xs permalink" title="Get a permanent link to this comment"
-                href="@{"#" + comment.id}">
+                 href="@{"#" + comment.id}">
                   <span class="glyphicon glyphicon-link"></span>
               </a>
               @if(user.can(Manage, comment)) {
-                <a class="btn btn-default btn-xs" title="Edit comment"
-                href="#">
-                  <span class="glyphicon glyphicon-edit" ></span>
+                <a class="btn btn-default btn-xs edit-comment" title="Edit comment"
+                   href="@{routes.CommentController.editComment(article.id, comment.id) + "#" + comment.id}">
+                  <span class="glyphicon glyphicon-pencil" ></span>
                 </a>
                 <a class="btn btn-default btn-xs delete-link" title="Remove comment completely"
-                href="@routes.CommentController.removeComment(article.id, comment.id)">
+                   href="@routes.CommentController.removeComment(article.id, comment.id)">
                   <span class="glyphicon glyphicon-remove"></span>
                 </a>
               }
@@ -85,13 +85,13 @@
         @if(user.can(Create, Comment)) {
           <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment(article.id)" method="post">
             <div class="form-group">
-              <i class="glyphicon glyphicon-info-sign"></i>
-              <label class="editor-hint">
-                Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
-                here</a>.
-              </label>
               <textarea name="content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
             </div>
+            <i class="glyphicon glyphicon-info-sign"></i>
+            <label class="editor-hint">
+              Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
+              here</a>.
+            </label>
             <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
           </form>
         }

@@ -1,0 +1,71 @@
+@(article: models.ArticleModels.ArticleDetailsModel,
+   comments: List[models.CommentModels.Comment], editCommentId: Int)(implicit user: Principal)
+@import views.helpers.Markdown
+
+@templates.main(article.title) {
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <article id="@article.id" class="entry">
+        <div class="main-content">
+          <header>
+            @templates.prettyDate(article.createdAt)
+            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+          </header>
+          <div class="body">
+            <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
+          </div>
+        </div>
+        <footer>
+          <ul class="footer-elements breadcrumb clearfix">
+            <li>
+              <i class="glyphicon glyphicon-user"></i>
+              <strong>by </strong>
+              <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
+            </li>
+            @for(tag <- article.tags) {
+              <li class="pull-right">
+                <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
+              </li>
+            }
+          </ul>
+        </footer>
+      </article>
+      <section class="comments" id="comments">
+        <h3 class="comments-header">Comments</h3>
+        @for(comment <- comments) {
+          @if(comment.id == editCommentId){
+            <form class="clearfix comment-bubble comment-bubble-other default-form"
+            action="@routes.CommentController.portCommentEdits(article.id, comment.id)" method="post">
+              <div class="form-group">
+                <textarea name="content" class="form-control" cols="40" rows="10">@comment.content</textarea>
+              </div>
+              <i class="glyphicon glyphicon-info-sign"></i>
+              <label class="editor-hint">
+                Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
+                here</a>.
+              </label>
+              <div class="btn-toolbar pull-right">
+                <input id="comment_submit" class="btn btn-primary" type="submit" value="Save" />
+                <a class="btn btn-success " href="@{routes.ArticleController.viewArticle(article.id) + "#" + comment.id}">Discard</a>
+              </div>
+            </form>
+            <a id="@comment.id"></a>
+          } else {
+            <article class="clearfix comment comment-other">
+              <div class="comment-bubble comment-bubble-other">
+                <header>
+                  <span class="glyphicon glyphicon-user"></span>
+                  <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
+                  <time class="pull-right">
+                    <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt
+                  </time>
+                </header>
+                <div>@Html(Markdown.toHtml(comment.content))</div>
+              </div>
+            </article>
+          }
+        }
+      </section>
+    </div>
+  </div>
+}

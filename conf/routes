@@ -17,6 +17,8 @@ DELETE        /articles/:id                        @controllers.ArticleControlle
 # Comments
 POST          /articles/:id/comments/new           @controllers.CommentController.postNewComment(id:Int)
 DELETE        /articles/:id/comments/:commentId    @controllers.CommentController.removeComment(id:Int, commentId: Int)
+GET           /articles/:id/comments/:commentId    @controllers.CommentController.editComment(id:Int, commentId: Int)
+POST          /articles/:id/comments/:commentId    @controllers.CommentController.portCommentEdits(id:Int, commentId: Int)
 # Users
 GET           /users/:name                         @controllers.UserController.viewProfile(name: String, page: Int ?= 1)
 # Static resources: styles, scripts, images, fonts, etc

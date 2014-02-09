@@ -87,7 +87,6 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
      val tagName = "tag1"
 
      val portion = articlesRepository.getListForUser(userId, 0, 10, Some(tagId))
-    println(portion)
 
      portion.map(asTags(_).contains(tagName)) must_== Seq(true)
    }

@@ -8,6 +8,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scalaz._
 import Scalaz._
 import Authorities.Authority
+import conf.Constants
 
 case class AuthenticatedUser(userId: Int, username: String, authority: Authority)
               extends AuthenticatedPrincipal(userId, authority)

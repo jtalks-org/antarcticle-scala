@@ -1,14 +1,14 @@
-package security
+package controllers
 
-import play.api.mvc._
+import play.api.mvc.{DiscardingCookie, Cookie, Action, Controller}
+import security.{Authentication, SecurityServiceComponent}
+import org.joda.time.DateTimeConstants
 import play.api.data.Form
 import play.api.data.Forms._
-import views.html
-import play.api.mvc.Cookie
 import scala.Some
-import play.api.libs.concurrent.Execution.Implicits._
-import java.util.concurrent.TimeUnit
-import org.joda.time.{DateTimeConstants, Weeks}
+import views.html
+import conf.Constants
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  *  Handles sign in and sign out user actions.
@@ -37,7 +37,7 @@ trait AuthenticationController {
       signInResult.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
         succ = { case (token, authUser) =>
-          Redirect(controllers.routes.ArticleController.listAllArticles())
+          Ok(routes.ArticleController.listAllArticles().absoluteURL())
             // http only to prevent session hijacking with XSS
             .withCookies(Cookie(Constants.RememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }

@@ -74,6 +74,6 @@ trait ArticleController {
 
   def removeArticle(id: Int) = Action { implicit request =>
       articlesService.removeArticle(id)
-      Redirect(routes.ArticleController.listAllArticles())
+      Ok(routes.ArticleController.listAllArticles().absoluteURL())
   }
 }

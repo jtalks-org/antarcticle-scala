@@ -56,7 +56,7 @@ trait Authentication {
     }
   }
 
-  protected val defaultOnUnauthorized = (req: RequestHeader) => Redirect(routes.AuthenticationController.signin())
+  protected val defaultOnUnauthorized = (req: RequestHeader) => Redirect(controllers.routes.AuthenticationController.signin())
 
   private val defaultOnUnauthorizedAsync = (req: RequestHeader) => Future(defaultOnUnauthorized(req))
 }

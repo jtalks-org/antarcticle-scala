@@ -4,8 +4,12 @@ import repositories.CommentsRepositoryComponent
 import models.database._
 import org.joda.time.DateTime
 import utils.Implicits._
+import scalaz._
+import Scalaz._
 import models.CommentModels.Comment
 import models.UserModels.UserModel
+import security.{Entities, AuthenticatedUser, Principal}
+import security.Permissions.Create
 
 /**
  *
@@ -15,7 +19,7 @@ trait CommentsServiceComponent {
 
   trait CommentsService {
     def getByArticle(id: Int): List[Comment]
-    def insert(articleId: Int, content : String): CommentRecord
+    def insert(articleId: Int, content : String)(implicit principal: Principal): ValidationNel[String, CommentRecord]
     def update(id: Int, comment: CommentToUpdate): Boolean
     def removeComment(id: Int): Boolean
   }
@@ -32,12 +36,14 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
       commentsRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
-    // todo: real user
-    def insert(articleId: Int, content : String) = withTransaction { implicit session =>
-        val userId = 1
-        val toInsert = CommentRecord(None, userId, articleId, content, DateTime.now)
+    def insert(articleId: Int, content : String) (implicit principal: Principal) = principal match {
+      case currentUser: AuthenticatedUser if currentUser.can(Create, Entities.Comment) =>
+        withTransaction { implicit session =>
+        val toInsert = CommentRecord(None, currentUser.userId, articleId, content, DateTime.now)
         val id = commentsRepository.insert(toInsert)
-        toInsert.copy(id = Some(id))
+        toInsert.copy(id = Some(id)).successNel
+      }
+      case _ => "Authorization failure".failureNel
     }
 
     def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit session =>

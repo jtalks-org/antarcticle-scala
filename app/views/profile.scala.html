@@ -5,7 +5,12 @@
       <div class="user-profile clearfix">
         <header class="user-profile-header clearfix">
           <div class="pull-left">
-            <h2 class="username"><i class="glyphicon glyphicon-user"></i>@userDetails.username (@userDetails.firstName @userDetails.lastName) </h2>
+            <h2 class="username"><i class="glyphicon glyphicon-user"></i>
+                @userDetails.username
+                @if(!userDetails.firstName.isEmpty || !userDetails.lastName.isEmpty){
+                    (@userDetails.firstName @userDetails.lastName)
+                }
+            </h2>
           </div>
           <div class="pull-right">
             <ul class="user-stats">

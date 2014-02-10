@@ -27,7 +27,7 @@ trait CommentController {
           fail = nel => {
             BadRequest(views.html.templates.formErrors(nel.list))
           },
-          succ = created => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id)
+          succ = created => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
         )
 
       }

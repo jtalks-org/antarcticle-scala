@@ -37,7 +37,8 @@ trait Controllers
 trait Services
   extends ArticlesServiceComponentImpl
   with TagsServiceComponentImpl
-  with CommentsServiceComponentImpl {
+  with CommentsServiceComponentImpl
+  with UsersServiceComponentImpl{
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator

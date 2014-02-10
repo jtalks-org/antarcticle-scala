@@ -58,7 +58,7 @@
                   <span class="glyphicon glyphicon-user"></span>
                   <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
                   <time class="pull-right">
-                    <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt
+                    <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt.format("dd-MMM-YYYY hh:mm")
                   </time>
                 </header>
                 <div>@Html(Markdown.toHtml(comment.content))</div>

@@ -9,7 +9,7 @@
   <body>
     <div class="page-wrapper">
       <nav class="navbar navbar-inverse nav">
-        <div class="col-md-10 col-md-offset-1 global-block">
+        <div class="col-md-8 global-block">
           <a href="@routes.ArticleController.listAllArticles()" class="navbar-brand"><i class="glyphicon glyphicon-book"></i>
             JavaTalks Articles</a>
           <ul class="nav navbar-nav navbar-right">
@@ -45,11 +45,11 @@
           </ul>
         </div>
       </nav>
-      <div class="container main-container">
+      <div class="container main-container col-md-10 col-md-offset-1">
       @content
       </div>
       <footer class="footer">
-        <div class="col-md-10 col-md-offset-1 global-block">
+        <div class="col-md-8 global-block">
           <span class="pull-left">
             Antarcticle project<br>© @{
             com.github.nscala_time.time.Imports.DateTime.now.year().get()

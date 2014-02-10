@@ -14,10 +14,15 @@
           </div>
         </header>
         @templates.bareArticleList(page, routes.UserController.viewProfile(username, _))
-        <div class="centralized-inputs">
-        @if(page.totalPages == 0) {
-          <h3>User has no articles.</h3>
-        }
+        <div class="centralized-inputs clearfix">
+          @if(page.totalPages == 0) {
+            <h3>User has no articles.</h3>
+          }
+          @if(user.can(Create, Article)) {
+            <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
+              <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+            </a>
+          }
         </div>
       </div>
     </div>

@@ -14,7 +14,8 @@ class FormHandler
 
   defaultOnSuccess: (data) =>
     window.location.href = data
-    window.location.reload(true)
+    if (window.location.href.split('#')[0] == data.split('#')[0])
+      window.location.reload(true)
 
   defaultOnFail: (data) => this.form.prepend(data.responseText)
 

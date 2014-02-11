@@ -12,7 +12,9 @@
 
 class FormHandler
 
-  defaultOnSuccess: (data) => window.location.href = data
+  defaultOnSuccess: (data) =>
+    window.location.href = data
+    window.location.reload(true)
 
   defaultOnFail: (data) => this.form.prepend(data.responseText)
 

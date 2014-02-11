@@ -19,7 +19,7 @@
   }
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
-      <article id="@article.id" class="entry">
+      <article class="entry">
         <div class="main-content">
           <header>
             @templates.prettyDate(article.createdAt)
@@ -57,7 +57,7 @@
                 <header>
                   <span class="glyphicon glyphicon-user"></span>
                   <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
-                  <time class="pull-right">
+                  <time class="pull-right" datetime="@comment.createdAt.format("YYYY-MM-dd hh:mm")">
                     <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt.format("dd-MMM-YYYY hh:mm")
                   </time>
                 </header>

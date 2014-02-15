@@ -10,7 +10,7 @@ trait TagsServiceComponent {
   val tagsService: TagsService
 
   trait TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]): ValidationNel[String, Seq[String]]
+    def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session): ValidationNel[String, Seq[String]]
   }
 }
 
@@ -21,7 +21,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
   val tagValidator: Validator[String]
 
   class TagsServiceImpl extends TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]) = withTransaction { implicit session =>
+    def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session) = {
       val trimmedTags = tags.map(_.trim)
 
       validateTags(trimmedTags).map { _ =>

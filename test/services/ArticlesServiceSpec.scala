@@ -169,7 +169,7 @@ with BeforeExample with ValidationMatchers with MockSession {
           val record = ArticleRecord(None, "", "", dt, dt, "", 1)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
-          tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+          tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
           usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
           articlesService.createArticle(article)
@@ -181,7 +181,7 @@ with BeforeExample with ValidationMatchers with MockSession {
     "return model" in {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
       val model: ArticleDetailsModel = articlesService.createArticle(article).get
@@ -195,16 +195,16 @@ with BeforeExample with ValidationMatchers with MockSession {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns articleId
       articleValidator.validate(any[Article]) returns article.successNel
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns tags.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns tags.success
 
       articlesService.createArticle(article.copy(tags = tags))
 
-      there was one(tagsService).createTagsForArticle(articleId, tags)
+      there was one(tagsService).createTagsForArticle(articleId, tags)(session)
     }
 
     "not create article when validation failed" in {
       articleValidator.validate(any[Article]) returns "".failNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
 
       articlesService.createArticle(article)
 
@@ -213,7 +213,7 @@ with BeforeExample with ValidationMatchers with MockSession {
 
     "rollback transaction when tags creation failed" in {
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns "".failNel
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns "".failNel
 
       articlesService.createArticle(article) must beFailing
 
@@ -223,7 +223,7 @@ with BeforeExample with ValidationMatchers with MockSession {
     "set author as current user" in {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]]) returns Seq.empty.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
       val model: ArticleDetailsModel = articlesService.createArticle(article).get

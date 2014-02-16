@@ -22,12 +22,12 @@ trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
+    def get(id: Int): Option[ArticleDetailsModel]
     def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
     def createArticle(article: Article)(implicit principal: Principal): ValidationNel[String, ArticleDetailsModel]
-    def get(id: Int): Option[ArticleDetailsModel]
-    def updateArticle(article: Article): ValidationNel[String, Article]
-    def removeArticle(id: Int)
+    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, Article]
+    def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
   }
 }
 
@@ -69,17 +69,32 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
 
-    def updateArticle(article: Article) = withTransaction { implicit session =>
-      articleValidator.validate(article).map { _ =>
-        val modificationTime = DateTime.now
-        //TODO: handle id, tags validation
-        articlesRepository.update(article.id.get, articleToUpdate(article, modificationTime))
-        article
-      }
+    def updateArticle(article: Article)(implicit principal: Principal) =  withTransaction {
+      implicit session =>
+        //incoming article may have no user information set
+        val persistentArticle = articlesRepository.get(article.id.get).get._1
+        principal match {
+          case currentUser: AuthenticatedUser if currentUser.can(Update, persistentArticle) =>
+              articleValidator.validate(article).fold(
+                  fail = nel => Failure(nel),
+                  succ = created => {
+                    articlesRepository.update(article.id.get, articleToUpdate(article, DateTime.now))
+                    tagsService.updateTagsForArticle(article.id.get, article.tags)
+                    article.successNel
+                  }
+                )
+          case _ => "Authorization failure".failureNel
+        }
     }
 
-    def removeArticle(id: Int) = withTransaction { implicit session =>
-      articlesRepository.remove(id)
+    def removeArticle(id: Int)(implicit principal: Principal) = withTransaction {
+      implicit session =>
+        val article = articlesRepository.get(id).get._1
+        principal match {
+          case currentUser: AuthenticatedUser if currentUser.can(Delete, article) =>
+            articlesRepository.remove(id).successNel
+          case _ => "Authorization failure".failureNel
+      }
     }
 
     def get(id: Int) = withSession { implicit session =>

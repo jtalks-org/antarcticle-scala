@@ -73,7 +73,11 @@ trait ArticleController {
   }
 
   def removeArticle(id: Int) = Action { implicit request =>
-      articlesService.removeArticle(id)
-      Ok(routes.ArticleController.listAllArticles().absoluteURL())
+      articlesService.removeArticle(id).fold(
+        fail = nel => {
+          BadRequest(views.html.templates.formErrors(nel.list))
+        },
+        succ = created => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+      )
   }
 }

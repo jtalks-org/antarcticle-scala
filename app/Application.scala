@@ -42,7 +42,7 @@ trait Services
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator
-  override val articleValidator = new ArticleValidator
+  override val articleValidator = new ArticleValidator(tagValidator)
 }
 
 trait Repositories

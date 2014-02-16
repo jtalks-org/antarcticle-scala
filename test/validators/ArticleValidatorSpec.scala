@@ -7,7 +7,7 @@ import org.specs2.scalaz.ValidationMatchers
 import models.ArticleModels.Article
 
 class ArticleValidatorSpec extends Specification with ValidationMatchers {
-  val validator = new ArticleValidator
+  val validator = new ArticleValidator(new TagValidator)
 
   "article validation" should {
     val article = Article(None, "dfds", "", List("tag1", "tag 2"))

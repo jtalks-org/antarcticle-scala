@@ -81,14 +81,6 @@ with BeforeExample with ValidationMatchers with MockSession {
     }
   }
 
-  "article removal" should {
-    "remove article" in {
-      articlesService.removeArticle(1)
-
-      there was one(articlesRepository).remove(1)(session)
-    }
-  }
-
   "paginated articles list" should {
 
     "request second page with correct parameters" in {
@@ -241,32 +233,61 @@ with BeforeExample with ValidationMatchers with MockSession {
 
   "article update" should {
     val article = Article(1.some, "", "", List("tag"))
+    val record = ArticleRecord(None, "", "", null, null, "", 1)
+    implicit def getCurrentUser = {
+      val usr = mock[AuthenticatedUser]
+      usr.userId returns 1
+      usr.username returns "user"
+      usr.can(Permissions.Update, record) returns true
+      usr
+    }
 
     "update existing article" in {
+      articlesRepository.get(1)(session) returns Option(record, null, null)
       articleValidator.validate(any[Article]) returns article.successNel
 
       articlesService.updateArticle(article)
 
-      there was one(articlesRepository).update(
-        Matchers.eq(1), any[ArticleToUpdate])(Matchers.eq(session))
+      there was one(articlesRepository).update(Matchers.eq(1), any[ArticleToUpdate])(Matchers.eq(session))
     }
 
     "update modification time" in {
       TimeFridge.withFrozenTime() { now =>
-          articleValidator.validate(any[Article]) returns article.successNel
+        articlesRepository.get(1)(session)  returns Option(record, null, null)
+        articleValidator.validate(any[Article]) returns article.successNel
 
-          articlesService.updateArticle(article)
+        articlesService.updateArticle(article)
 
-          there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
+        there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
       }
     }
 
     "not update article when validation failed" in {
+      articlesRepository.get(1)(session)  returns Option(record, null, null)
       articleValidator.validate(any[Article]) returns "".failNel
 
       articlesService.updateArticle(article)
 
-      there was noMoreCallsTo(articlesRepository)
+      there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
+    }
+  }
+
+  "article removal" should {
+    val record = ArticleRecord(None, "", "", null, null, "", 1)
+    implicit def getCurrentUser = {
+      val usr = mock[AuthenticatedUser]
+      usr.userId returns 1
+      usr.username returns "user"
+      usr.can(Permissions.Delete, record) returns true
+      usr
+    }
+
+    "remove article" in {
+      articlesRepository.get(1)(session)  returns Option(record, null, null)
+
+      articlesService.removeArticle(1)
+
+      there was one(articlesRepository).remove(1)(session)
     }
   }
 }

@@ -8,6 +8,7 @@ import models.ArticleModels.ArticleDetailsModel
 import models.CommentModels.Comment
 import scalaz._
 import Scalaz._
+import models.database.ArticleRecord
 
 object Permissions {
   sealed trait Permission
@@ -87,6 +88,7 @@ class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
       case (User, Read, _) => true
       case (User, _, article: ArticleListModel) => article.author.id == sid
       case (User, _, article: ArticleDetailsModel) => article.author.id == sid
+      case (User, _, article: ArticleRecord) => article.authorId == sid
       case (User, _, comment: Comment) => comment.author.id == sid
 
       case t => notConfigured(t)

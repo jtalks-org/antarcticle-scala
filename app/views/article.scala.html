@@ -23,7 +23,7 @@
         <div class="main-content">
           <header>
             @templates.prettyDate(article.createdAt)
-            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+            <h2>@article.title</h2>
           </header>
           <div class="body">
             <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>

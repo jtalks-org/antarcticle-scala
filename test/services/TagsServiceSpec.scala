@@ -10,7 +10,6 @@ import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.ArgumentCapture
 import validators.Validator
-import util.ScalazValidationTestUtils._
 import scalaz._
 import Scalaz._
 

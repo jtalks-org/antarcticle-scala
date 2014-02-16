@@ -4,13 +4,12 @@ import play.api.mvc.{Action, Controller}
 import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.Article
+import models.ArticleModels.{ArticleDetailsModel, Article}
 import views.html
 import security.Authentication
 
 /**
  * Serves web-based operations on articles
- * todo: handle 404
  */
 trait ArticleController {
   this: Controller with ArticlesServiceComponent with CommentsServiceComponent with Authentication =>
@@ -33,7 +32,10 @@ trait ArticleController {
   }
 
   def viewArticle(id: Int) = Action { implicit request =>
-    Ok(views.html.article(articlesService.get(id).get, commentsService.getByArticle(id)))
+    articlesService.get(id) match {
+      case Some(article : ArticleDetailsModel) => Ok(views.html.article(article, commentsService.getByArticle(id)))
+      case _ => NotFound(views.html.errors.notFound())
+    }
   }
 
   def getNewArticlePage = Action { implicit request =>

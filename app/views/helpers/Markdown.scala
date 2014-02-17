@@ -50,6 +50,10 @@ object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
 
 object Markdown {
 
+  private val whiteList = Whitelist
+    .relaxed()
+    .addAttributes("code", "class")
+
   private val settings = new OutputSettings()
     .prettyPrint(false)
     .escapeMode(EscapeMode.xhtml)
@@ -63,6 +67,6 @@ object Markdown {
     serializerMap.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
     val html = processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
     // postprocessing to avoid XSS
-    Jsoup.clean(html, "", Whitelist.relaxed(), settings)
+    Jsoup.clean(html, "", whiteList, settings)
   }
 }

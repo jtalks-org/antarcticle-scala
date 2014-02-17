@@ -1,6 +1,5 @@
 package views.helpers
 
-import java.io.{StringReader, StringWriter}
 import org.pegdown.PegDownProcessor
 import org.pegdown.Extensions._
 import org.pegdown.VerbatimSerializer
@@ -8,7 +7,8 @@ import org.pegdown.LinkRenderer
 import org.pegdown.Printer
 import org.parboiled.common.StringUtils
 import org.pegdown.ast.VerbatimNode
-import org.pegdown.ToHtmlSerializer
+import org.jsoup.Jsoup
+import org.jsoup.safety.Whitelist
 
 /**
  * Adds class with specified in fenced code block language for
@@ -52,6 +52,7 @@ object Markdown {
     // custom fenced code blocks serializer
     val serializerMap = new java.util.HashMap[String, VerbatimSerializer]
     serializerMap.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
-    processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
+    val html = processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
+    Jsoup.clean(html, Whitelist.relaxed())
   }
 }

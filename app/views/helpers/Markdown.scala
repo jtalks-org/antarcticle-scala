@@ -9,6 +9,8 @@ import org.parboiled.common.StringUtils
 import org.pegdown.ast.VerbatimNode
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
+import org.jsoup.nodes.Document.OutputSettings
+import org.jsoup.nodes.Entities.EscapeMode
 
 /**
  * Adds class with specified in fenced code block language for
@@ -22,6 +24,7 @@ import org.jsoup.safety.Whitelist
  * ```
  */
 object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
+
   override def serialize(node: VerbatimNode, printer: Printer): Unit = {
     println("SERIALIZE:" + node)
     printer.println().print("<pre><code")
@@ -46,6 +49,12 @@ object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
 }
 
 object Markdown {
+
+  private val settings = new OutputSettings()
+    .prettyPrint(false)
+    .escapeMode(EscapeMode.xhtml)
+    .charset("UTF-8")
+
   def toHtml(markdown: String): String = {
     // use all extensions
     val processor = new PegDownProcessor(ALL)
@@ -53,6 +62,7 @@ object Markdown {
     val serializerMap = new java.util.HashMap[String, VerbatimSerializer]
     serializerMap.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
     val html = processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
-    Jsoup.clean(html, Whitelist.relaxed())
+    // postprocessing to avoid XSS
+    Jsoup.clean(html, "", Whitelist.relaxed(), settings)
   }
 }

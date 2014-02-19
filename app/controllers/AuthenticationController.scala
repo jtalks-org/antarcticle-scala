@@ -2,21 +2,20 @@ package controllers
 
 import play.api.mvc.{DiscardingCookie, Cookie, Action, Controller}
 import security.{Authentication, SecurityServiceComponent}
-import org.joda.time.DateTimeConstants
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
 import views.html
-import conf.Constants
+import conf.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  *  Handles sign in and sign out user actions.
+ *  After successful sign in a new session is created with http-only "remember me" 
+ *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
   this: Controller with SecurityServiceComponent with Authentication  =>
-
-  val rememberMeExpirationTime = DateTimeConstants.SECONDS_PER_WEEK * 4
 
   val loginForm = Form(
     tuple(
@@ -25,11 +24,11 @@ trait AuthenticationController {
     )
   )
 
-  def signin = Action { implicit request =>
+  def showLoginPage = Action { implicit request =>
     Ok(html.signin(loginForm))
   }
 
-  def authenticate = Action.async { implicit request =>
+  def login = Action.async { implicit request =>
     val (username, password) = loginForm.bindFromRequest.get
     for {
       signInResult <- securityService.signInUser(username, password)
@@ -39,16 +38,15 @@ trait AuthenticationController {
         succ = { case (token, authUser) =>
           Ok(routes.ArticleController.listAllArticles().absoluteURL())
             // http only to prevent session hijacking with XSS
-            .withCookies(Cookie(Constants.RememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
+            .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }
       )
     }
   }
 
-  def signout = Action {
+  def logout = Action {
     Redirect(controllers.routes.ArticleController.listAllArticles())
       .withNewSession
-      // TODO: move this constant
-      .discardingCookies(DiscardingCookie(Constants.RememberMeCookie))
+      .discardingCookies(DiscardingCookie(rememberMeCookie))
   }
 }

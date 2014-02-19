@@ -21,7 +21,7 @@ trait Authentication {
     def getUserByToken(token: String) = withSession(usersRepository.getByRemeberToken(token)(_))
 
     for {
-      tokenCookie <- request.cookies.get(Constants.RememberMeCookie)
+      tokenCookie <- request.cookies.get(Constants.rememberMeCookie)
       token = tokenCookie.value
       user <- getUserByToken(token)
       userId <- user.id
@@ -56,7 +56,8 @@ trait Authentication {
     }
   }
 
-  protected val defaultOnUnauthorized = (req: RequestHeader) => Redirect(controllers.routes.AuthenticationController.signin())
+  protected val defaultOnUnauthorized = (req: RequestHeader) =>
+    Redirect(controllers.routes.AuthenticationController.showLoginPage())
 
   private val defaultOnUnauthorizedAsync = (req: RequestHeader) => Future(defaultOnUnauthorized(req))
 }

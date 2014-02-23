@@ -55,6 +55,7 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
     }
 
     def removeComment(id: Int) = withTransaction { implicit session =>
+      // todo: authorization
       commentsRepository.delete(id)
     }
 

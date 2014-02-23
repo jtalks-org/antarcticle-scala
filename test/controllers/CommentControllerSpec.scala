@@ -11,8 +11,10 @@ import scalaz._
 import Scalaz._
 import security.AnonymousPrincipal
 import models.database.CommentRecord
-import models.database.CommentRecord
 import scala.Some
+import org.joda.time.DateTime
+import models.UserModels.UserModel
+import models.ArticleModels.ArticleDetailsModel
 
 
 class CommentControllerSpec extends Specification with Mockito with AfterExample {
@@ -36,11 +38,12 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
 
   val comment = "content"
   val request = FakeRequest("POST","/").withFormUrlEncodedBody(("content", comment))
+  val commentId = 1
+  val articleId = 2
   implicit def principal = AnonymousPrincipal
 
   "post new comment" should {
 
-    val articleId = 1
     val commentRecord = new CommentRecord(Some(1), 1, 1, comment, null)
 
     "create a comment from valid data" in {
@@ -65,6 +68,85 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       commentsService.insert(articleId, comment) returns "service failure".failureNel
 
       val page = controller.postNewComment(articleId)(request)
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "remove comment" should {
+
+    "delete requested comment" in {
+      commentsService.removeComment(commentId) returns true
+
+      val page = controller.removeComment(articleId,commentId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+      there was one(commentsService).removeComment(commentId)
+    }
+
+    "ignore already deleted comment" in {
+      commentsService.removeComment(commentId) returns false
+
+      val page = controller.removeComment(articleId ,commentId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+      there was one(commentsService).removeComment(commentId)
+    }
+  }
+
+  "edit comment page" should {
+
+    val now = DateTime.now.toDate
+    val userModel = new UserModel(1, "name")
+    val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
+
+    "have article content and comments" in {
+      articlesService.get(articleId) returns Some(articleDetailsModel)
+      commentsService.getByArticle(articleId) returns List()
+
+      val page = controller.editComment(articleId, commentId)(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+    }
+
+    "return 404 if no comment found for edit" in {
+      articlesService.get(articleId) returns None
+
+      val page = controller.editComment(articleId, commentId)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "post comment edit" should {
+
+    "update a comment from valid data" in {
+      commentsService.update(commentId, comment) returns true.successNel
+
+      val page = controller.postCommentEdits(articleId, commentId)(request)
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+      there was one(commentsService).update(commentId, comment)
+    }
+
+    "report validation errors" in {
+      val page = controller.postCommentEdits(articleId, commentId)(FakeRequest("POST","/"))
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+      there was no(commentsService).update(commentId, comment)
+    }
+
+    "handle service layer failures" in {
+      commentsService.update(commentId, comment) returns "service failure".failureNel
+
+      val page = controller.postCommentEdits(articleId, commentId)(request)
 
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")

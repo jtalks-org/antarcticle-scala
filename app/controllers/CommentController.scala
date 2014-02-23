@@ -5,9 +5,10 @@ import services.{ArticlesServiceComponent, CommentsServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import security.Authentication
+import models.ArticleModels.ArticleDetailsModel
 
 /**
- *
+ * Handles all web operations related to article comments
  */
 trait CommentController {
   this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
@@ -26,7 +27,6 @@ trait CommentController {
           },
           succ = created => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
         )
-
       }
     )
   }
@@ -37,13 +37,15 @@ trait CommentController {
   }
 
   def editComment(articleId: Int, commentId: Int) = Action { implicit request =>
-    Ok(views.html.editComment(
-      articlesService.get(articleId).get,
-      commentsService.getByArticle(articleId),
-      commentId))
+    articlesService.get(articleId) match {
+      case article : Some[ArticleDetailsModel] =>
+        Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId))
+      case None =>
+        NotFound(views.html.errors.notFound())
+    }
   }
 
-  def portCommentEdits(articleId: Int, commentId: Int) = Action { implicit request =>
+  def postCommentEdits(articleId: Int, commentId: Int) = Action { implicit request =>
     commentForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
       content => {

@@ -8,13 +8,14 @@ import org.specs2.specification.AfterExample
 import com.github.nscala_time.time.Imports._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import models.UserModels.UserModel
-import models.ArticleModels.{ArticleDetailsModel, ArticleListModel}
-import models.Page
-import scala.Some
 import scalaz._
 import Scalaz._
 import security.AnonymousPrincipal
+import models.Page
+import scala.Some
+import models.UserModels.UserModel
+import models.ArticleModels.ArticleDetailsModel
+import models.ArticleModels.ArticleListModel
 
 class ArticleControllerSpec extends Specification with Mockito with AfterExample{
 
@@ -37,8 +38,9 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   val now = DateTime.now.toDate
   val userModel = new UserModel(1, "name")
-  val articleListModel = new ArticleListModel(1, "title", "description", now, userModel, Seq())
-  val articleDetailsModel = new ArticleDetailsModel(1, "title", "content", now, userModel, Seq())
+  val articleId = 1
+  val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq())
+  val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
   implicit def principal = AnonymousPrincipal
 
   "list all articles" should {
@@ -55,24 +57,24 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     }
   }
 
-  "get article" should {
+  "view article" should {
     "fetch an existing article" in {
-      articlesService.get(1) returns Some(articleDetailsModel)
-      commentsService.getByArticle(1) returns List()
+      articlesService.get(articleId) returns Some(articleDetailsModel)
+      commentsService.getByArticle(articleId) returns List()
 
-      val page = controller.viewArticle(1)(FakeRequest())
+      val page = controller.viewArticle(articleId)(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
       contentAsString(page).contains(articleDetailsModel.title) must beTrue
       contentAsString(page).contains(articleDetailsModel.content) must beTrue
-      there was one(articlesService).get(1)
+      there was one(articlesService).get(articleId)
     }
 
     "show error page for illegal article id" in {
-      articlesService.get(1) returns None
+      articlesService.get(articleId) returns None
 
-      val page = controller.viewArticle(1)(FakeRequest())
+      val page = controller.viewArticle(articleId)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
@@ -120,6 +122,87 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
+    }
+  }
+
+  "get edit article page" should {
+    "fetch an existing article" in {
+      articlesService.get(articleId) returns Some(articleDetailsModel)
+
+      val page = controller.editArticle(articleId)(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(articleDetailsModel.title) must beTrue
+      contentAsString(page).contains(articleDetailsModel.content) must beTrue
+      there was one(articlesService).get(articleId)
+    }
+
+    "show error page for illegal article id" in {
+      articlesService.get(articleId) returns None
+
+      val page = controller.editArticle(1)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "post article edit" should {
+
+    val validRequest = FakeRequest("POST","/")
+      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"))
+    val badRequest = FakeRequest("POST","/")
+      .withFormUrlEncodedBody(("content", ""), ("tags","#$%^&"))
+    val article = controller.articleForm.bindFromRequest()(validRequest).get
+
+    "save an article if data is valid" in {
+      articlesService.updateArticle(article) returns article.successNel
+
+      val page = controller.postArticleEdits()(validRequest)
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+      there was one(articlesService).updateArticle(article)
+    }
+
+    "report an error on bad request" in {
+      val page = controller.postArticleEdits()(badRequest)
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+
+    "report error list on service operation error" in {
+      articlesService.updateArticle(article) returns "bad request".failureNel
+
+      val page = controller.postArticleEdits()(validRequest)
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "remove article" should {
+
+    "delete requested article" in {
+      articlesService.removeArticle(articleId) returns true.successNel
+
+      val page = controller.removeArticle(articleId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+      there was one(articlesService).removeArticle(articleId)
+    }
+
+    "report service failures" in {
+      articlesService.removeArticle(articleId) returns "authorization failure".failureNel
+
+      val page = controller.removeArticle(articleId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+      there was one(articlesService).removeArticle(articleId)
     }
   }
 }

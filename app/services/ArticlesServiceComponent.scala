@@ -72,6 +72,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def updateArticle(article: Article)(implicit principal: Principal) =  withTransaction {
       implicit session =>
         //incoming article may have no user information set
+        // todo: handle non-existent id properly
         val persistentArticle = articlesRepository.get(article.id.get).get._1
         principal match {
           case currentUser: AuthenticatedUser if currentUser.can(Update, persistentArticle) =>
@@ -89,6 +90,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
     def removeArticle(id: Int)(implicit principal: Principal) = withTransaction {
       implicit session =>
+      // todo: handle non-existent id properly
         val article = articlesRepository.get(id).get._1
         principal match {
           case currentUser: AuthenticatedUser if currentUser.can(Delete, article) =>

@@ -35,7 +35,7 @@
         @for(comment <- comments) {
           @if(comment.id == editCommentId){
             <form class="clearfix comment-bubble comment-bubble-other default-form"
-            action="@routes.CommentController.portCommentEdits(article.id, comment.id)" method="post">
+            action="@routes.CommentController.postCommentEdits(article.id, comment.id)" method="post">
               <div class="form-group">
                 <textarea name="content" class="form-control" cols="40" rows="10">@comment.content</textarea>
               </div>

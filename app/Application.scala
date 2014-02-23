@@ -7,7 +7,6 @@ import models.database._
 import conf.ConfigurationComponent
 import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
-import scala.slick.jdbc.JdbcBackend.Session
 
 object Application
   extends ConfigurationComponent

@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   // 1.3.174 has problem fixed in trunk:
   // https://code.google.com/p/h2database/source/detail?r=5363
   "com.h2database" % "h2" % "1.3.173",
-  "org.mockito" % "mockito-all" % "1.9.0",
+  "org.mockito" % "mockito-all" % "1.9.5",
   // markdown support
   "org.pegdown" % "pegdown" % "1.4.2",
   "org.jsoup" % "jsoup" % "1.7.3",

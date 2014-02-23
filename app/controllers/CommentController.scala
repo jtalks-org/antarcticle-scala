@@ -12,9 +12,6 @@ import security.Authentication
 trait CommentController {
   this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
 
-  /**
-   * Describes binding between Article model object and web-form
-   */
   val commentForm = Form(
     "content" -> nonEmptyText
   )
@@ -54,7 +51,7 @@ trait CommentController {
           fail = nel => {
             BadRequest(views.html.templates.formErrors(nel.list))
           },
-          succ = created => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
+          succ = edited => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
         )
       }
     )

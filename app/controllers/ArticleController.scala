@@ -57,7 +57,10 @@ trait ArticleController {
   }
 
   def editArticle(id: Int = 0) = Action { implicit request =>
-    Ok(views.html.editArticle(articleForm.fill(articlesService.get(id).get)))
+    articlesService.get(id) match {
+      case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
+      case _ => NotFound(views.html.errors.notFound())
+    }
   }
 
   def postArticleEdits() = Action { implicit request =>

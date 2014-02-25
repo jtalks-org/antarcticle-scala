@@ -1,16 +1,10 @@
 package views.helpers
 
-import org.pegdown.PegDownProcessor
+import org.pegdown._
 import org.pegdown.Extensions._
-import org.pegdown.VerbatimSerializer
-import org.pegdown.LinkRenderer
-import org.pegdown.Printer
 import org.parboiled.common.StringUtils
-import org.pegdown.ast.VerbatimNode
-import org.jsoup.Jsoup
-import org.jsoup.safety.Whitelist
-import org.jsoup.nodes.Document.OutputSettings
-import org.jsoup.nodes.Entities.EscapeMode
+import org.pegdown.ast._
+import org.apache.commons.lang3.StringEscapeUtils
 
 /**
  * Adds class with specified in fenced code block language for
@@ -25,6 +19,9 @@ import org.jsoup.nodes.Entities.EscapeMode
  */
 object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
 
+  val map  = new java.util.HashMap[String, VerbatimSerializer]
+  map.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
+  
   override def serialize(node: VerbatimNode, printer: Printer): Unit = {
     println("SERIALIZE:" + node)
     printer.println().print("<pre><code")
@@ -48,25 +45,29 @@ object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
   }
 }
 
+/**
+ * Prevents XSS attack by escaping any tags in article/comment contents,
+ * which are not parsed as explicit code by markdown parser
+ */
+class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer, GooglePrettifyVerbatimSerializer.map){
+
+  override def visit(node : HtmlBlockNode) {
+    val text = node.getText
+    if (text.length() > 0) printer.println()
+    printer.print(escape(text))
+  }
+
+  override def visit(node : InlineHtmlNode ) = printer.print(escape(node.getText))
+
+  private def escape(text:String) = StringEscapeUtils.escapeHtml4(text)
+}
+
 object Markdown {
-
-  private val whiteList = Whitelist
-    .relaxed()
-    .addAttributes("code", "class")
-
-  private val settings = new OutputSettings()
-    .prettyPrint(false)
-    .escapeMode(EscapeMode.xhtml)
-    .charset("UTF-8")
 
   def toHtml(markdown: String): String = {
     // use all extensions
     val processor = new PegDownProcessor(ALL)
-    // custom fenced code blocks serializer
-    val serializerMap = new java.util.HashMap[String, VerbatimSerializer]
-    serializerMap.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
-    val html = processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
-    // postprocessing to avoid XSS
-    Jsoup.clean(html, "", whiteList, settings)
+    val astRoot = processor.parseMarkdown(processor.prepareSource(markdown.toCharArray))
+    new EscapingToHtmlSerializer().toHtml(astRoot)
   }
 }

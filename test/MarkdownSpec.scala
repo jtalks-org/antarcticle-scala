@@ -29,5 +29,15 @@ class Example(name: String) {
 
       Markdown.toHtml(markdownSource) must contain(expectedCodeTag)
     }
+
+    "properly escape symbols to prevent xss and broken formatting" in {
+      val markdownSource = "<script></script><div><a href=\"url&param\">"
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must not contain "<script>"
+      result must not contain "<div>"
+      result must not contain "<a"
+    }
   }
 }

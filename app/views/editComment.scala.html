@@ -1,5 +1,5 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-   comments: List[models.CommentModels.Comment], editCommentId: Int)(implicit user: Principal)
+   comments: Seq[models.CommentModels.Comment], editCommentId: Int)(implicit user: Principal)
 @import views.helpers.Markdown
 
 @templates.main(article.title) {

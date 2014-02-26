@@ -15,6 +15,7 @@ import scala.Some
 import org.joda.time.DateTime
 import models.UserModels.UserModel
 import models.ArticleModels.ArticleDetailsModel
+import security.Result._
 
 
 class CommentControllerSpec extends Specification with Mockito with AfterExample {
@@ -47,7 +48,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
     val commentRecord = new CommentRecord(Some(1), 1, 1, comment, null)
 
     "create a comment from valid data" in {
-      commentsService.insert(articleId, comment) returns commentRecord.successNel
+      commentsService.insert(articleId, comment) returns Authorized(commentRecord)
 
       val page = controller.postNewComment(articleId)(request)
 
@@ -64,20 +65,13 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       there was no(commentsService).insert(articleId, comment)
     }
 
-    "handle service layer failures" in {
-      commentsService.insert(articleId, comment) returns "service failure".failureNel
-
-      val page = controller.postNewComment(articleId)(request)
-
-      status(page) must equalTo(400)
-      contentType(page) must beSome("text/html")
-    }
+    "authorization failure" in pending
   }
 
   "remove comment" should {
 
     "delete requested comment" in {
-      commentsService.removeComment(commentId) returns true
+      commentsService.removeComment(commentId) returns Authorized(()).successNel
 
       val page = controller.removeComment(articleId,commentId)(FakeRequest("DELETE", "/"))
 
@@ -87,7 +81,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
     }
 
     "ignore already deleted comment" in {
-      commentsService.removeComment(commentId) returns false
+      commentsService.removeComment(commentId) returns "Comment not found".failureNel
 
       val page = controller.removeComment(articleId ,commentId)(FakeRequest("DELETE", "/"))
 
@@ -95,6 +89,8 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       contentType(page) must beSome("text/plain")
       there was one(commentsService).removeComment(commentId)
     }
+
+    "authorization failure" in pending
   }
 
   "edit comment page" should {
@@ -126,7 +122,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
   "post comment edit" should {
 
     "update a comment from valid data" in {
-      commentsService.update(commentId, comment) returns true.successNel
+      commentsService.update(commentId, comment) returns Authorized(()).successNel
 
       val page = controller.postCommentEdits(articleId, commentId)(request)
 

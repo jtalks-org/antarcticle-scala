@@ -5,6 +5,8 @@ import services.{ArticlesServiceComponent, CommentsServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import security.Authentication
+import security.Result._
+import models.database.CommentRecord
 import models.ArticleModels.ArticleDetailsModel
 
 /**
@@ -13,6 +15,9 @@ import models.ArticleModels.ArticleDetailsModel
 trait CommentController {
   this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
 
+  /**
+   * Describes binding between Article model object and web-form
+   */
   val commentForm = Form(
     "content" -> nonEmptyText
   )
@@ -21,12 +26,12 @@ trait CommentController {
     commentForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
       comment => {
-        commentsService.insert(articleId, comment).fold(
-          fail = nel => {
-            BadRequest(views.html.templates.formErrors(nel.list))
-          },
-          succ = created => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
-        )
+        commentsService.insert(articleId, comment) match {
+          case Authorized(created) =>
+            Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
+          case NotAuthorized() =>
+            Unauthorized("You are not authorized to create comments")
+        }
       }
     )
   }

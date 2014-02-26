@@ -21,8 +21,9 @@ import conf.Constants._
 import security._
 
 
-class ArticlesServiceSpec extends Specification with NoTimeConversions with Mockito
-with BeforeExample with ValidationMatchers with MockSession {
+class ArticlesServiceSpec extends Specification
+  with NoTimeConversions with Mockito
+  with BeforeExample with ValidationMatchers with MockSession {
 
   object service extends ArticlesServiceComponentImpl
   with ArticlesRepositoryComponent

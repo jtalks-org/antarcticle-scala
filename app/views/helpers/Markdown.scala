@@ -23,7 +23,6 @@ object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
   map.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
   
   override def serialize(node: VerbatimNode, printer: Printer): Unit = {
-    println("SERIALIZE:" + node)
     printer.println().print("<pre><code")
     if (!StringUtils.isEmpty(node.getType)) {
       printAttribute(printer, "class", s"lang-${node.getType}")

@@ -5,11 +5,11 @@
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">
         <div class="tag-search pull-left">
-          <form>
-            <div class="bootstrap-tagsinput" >
+          <form class="form-inline">
+            <div class="form-group bootstrap-tagsinput">
               <input type="text" class="form-control tags-inner-input" id="tags_filter" placeholder="Tags filter">
             </div>
-              <button class="btn btn-sm btn-info tag-search-button">Find</button>
+            <button class="btn btn-sm btn-info tag-search-button">Find</button>
           </form>
         </div>
         @if(user.can(Create, Article)) {

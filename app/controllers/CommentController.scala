@@ -6,7 +6,6 @@ import play.api.data.Form
 import play.api.data.Forms._
 import security.Authentication
 import security.Result._
-import models.database.CommentRecord
 import models.ArticleModels.ArticleDetailsModel
 import scalaz._
 import Scalaz._
@@ -44,11 +43,9 @@ trait CommentController {
     def refreshPage = Ok(routes.ArticleController.viewArticle(articleId).absoluteURL())
     commentsService.removeComment(commentId).fold(
       fail = _ => refreshPage,
-      succ = _ match {
-        case NotAuthorized() =>
-          Unauthorized("You are not authorized to remove this comment")
-        case Authorized(_) =>
-          Ok(routes.ArticleController.viewArticle(articleId).absoluteURL())
+      succ = {
+        case NotAuthorized() => Unauthorized("You are not authorized to remove this comment")
+        case Authorized(_) => refreshPage
       }
     )
   }
@@ -66,11 +63,9 @@ trait CommentController {
     def updateComment(content: String) = {
       commentsService.update(commentId, content).fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-        succ = _ match {
-          case NotAuthorized() =>
-            Unauthorized("You are not authorized to edit this comment")
-          case Authorized(_) =>
-            Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
+        succ = {
+          case NotAuthorized() => Unauthorized("You are not authorized to edit this comment")
+          case Authorized(_) => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
         }
       )
     }

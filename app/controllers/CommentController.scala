@@ -8,6 +8,8 @@ import security.Authentication
 import security.Result._
 import models.database.CommentRecord
 import models.ArticleModels.ArticleDetailsModel
+import scalaz._
+import Scalaz._
 
 /**
  * Handles all web operations related to article comments
@@ -23,22 +25,32 @@ trait CommentController {
   )
 
   def postNewComment(articleId: Int) = Action { implicit request =>
+    def insertComment(comment: String) = {
+      commentsService.insert(articleId, comment) match {
+        case Authorized(created) =>
+          Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
+        case NotAuthorized() =>
+          Unauthorized("You are not authorized to create comments")
+      }
+    }
+
     commentForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
-      comment => {
-        commentsService.insert(articleId, comment) match {
-          case Authorized(created) =>
-            Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + created.id.get)
-          case NotAuthorized() =>
-            Unauthorized("You are not authorized to create comments")
-        }
-      }
+      comment => insertComment(comment)
     )
   }
 
   def removeComment(articleId: Int, commentId: Int) = Action { implicit request =>
-    commentsService.removeComment(commentId)
-    Ok(routes.ArticleController.viewArticle(articleId).absoluteURL())
+    def refreshPage = Ok(routes.ArticleController.viewArticle(articleId).absoluteURL())
+    commentsService.removeComment(commentId).fold(
+      fail = _ => refreshPage,
+      succ = _ match {
+        case NotAuthorized() =>
+          Unauthorized("You are not authorized to remove this comment")
+        case Authorized(_) =>
+          Ok(routes.ArticleController.viewArticle(articleId).absoluteURL())
+      }
+    )
   }
 
   def editComment(articleId: Int, commentId: Int) = Action { implicit request =>
@@ -51,16 +63,21 @@ trait CommentController {
   }
 
   def postCommentEdits(articleId: Int, commentId: Int) = Action { implicit request =>
+    def updateComment(content: String) = {
+      commentsService.update(commentId, content).fold(
+        fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
+        succ = _ match {
+          case NotAuthorized() =>
+            Unauthorized("You are not authorized to edit this comment")
+          case Authorized(_) =>
+            Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
+        }
+      )
+    }
+
     commentForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.templates.formErrors(List("Comment should be non-empty"))),
-      content => {
-        commentsService.update(commentId, content).fold(
-          fail = nel => {
-            BadRequest(views.html.templates.formErrors(nel.list))
-          },
-          succ = edited => Ok(routes.ArticleController.viewArticle(articleId).absoluteURL() + "#" + commentId)
-        )
-      }
+      content => updateComment(content)
     )
   }
 }

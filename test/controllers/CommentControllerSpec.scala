@@ -65,7 +65,13 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       there was no(commentsService).insert(articleId, comment)
     }
 
-    "authorization failure" in pending
+    "authorization failure" in {
+      commentsService.insert(articleId, comment) returns NotAuthorized()
+
+      val page = controller.postNewComment(articleId)(request)
+
+      status(page) must equalTo(401)
+    }
   }
 
   "remove comment" should {
@@ -90,7 +96,13 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       there was one(commentsService).removeComment(commentId)
     }
 
-    "authorization failure" in pending
+    "authorization failure" in {
+      commentsService.removeComment(commentId) returns NotAuthorized().successNel
+
+      val page = controller.removeComment(articleId,commentId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(401)
+    }
   }
 
   "edit comment page" should {
@@ -146,6 +158,14 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
 
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
+    }
+
+    "authorization failure" in {
+      commentsService.update(commentId, comment) returns NotAuthorized().successNel
+
+      val page = controller.postCommentEdits(articleId, commentId)(request)
+
+      status(page) must equalTo(401)
     }
   }
 }

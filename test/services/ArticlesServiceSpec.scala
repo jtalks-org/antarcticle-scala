@@ -19,6 +19,7 @@ import util.ScalazValidationTestUtils._
 import org.specs2.scalaz.ValidationMatchers
 import conf.Constants._
 import security._
+import security.Result._
 
 
 class ArticlesServiceSpec extends Specification
@@ -147,39 +148,40 @@ class ArticlesServiceSpec extends Specification
   }
 
   "creating new article" should {
-    val article = Article(None, "", "", List())
     implicit def getCurrentUser = {
-      val usr = mock[AuthenticatedUser]
-      usr.userId returns 1
-      usr.username returns "user"
-      usr.can(Permissions.Create, Entities.Article) returns true
+      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(true)
+        .when(usr)
+        .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Article))
       usr
     }
+    val article = Article(None, "", "", List())
     val userRecord = UserRecord(1.some, "user").some
 
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>
-          val record = ArticleRecord(None, "", "", dt, dt, "", 1)
+          val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
           tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
           usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
-          articlesService.createArticle(article)
+          articlesService.insert(article)
 
           there was one(articlesRepository).insert(record)(session)
       }
     }
 
-    "return model" in {
+    "return model with assigned id" in {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
-      val model: ArticleDetailsModel = articlesService.createArticle(article).get
-
-      model.id must_== 1
+      articlesService.insert(article) match {
+        case Authorized(Success(model)) => model.id must_== 1
+        case _ => ko
+      }
     }
 
     "create tags" in {
@@ -190,7 +192,7 @@ class ArticlesServiceSpec extends Specification
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns tags.success
 
-      articlesService.createArticle(article.copy(tags = tags))
+      articlesService.insert(article.copy(tags = tags))
 
       there was one(tagsService).createTagsForArticle(articleId, tags)(session)
     }
@@ -199,7 +201,7 @@ class ArticlesServiceSpec extends Specification
       articleValidator.validate(any[Article]) returns "".failNel
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
 
-      articlesService.createArticle(article)
+      articlesService.insert(article)
 
       there was noMoreCallsTo(articlesRepository, tagsService)
     }
@@ -208,7 +210,7 @@ class ArticlesServiceSpec extends Specification
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns "".failNel
 
-      articlesService.createArticle(article) must beFailing
+      articlesService.insert(article)
 
       there was one(session).rollback()
     }
@@ -219,16 +221,20 @@ class ArticlesServiceSpec extends Specification
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
-      val model: ArticleDetailsModel = articlesService.createArticle(article).get
-
-      model.author.id must_== getCurrentUser.userId
+      articlesService.insert(article) match {
+        case Authorized(Success(model)) => model.author.id must_== getCurrentUser.userId
+        case _ => ko
+      }
     }
 
-    "not create article when user is not authorized to do it" in {
+    "fail when user is not authorized to do it" in {
       val currentUser = mock[AuthenticatedUser]
       currentUser.can(Permissions.Create, Entities.Article) returns false
 
-      articlesService.createArticle(article)(AnonymousPrincipal) must beFailing
+      articlesService.insert(article)(AnonymousPrincipal) must beLike {
+        case NotAuthorized() => ok
+        case _ => ko
+      }
     }
   }
 

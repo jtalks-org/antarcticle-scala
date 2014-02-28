@@ -11,6 +11,7 @@ import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
 import security.AnonymousPrincipal
+import security.Result._
 import models.Page
 import scala.Some
 import models.UserModels.UserModel
@@ -99,13 +100,13 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     val article = controller.articleForm.bindFromRequest()(validRequest).get
 
     "save new article if data is valid" in {
-      articlesService.createArticle(article) returns articleDetailsModel.successNel
+      articlesService.insert(article) returns Authorized(articleDetailsModel.successNel)
 
       val page = controller.postNewArticle(validRequest)
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/plain")
-      there was one(articlesService).createArticle(article)
+      there was one(articlesService).insert(article)
     }
 
     "report an error on bad request" in {
@@ -116,7 +117,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     }
 
     "report error list on service operation error" in {
-      articlesService.createArticle(article) returns "bad request".failureNel
+      articlesService.insert(article) returns Authorized("bad request".failureNel)
 
       val page = controller.postNewArticle(validRequest)
 

@@ -7,6 +7,7 @@ import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
 import views.html
 import security.Authentication
+import security.Result._
 
 /**
  * Serves web-based operations on articles
@@ -46,12 +47,17 @@ trait ArticleController {
       articleForm.bindFromRequest.fold(
         formWithErrors => BadRequest(views.html.templates.formErrors(List("Invalid request"))),
         article => {
-          articlesService.createArticle(article).fold(
-            fail = nel => {
-              BadRequest(views.html.templates.formErrors(nel.list))
-            },
-            succ = created => Ok(routes.ArticleController.viewArticle(created.id).absoluteURL())
-          )
+          articlesService.insert(article) match {
+            case Authorized(result) =>
+              result.fold(
+                fail = nel => {
+                  BadRequest(views.html.templates.formErrors(nel.list))
+                },
+                succ = created => Ok(routes.ArticleController.viewArticle(created.id).absoluteURL())
+              )
+            case NotAuthorized() =>
+              Unauthorized("Not authorized to create articles")
+          }
         }
       )
   }

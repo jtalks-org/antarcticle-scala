@@ -17,6 +17,7 @@ import security.Principal
 import security.Entities
 import security.Permissions._
 import security.AuthenticatedUser
+import security.Result._
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
@@ -25,7 +26,7 @@ trait ArticlesServiceComponent {
     def get(id: Int): Option[ArticleDetailsModel]
     def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
-    def createArticle(article: Article)(implicit principal: Principal): ValidationNel[String, ArticleDetailsModel]
+    def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
     def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, Article]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
   }
@@ -40,12 +41,14 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
   class ArticlesServiceImpl extends ArticlesService {
 
-    def createArticle(article: Article)(implicit principal: Principal) = principal match {
-      case currentUser: AuthenticatedUser if currentUser.can(Create, Entities.Article) =>
+    def insert(article: Article)(implicit principal: Principal) =
+      principal.doAuthorizedOrFail(Create, Entities.Article) { () =>
         withTransaction { implicit session =>
           def createRecord = {
             val creationTime = DateTime.now
-            articleToInsert(article, creationTime, currentUser.userId)
+            //TODO:
+            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+            articleToInsert(article, creationTime, currentUserId)
           }
 
           val result = for {
@@ -53,7 +56,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             newRecord = createRecord
             id = articlesRepository.insert(newRecord)
             tags <- tagsService.createTagsForArticle(id, article.tags)
-            user = usersRepository.getByUsername(currentUser.username).get
+            user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
           } yield recordToDetailsModel(newRecord.copy(id = Some(id)), user, tags)
 
           if (result.isFailure) {
@@ -64,12 +67,9 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
           result
         }
+      }
 
-      case _ => "Authorization failure".failureNel
-    }
-
-
-    def updateArticle(article: Article)(implicit principal: Principal) =  withTransaction {
+    def updateArticle(article: Article)(implicit principal: Principal) = withTransaction {
       implicit session =>
         //incoming article may have no user information set
         // todo: handle non-existent id properly

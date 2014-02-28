@@ -3,7 +3,7 @@ package views.helpers
 import org.pegdown._
 import org.pegdown.Extensions._
 import org.pegdown.ast._
-import org.apache.commons.lang3.StringEscapeUtils
+import org.apache.commons.lang3.{StringUtils, StringEscapeUtils}
 
 /**
  * <p>Extends PegDown serializer to archive the following:
@@ -23,8 +23,22 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
   override def visit(node : InlineHtmlNode ) = printer.printEncoded(node.getText)
 
   override def visit(node: CodeNode) = {
-    printer.println().print("<pre class='prettyprint linenums'><code>")
-    printer.printEncoded(node.getText)
+    printer.println().print(s"<pre class='prettyprint linenums'><code>${node.getText}</code></pre>")
+  }
+
+  override def visit(node: VerbatimNode) = {
+    printer.println().print("<pre class='prettyprint linenums'><code")
+    if (!StringUtils.isEmpty(node.getType)) {
+      printer.print(s" class='lang-${node.getType}'")
+    }
+    printer.print(">")
+    var text = node.getText
+    // print HTML breaks for all initial newlines
+    while (text.charAt(0) == '\n') {
+      printer.print("<br/>")
+      text = text.substring(1)
+    }
+    printer.printEncoded(text)
     printer.print("</code></pre>")
   }
 }
@@ -32,7 +46,7 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
 object Markdown {
 
   def toHtml(markdown: String): String = {
-    // use all extensions
+    // use all extensions, except html filtering
     val processor = new PegDownProcessor(ALL)
     val astRoot = processor.parseMarkdown(processor.prepareSource(markdown.toCharArray))
     new EscapingToHtmlSerializer().toHtml(astRoot)

@@ -27,8 +27,6 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
     printer.printEncoded(node.getText)
     printer.print("</code></pre>")
   }
-
-  private def escape(text:String) = StringEscapeUtils.escapeHtml4(text)
 }
 
 object Markdown {

@@ -171,7 +171,6 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       val page = controller.postArticleEdits()(badRequest)
 
       status(page) must equalTo(400)
-      contentType(page) must beSome("text/html")
     }
 
     "report error list on service operation error" in {

@@ -71,7 +71,7 @@ trait ArticleController {
 
   def postArticleEdits() = Action { implicit request =>
       articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.editArticle(formWithErrors)),
+        formWithErrors => BadRequest,
         article => {
           articlesService.updateArticle(article).fold(
             fail = nel => {

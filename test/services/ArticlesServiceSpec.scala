@@ -14,7 +14,7 @@ import models.Page
 import org.specs2.specification.BeforeExample
 import scalaz._
 import Scalaz._
-import validators.Validator
+import validators.{TagValidator, Validator}
 import util.ScalazValidationTestUtils._
 import org.specs2.scalaz.ValidationMatchers
 import conf.Constants._
@@ -34,6 +34,7 @@ class ArticlesServiceSpec extends Specification
     override val articleValidator = mock[Validator[Article]]
     override val usersRepository = mock[UsersRepository]
     override val tagsRepository = mock[TagsRepository]
+    val tagValidator: TagValidator = mock[TagValidator]
   }
 
   import service._

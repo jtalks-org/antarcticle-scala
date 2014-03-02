@@ -1,15 +1,15 @@
-This is intended as a quick reference and showcase. For more complete info, see [John Gruber's original spec](http://daringfireball.net/projects/markdown/) and the [Github-flavored Markdown info page](http://github.github.com/github-flavored-markdown/).
+This docuemnt is intended as a quick reference and showcase on how to use Markdown language to create Antracticle articles and comments. For more complete info, see [John Gruber's original spec](http://daringfireball.net/projects/markdown/) and the [Github-flavored Markdown info page](http://github.github.com/github-flavored-markdown/).
 
 ##### Table of Contents
-[Headers](#headers)
-[Emphasis](#emphasis)
-[Lists](#lists)
-[Links](#links)
-[Code and Syntax Highlighting](#code)
-[Tables](#tables)
-[Blockquotes](#blockquotes)
-[Horizontal Rule](#hr)
-[Line Breaks](#lines)
+* [Headers](#headers)
+* [Emphasis](#emphasis)
+* [Lists](#lists)
+* [Links](#links)
+* [Code and Syntax Highlighting](#code)
+* [Tables](#tables)
+* [Blockquotes](#blockquotes)
+* [Horizontal Rule](#hr)
+* [Line Breaks](#lines)
 
 <a name="headers"/>
 ## Headers
@@ -102,30 +102,21 @@ Strikethrough uses two tildes. ~~Scratch this.~~
 <a name="links"/>
 ## Links
 
-There are the ways to create links:
+There are two ways to create links. Inline links can contain some explanatory text to substitute the URL. The other way is to simply use bare URL address:
 
 ```no-highlight
 [I'm an inline-style link](https://www.google.com)
-
-[I'm a reference-style link][Arbitrary case-insensitive reference text]
-
-[You can use numbers for reference-style link definitions][1]
-
-Or leave it empty and use the [link text itself]
-
-Some text to show that the reference links can follow later.
-
-[arbitrary case-insensitive reference text]: https://www.mozilla.org
-[1]: http://slashdot.org
-[link text itself]: http://www.reddit.com
+https://www.mozilla.org
 ```
 
 [I'm an inline-style link](https://www.google.com)
 
+https://www.mozilla.org
+
 <a name="code"/>
 ## Code and Syntax Highlighting
 
-Code blocks are part of the Markdown spec, but syntax highlighting isn't. However, many renderers -- like Github's -- support syntax highlighting. To see the complete list, and how to write the language names, see the [highlight.js demo page](http://softwaremaniacs.org/media/soft/highlight/test.html).
+Code blocks are part of the Markdown spec, but syntax highlighting isn't. However, Antarcticle render supports syntax highlighting for the following languages: C and friends, Java, Python, Bash, SQL, HTML, XML, CSS, Javascript, Makefiles, and Rust. It works passably on Ruby, PHP, VB, and Awk and a decent subset of Perl and Ruby, but, because of commenting conventions, but doesn't work on Smalltalk. Some examples on how to use it:
 
 ```no-highlight
 Inline `code` has `back-ticks around` it.
@@ -135,22 +126,22 @@ Inline `code` has `back-ticks around` it.
 
 Blocks of code are either fenced by lines with three back-ticks <code>```</code>, or are indented with four spaces. I recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.
 
-```no-highlight
- ```javascript
- var s = "JavaScript syntax highlighting";
- alert(s);
- ```
 
- ```python
- s = "Python syntax highlighting"
- print s
- ```
+    ```javascript
+    var s = "JavaScript syntax highlighting";
+    alert(s);
+    ```
 
- ```
- No language indicated, so no syntax highlighting.
- But let's throw in a <b>tag</b>.
- ```
-```
+    ```python
+    s = "Python syntax highlighting"
+    print s
+    ```
+
+    ```
+    No language indicated, so parser will try to guess the language.
+    Let's throw in a <b>tag</b>.
+    ```
+result in
 
 ```javascript
 var s = "JavaScript syntax highlighting";
@@ -164,6 +155,7 @@ print s
 
 ```
 No language indicated, so parser will try to guess the language.
+Let's throw in a <b>tag</b>.
 ```
 
 <a name="tables"/>

@@ -17,8 +17,9 @@ trait TagsRepositoryComponent {
     def insertAll(names: Seq[String])(implicit session: JdbcBackend#Session): Seq[Int]
 
     def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session)
-  }
 
+    def removeArticleTags(articleId: Int)(implicit session: JdbcBackend#Session)
+  }
 }
 
 trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
@@ -36,7 +37,7 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
       tags.filter(_.name === name).firstOption.map(r => Tag(r._1.get, r._2))
     }
 
-    def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
+    override def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       import models.database.Tag
       if (names.isEmpty) {
         Vector[Tag]()
@@ -46,12 +47,16 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
       }
     }
 
-    def insertAll(names: Seq[String])(implicit session: JdbcBackend#Session) = {
+    override def insertAll(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       tags.map(t => t.name).returning(tags.map(_.id)).insertAll(names: _*)
     }
 
-    def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) = {
+    override def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) = {
       articlesTags.insertAll(articleTags: _*)
+    }
+
+    override def removeArticleTags(articleId: Int)(implicit session: JdbcBackend#Session): Unit = {
+      articlesTags.filter(_.articleId === articleId).delete
     }
   }
 

@@ -11,10 +11,11 @@ trait CommentsRepositoryComponent {
   val commentsRepository: CommentsRepository
 
   trait CommentsRepository {
-    def getByArticle(id: Int)(implicit session: JdbcBackend#Session): List[(CommentRecord, UserRecord)]
+    def getByArticle(id: Int)(implicit session: JdbcBackend#Session): Seq[(CommentRecord, UserRecord)]
     def insert(comment: CommentRecord)(implicit session: JdbcBackend#Session): Int
     def update(id: Int, comment: CommentToUpdate)(implicit session: JdbcBackend#Session): Boolean
     def delete(id: Int)(implicit session: JdbcBackend#Session): Boolean
+    def get(id: Int)(implicit session: JdbcBackend#Session): Option[CommentRecord]
   }
 }
 
@@ -57,6 +58,10 @@ trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
 
     def delete(id: Int)(implicit session: JdbcBackend#Session) = {
       comments.byId(id).delete > 0
+    }
+
+    def get(id: Int)(implicit session: JdbcBackend#Session) = {
+       comments.byId(id).firstOption
     }
   }
 

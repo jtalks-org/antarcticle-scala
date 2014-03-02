@@ -1,4 +1,5 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)
+@import views.helpers.Markdown
 <section class="articles-list">
   @for(article <- page.list) {
     <article id="@article.id" class="entry">
@@ -8,7 +9,7 @@
         <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
         </header>
         <div class="body">
-          <div class="content">@article.description</div>
+          <div class="content">@Html(Markdown.toHtml(article.description))</div>
           <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
           <div class="clearfix"></div>
         </div>

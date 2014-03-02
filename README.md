@@ -5,17 +5,32 @@ Antarcticle is an article engine for [JTalks](http://jtalks.org/) community proj
 Please report all the bugs and feature requests [here](http://jira.jtalks.org/browse/ANTARCTICLE).
 
 ##Installation
-At the moment the only way to get Antarticle executable is to build it from the source code:
 
-1. Clone this repository. You will probably need to install GIT for that.
-2. Install [SBT 0.13+](http://www.scala-sbt.org/0.13.0/docs/Getting-Started/Setup).
-3. Navigate to root project folder and execute the following to create an application deployment archive (WAR):
-```
-     sbt war
-``` 
+ The following two deployment alternatives are supported:
+ 
+### Native Play Framework deployment
 
-4. Once you have the WAR file (**/target/antarcticle-scala-X.X.war**) assembled proceed to **configuration** section to prepare the application environment.
-5. When done with configuration deploy WAR file to the servlet container of your choice (e.g. Apache Tomcat) and enjoy application running.   
+1. Clone this repository to get the latest source code
+2. Install [Java 1.7](http://www.oracle.com/technetwork/java/javase/downloads/java-se-jre-7-download-432155.html), [Scala 2.10](http://www.scala-lang.org/download/2.10.3.html) and [Play Framework 2.2](http://downloads.typesafe.com/play/2.2.0/play-2.2.0.zip)
+3. Navigate to clonned source code root and try ```play``` console command. It should open Play console if evething has been installed in a correct way
+4. Perform application configuration via **conf/application.conf** as described in **Configuration** section below
+5. Excecute ```play run <port>``` command to launch an application
+
+### Traditional war-file deployment
+
+War file may be deployed to any servlet container or application server on your choice (e.g. Apache Tomcat). You can download an assemnled war from our [repository](http://repo.jtalks.org/content/repositories/deployment-pipeline/deployment-pipeline/antarcticle/) (usually you'd want the latest version) or build one yourself from the source code.
+
+####Building war file from a source code (optional)
+
+1. Clone this repository to get the latest source code
+2. Install [SBT 0.13](http://www.scala-sbt.org/0.13.0/docs/Getting-Started/Setup)
+3. Navigate to root project folder and execute the following to create an application deployment archive: ```sbt war``` 
+4. Find assembled war at **/target/antarcticle-scala-X.X.war**
+
+####Installing the war file
+
+1. First, proceed to **configuration** section to prepare the application environment. For war-based deployment model application configuration should be performed via JNDI. Consult your server documentation on how to set JNDI properties fro an application. You can find Tomcat configuration below in Examples section.
+2. When done with configuration deploy WAR file to the servlet container and enjoy application running   
 
 ##Configuration
 
@@ -45,9 +60,9 @@ It's also possible to perform a data migration from an [old Antarticle version](
 
 ###Authentication
 
-Authentication is performed via Poulpe instance or using fake internal authenticator. The later one is mostly intended for testing purposes and should not be be used in production.
+Authentication is performed via [JTalks Poulpe](https://github.com/jtalks-org/poulpe) instance which is an authentication service or using fake internal authenticator. The latter is mostly intended for testing purposes and should not be be used in production.
 
-To setup antarcticle for using Poulpe ensure the following properties are set:
+To setup antarcticle to use Poulpe ensure the following properties are set:
 
 
     security.authentication.useFake=false
@@ -57,15 +72,47 @@ To configure fake authentication manager (contains only admin/admin user) set pr
 
     security.authentication.useFake=true
 
+###Examples
+
+The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 in **context.xml** configuration file:
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <Environment name="db.default.driver" 
+         value="com.mysql.jdbc.Driver"
+         type="java.lang.String"/>
+    <Environment name="db.default.url" 
+         value="jdbc:mysql://localhost:3306/antarcticle?characterEncoding=UTF-8"
+         type="java.lang.String"/>
+    <Environment name="db.default.user" 
+         value="root"
+         type="java.lang.String"/>
+    <Environment name="db.default.password" 
+         value="root"
+         type="java.lang.String"/>
+    <Environment name="security.authentication.useFake" 
+         value="false"
+         type="java.lang.Boolean"/>
+    <Environment name="security.authentication.poulpe.url" 
+         value="http://mydomain.com/poulpeContext"
+         type="java.lang.String"/>    
+</Context>
+```
 ##Development
+
+It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).
+
 ###Necessary software
 - IDE or text editor on your choice
 - GIT client
-- SBT 0.13+
-- Play Framework 2.0+ 
+- JDK 1.7
+- Scala 2.10
+- SBT 0.13
+- Play Framework 2.2 
 
 ###Useful links
 - Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)
-- Continious Integration server : [http://ci.jtalks.org/view/Antarcticle](http://ci.jtalks.org/view/Antarcticle/)  
+- Continuous Integration server : [http://ci.jtalks.org/view/Antarcticle](http://ci.jtalks.org/view/Antarcticle/)  
 - Test application instance: [http://qa.jtalks.org/antarcticle](http://qa.jtalks.org/antarcticle/)
-- Staging application instance: [http://preprod.jtalks.org/antarcticle](http://preprod.jtalks.org/antarcticle)

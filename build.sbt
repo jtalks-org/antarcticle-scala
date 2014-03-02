@@ -14,9 +14,10 @@ libraryDependencies ++= Seq(
   // 1.3.174 has problem fixed in trunk:
   // https://code.google.com/p/h2database/source/detail?r=5363
   "com.h2database" % "h2" % "1.3.173",
-  "org.mockito" % "mockito-all" % "1.9.0",
+  "org.mockito" % "mockito-all" % "1.9.5",
   // markdown support
   "org.pegdown" % "pegdown" % "1.4.2",
+  // scalaz magic
   "org.scalaz" %% "scalaz-core" % "7.0.5",
   "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
   // production database

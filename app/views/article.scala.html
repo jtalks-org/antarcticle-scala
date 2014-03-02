@@ -1,5 +1,5 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-   comments: List[models.CommentModels.Comment])(implicit user: Principal)
+   comments: Seq[models.CommentModels.Comment])(implicit user: Principal)
 @import views.helpers.Markdown
 
 @templates.main(article.title) {
@@ -10,7 +10,7 @@
           <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
             <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
           </a>
-          <a class="btn btn-sm btn-danger" id="delete-article" href="@routes.ArticleController.removeArticle(article.id)">
+          <a class="btn btn-sm btn-danger delete-link" href="@routes.ArticleController.removeArticle(article.id)">
             <i class="glyphicon glyphicon-remove icon-white"></i> Delete
           </a>
         </div>
@@ -19,11 +19,11 @@
   }
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
-      <article id="@article.id" class="entry">
+      <article class="entry">
         <div class="main-content">
           <header>
             @templates.prettyDate(article.createdAt)
-            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+            <h2>@article.title</h2>
           </header>
           <div class="body">
             <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
@@ -55,28 +55,43 @@
             <article class="clearfix comment comment-other">
               <div class="comment-bubble comment-bubble-other">
                 <header>
-                  <i class="glyphicon glyphicon-user"></i>
+                  <span class="glyphicon glyphicon-user"></span>
                   <a href="@routes.UserController.viewProfile(comment.author.username)">@comment.author.username</a>
-                  <time class="pull-right">
-                    <i class="glyphicon glyphicon-calendar"></i> @comment.createdAt
+                  <time class="pull-right" datetime="@comment.createdAt.format("YYYY-MM-dd hh:mm")">
+                    <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt.format("dd-MMM-YYYY hh:mm")
                   </time>
                 </header>
                 <div>@Html(Markdown.toHtml(comment.content))</div>
+              </div>
+              <div class="toolb">
+              <a id="@comment.id" class="btn btn-default btn-xs permalink" title="Get a permanent link to this comment"
+                 href="@{"#" + comment.id}">
+                  <span class="glyphicon glyphicon-link"></span>
+              </a>
+              @if(user.can(Manage, comment)) {
+                <a class="btn btn-default btn-xs edit-comment" title="Edit comment"
+                   href="@{routes.CommentController.editComment(article.id, comment.id) + "#" + comment.id}">
+                  <span class="glyphicon glyphicon-pencil" ></span>
+                </a>
+                <a class="btn btn-default btn-xs delete-link" title="Remove comment completely"
+                   href="@routes.CommentController.removeComment(article.id, comment.id)">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </a>
+              }
               </div>
             </article>
           }
         }
         @if(user.can(Create, Comment)) {
-          <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment" method="post">
+          <form class="clearfix comment-bubble comment-bubble-other default-form" action="@routes.CommentController.postNewComment(article.id)" method="post">
             <div class="form-group">
-              <input name="articleId" type="hidden" value="@article.id"/>
-              <i class="glyphicon glyphicon-info-sign"></i>
-              <label class="editor-hint">
-                Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
-                here</a>.
-              </label>
               <textarea name="content" class="form-control" cols="40" placeholder="Enter your comment here ..." rows="10"></textarea>
             </div>
+            <i class="glyphicon glyphicon-info-sign"></i>
+            <label class="editor-hint">
+              Editor uses Markdown markup language. You can read reference <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">
+              here</a>.
+            </label>
             <input id="comment_submit" class="btn btn-primary pull-right" type="submit" value="Post" />
           </form>
         }

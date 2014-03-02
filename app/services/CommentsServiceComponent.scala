@@ -4,20 +4,25 @@ import repositories.CommentsRepositoryComponent
 import models.database._
 import org.joda.time.DateTime
 import utils.Implicits._
+import scalaz._
+import Scalaz._
 import models.CommentModels.Comment
 import models.UserModels.UserModel
+import security.{Entities, AuthenticatedUser, Principal}
+import security.Permissions._
+import security.Result._
 
 /**
- *
+ *  Performs transactional operations upon articles' comments
  */
 trait CommentsServiceComponent {
   val commentsService: CommentsService
 
   trait CommentsService {
-    def getByArticle(id: Int): List[Comment]
-    def insert(articleId: Int, content : String): CommentRecord
-    def update(id: Int, comment: CommentToUpdate): Boolean
-    def removeComment(id: Int): Boolean
+    def getByArticle(id: Int): Seq[Comment]
+    def insert(articleId: Int, content: String)(implicit principal: Principal): AuthorizationResult[CommentRecord]
+    def update(id: Int, content: String)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
+    def removeComment(id: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
   }
 }
 
@@ -32,21 +37,40 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
       commentsRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
-    // todo: real user
-    def insert(articleId: Int, content : String) = withTransaction { implicit session =>
-        val userId = 1
-        val toInsert = CommentRecord(None, userId, articleId, content, DateTime.now)
-        val id = commentsRepository.insert(toInsert)
-        toInsert.copy(id = Some(id))
+    def insert(articleId: Int, content: String)(implicit principal: Principal) =
+      principal.doAuthorizedOrFail(Create, Entities.Comment) { () =>
+        withTransaction { implicit session =>
+          //TODO: avoid explicit cast. pass AuthenticatedUser as function param?
+          val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+          val toInsert = CommentRecord(None, currentUserId, articleId, content, DateTime.now)
+          val id = commentsRepository.insert(toInsert)
+          toInsert.copy(id = Some(id))
+        }
+      }
+
+    def update(id: Int, content: String)(implicit principal: Principal) = withTransaction { implicit session =>
+      commentsRepository.get(id) match {
+        case Some(comment) =>
+          val toUpdate = CommentToUpdate(content, DateTime.now)
+          principal.doAuthorizedOrFail(Update, comment){ () =>
+            commentsRepository.update(id, toUpdate)
+            ()
+          }.successNel
+        case None => "Comment not found".failureNel
+      }
     }
 
-    def update(id: Int, comment: CommentToUpdate) = withTransaction { implicit session =>
-      commentsRepository.update(id, comment)
+    def removeComment(id: Int)(implicit principal: Principal) = withTransaction { implicit session =>
+      commentsRepository.get(id) match {
+        case Some(comment) =>
+          principal.doAuthorizedOrFail(Delete, comment){ () =>
+            commentsRepository.delete(id)
+            ()
+          }.successNel
+        case None => "Comment not found".failureNel
+      }
     }
 
-    def removeComment(id: Int) = withTransaction { implicit session =>
-      commentsRepository.delete(id)
-    }
 
     //TODO: remove UserRecord to UserModel duplication with article service
     private def toComment(record: CommentRecord, user: UserRecord) = {

@@ -7,7 +7,6 @@ import models.database._
 import conf.ConfigurationComponent
 import play.api.mvc.Controller
 import validators.{ArticleValidator, TagValidator}
-import scala.slick.jdbc.JdbcBackend.Session
 
 object Application
   extends ConfigurationComponent
@@ -37,11 +36,12 @@ trait Controllers
 trait Services
   extends ArticlesServiceComponentImpl
   with TagsServiceComponentImpl
-  with CommentsServiceComponentImpl {
+  with CommentsServiceComponentImpl
+  with UsersServiceComponentImpl{
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator
-  override val articleValidator = new ArticleValidator
+  override val articleValidator = new ArticleValidator(tagValidator)
 }
 
 trait Repositories

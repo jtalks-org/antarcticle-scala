@@ -1,11 +1,16 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], username: String)(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord)(implicit user: Principal)
 @templates.main("My articles") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="user-profile clearfix">
         <header class="user-profile-header clearfix">
           <div class="pull-left">
-            <h2 class="username"><i class="glyphicon glyphicon-user"></i>@username</h2>
+            <h2 class="username"><i class="glyphicon glyphicon-user"></i>
+                @userDetails.username
+                @if(!userDetails.firstName.isEmpty || !userDetails.lastName.isEmpty){
+                    (@userDetails.firstName @userDetails.lastName)
+                }
+            </h2>
           </div>
           <div class="pull-right">
             <ul class="user-stats">
@@ -13,11 +18,16 @@
             </ul>
           </div>
         </header>
-        @templates.bareArticleList(page, routes.UserController.viewProfile(username, _))
-        <div class="centralized-inputs">
-        @if(page.totalPages == 0) {
-          <h3>User has no articles.</h3>
-        }
+        @templates.bareArticleList(page, routes.UserController.viewProfile(userDetails.username, _))
+        <div class="centralized-inputs clearfix">
+          @if(page.totalPages == 0) {
+            <h3>User has no articles.</h3>
+          }
+          @if(user.can(Create, Article)) {
+            <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
+              <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+            </a>
+          }
         </div>
       </div>
     </div>

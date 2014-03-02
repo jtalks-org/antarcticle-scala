@@ -12,7 +12,10 @@
 
 class FormHandler
 
-  defaultOnSuccess: (data) => window.location = data
+  defaultOnSuccess: (data) =>
+    window.location.href = data
+    if (window.location.href.split('#')[0] == data.split('#')[0])
+      window.location.reload(true)
 
   defaultOnFail: (data) => this.form.prepend(data.responseText)
 
@@ -27,3 +30,5 @@ class FormHandler
     )
 
 new FormHandler('.default-form')
+tagSearchHandler = new FormHandler('.tags-search-form')
+tagSearchHandler.onFail = ((data) => bootbox.alert(data.responseText))

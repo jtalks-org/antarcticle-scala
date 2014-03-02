@@ -10,7 +10,9 @@ trait TagsServiceComponent {
   val tagsService: TagsService
 
   trait TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]): ValidationNel[String, Seq[String]]
+    def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session): ValidationNel[String, Seq[String]]
+
+    def updateTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session): ValidationNel[String, Seq[String]]
   }
 }
 
@@ -21,23 +23,24 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
   val tagValidator: Validator[String]
 
   class TagsServiceImpl extends TagsService {
-    def createTagsForArticle(articleId: Int, tags: Seq[String]) = withTransaction { implicit session =>
-      val trimmedTags = tags.map(_.trim)
 
+    override def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session) = {
+      val trimmedTags = tags.map(_.trim)
       validateTags(trimmedTags).map { _ =>
         val existingTags = tagsRepository.getByNames(trimmedTags)
         val existingTagsNames = existingTags.map(_.name)
-
         val newTags = trimmedTags.filterNot(existingTagsNames.contains)
         val newTagsIds = tagsRepository.insertAll(newTags)
-
         val allTagsId = newTagsIds ++ existingTags.map(_.id)
-
         val articleTags = allTagsId.map((articleId, _))
-
         tagsRepository.insertArticleTags(articleTags)
         trimmedTags
       }
+    }
+
+    override def updateTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session) = {
+      tagsRepository.removeArticleTags(articleId)
+      createTagsForArticle(articleId, tags)
     }
 
     def validateTags(tags: Seq[String]) = {

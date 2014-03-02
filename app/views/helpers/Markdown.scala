@@ -1,32 +1,35 @@
 package views.helpers
 
-import java.io.{StringReader, StringWriter}
-import org.pegdown.PegDownProcessor
+import org.pegdown._
 import org.pegdown.Extensions._
-import org.pegdown.VerbatimSerializer
-import org.pegdown.LinkRenderer
-import org.pegdown.Printer
-import org.parboiled.common.StringUtils
-import org.pegdown.ast.VerbatimNode
-import org.pegdown.ToHtmlSerializer
+import org.pegdown.ast._
+import org.apache.commons.lang3.{StringUtils, StringEscapeUtils}
 
 /**
- * Adds class with specified in fenced code block language for
- * extended syntax highlighting using google prettify.
+ * <p>Extends PegDown serializer to archive the following:
  *
- * Example:
- * Should produce: <pre><code class="lang-ruby">..</code></pre>
- * for markdown like:
- * ```ruby
- * ruby code here
- * ```
+ * <p>1. Prevents XSS attack by escaping any tags in article/comment contents,
+ * which are not parsed as explicit code by markdown parser
+ * <p>2. Adds source code formatting CSS classes
  */
-object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
-  override def serialize(node: VerbatimNode, printer: Printer): Unit = {
-    println("SERIALIZE:" + node)
-    printer.println().print("<pre><code")
+class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
+
+  override def visit(node : HtmlBlockNode) {
+    val text = node.getText
+    if (text.length() > 0) printer.println()
+    printer.printEncoded(text)
+  }
+
+  override def visit(node : InlineHtmlNode ) = printer.printEncoded(node.getText)
+
+  override def visit(node: CodeNode) = {
+    printer.println().print(s"<pre class='prettyprint linenums'><code>${node.getText}</code></pre>")
+  }
+
+  override def visit(node: VerbatimNode) = {
+    printer.println().print("<pre class='prettyprint linenums'><code")
     if (!StringUtils.isEmpty(node.getType)) {
-      printAttribute(printer, "class", s"lang-${node.getType}")
+      printer.print(s" class='lang-${node.getType}'")
     }
     printer.print(">")
     var text = node.getText
@@ -37,21 +40,15 @@ object GooglePrettifyVerbatimSerializer extends VerbatimSerializer {
     }
     printer.printEncoded(text)
     printer.print("</code></pre>")
-
-  }
-
-  private def printAttribute(printer: Printer, name: String, value: String): Unit = {
-    printer.print(' ').print(name).print('=').print('"').print(value).print('"')
   }
 }
 
 object Markdown {
+
   def toHtml(markdown: String): String = {
-    // use all extensions
+    // use all extensions, except html filtering
     val processor = new PegDownProcessor(ALL)
-    // custom fenced code blocks serializer
-    val serializerMap = new java.util.HashMap[String, VerbatimSerializer]
-    serializerMap.put(VerbatimSerializer.DEFAULT, GooglePrettifyVerbatimSerializer)
-    processor.markdownToHtml(markdown, new LinkRenderer(), serializerMap)
+    val astRoot = processor.parseMarkdown(processor.prepareSource(markdown.toCharArray))
+    new EscapingToHtmlSerializer().toHtml(astRoot)
   }
 }

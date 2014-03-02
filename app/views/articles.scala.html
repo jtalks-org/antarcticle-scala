@@ -4,17 +4,17 @@
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">
-        <div class="tag-search pull-left col-md-7">
-          <form>
-            <ul class="bootstrap-tagsinput col-md-5">
-              <input type="text" class="tags-inner-input" id="tags_filter" placeholder="Tags filter">
-            </ul>
-            <button class="btn btn-sm btn-primary">Find</button>
+        <div class="tag-search pull-left">
+          <form class="tags-search-form" method="POST" action="@routes.ArticleController.searchByTag">
+            <div class="bootstrap-tagsinput">
+              <input type="text" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter">
+            </div>
+            <button class="btn btn-sm btn-info tag-search-button">Find</button>
           </form>
         </div>
         @if(user.can(Create, Article)) {
-          <div class="pull-right">
-            <a class="btn btn-sm btn-primary" href="@routes.ArticleController.getNewArticlePage">
+          <div class="pull-right create-article-button">
+            <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
               <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
             </a>
             <div class="clearfix"></div>

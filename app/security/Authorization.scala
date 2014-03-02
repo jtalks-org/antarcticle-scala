@@ -3,11 +3,13 @@ package security
 import Permissions._
 import Entities._
 import Authorities._
+import Result._
 import models.ArticleModels.ArticleListModel
 import models.ArticleModels.ArticleDetailsModel
 import models.CommentModels.Comment
 import scalaz._
 import Scalaz._
+import models.database._
 
 object Permissions {
   sealed trait Permission
@@ -32,11 +34,29 @@ object Authorities {
   case object User extends Authority
 }
 
+object Result {
+  sealed trait AuthorizationResult[+T]
+  case class Authorized[T](result: T) extends AuthorizationResult[T]
+  case class NotAuthorized[T]() extends AuthorizationResult[T]
+}
+
 trait Principal {
   // check permissions for "collection of objects" or "objects in general"
   def can(permission: Permission, entity: Entity): Boolean
   // check permissions for specific object
   def can(permission: Permission, obj: AnyRef): Boolean
+
+  def doAuthorizedOrFail[T](permission: Permission, ref: AnyRef)(f: () => T): AuthorizationResult[T] = {
+    val authorized = ref match {
+      case entity: Entity => can(permission, entity)
+      case _ => can(permission, ref)
+    }
+
+    authorized match {
+      case true => Authorized(f())
+      case false => NotAuthorized()
+    }
+  }
 
   def isAuthenticated: Boolean
 }
@@ -87,7 +107,9 @@ class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
       case (User, Read, _) => true
       case (User, _, article: ArticleListModel) => article.author.id == sid
       case (User, _, article: ArticleDetailsModel) => article.author.id == sid
+      case (User, _, article: ArticleRecord) => article.authorId == sid
       case (User, _, comment: Comment) => comment.author.id == sid
+      case (User, _, comment: CommentRecord) => comment.userId == sid
 
       case t => notConfigured(t)
     }

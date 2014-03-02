@@ -11,19 +11,25 @@ import conf.Constants
 import models.Page
 import scalaz._
 import Scalaz._
-import validators.Validator
+import validators.{TagValidator, Validator}
 import scala.slick.jdbc.JdbcBackend
+import security.Principal
+import security.Entities
+import security.Permissions._
+import security.AuthenticatedUser
+import security.Result._
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
+    def get(id: Int): Option[ArticleDetailsModel]
     def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
-    def createArticle(article: Article): ValidationNel[String, ArticleDetailsModel]
-    def get(id: Int): Option[ArticleDetailsModel]
-    def updateArticle(article: Article): ValidationNel[String, Article]
-    def removeArticle(id: Int)
+    def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
+    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, Article]
+    def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
+    def searchByTag(tag: String): ValidationNel[String, List[Article]]
   }
 }
 
@@ -33,44 +39,66 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
   val articlesService = new ArticlesServiceImpl
   val articleValidator: Validator[Article]
+  val tagValidator: TagValidator
 
   class ArticlesServiceImpl extends ArticlesService {
 
-    def createArticle(article: Article) = withTransaction { implicit session =>
-      def createRecord = {
-        val creationTime = DateTime.now
-        val currentUserId = 1 //TODO
-        articleToInsert(article, creationTime, currentUserId)
+    def insert(article: Article)(implicit principal: Principal) =
+      principal.doAuthorizedOrFail(Create, Entities.Article) { () =>
+        withTransaction { implicit session =>
+          def createRecord = {
+            val creationTime = DateTime.now
+            //TODO:
+            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+            articleToInsert(article, creationTime, currentUserId)
+          }
+
+          val result = for {
+            _ <- articleValidator.validate(article)
+            newRecord = createRecord
+            id = articlesRepository.insert(newRecord)
+            tags <- tagsService.createTagsForArticle(id, article.tags)
+            user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
+          } yield recordToDetailsModel(newRecord.copy(id = Some(id)), user, tags)
+
+          if (result.isFailure) {
+            // article should not be persisted, when tags creation failed
+            // reason: tags creation requires article id which is auto-increment column
+            session.rollback()
+          }
+
+          result
+        }
       }
 
-      val result = for {
-        _ <- articleValidator.validate(article)
-        newRecord = createRecord
-        id = articlesRepository.insert(newRecord)
-        tags <- tagsService.createTagsForArticle(id, article.tags)
-      } yield recordToDetailsModel(newRecord.copy(id = Some(id)), UserRecord(Some(1), "")/*TODO: real user*/, tags)
-
-      if (result.isFailure) {
-        // article should not be persisted, when tags creation failed
-        // reason: tags creation requires article id which is auto-increment column
-        session.rollback()
-      }
-
-      result
+    def updateArticle(article: Article)(implicit principal: Principal) = withTransaction {
+      implicit session =>
+        //incoming article may have no user information set
+        // todo: handle non-existent id properly
+        val persistentArticle = articlesRepository.get(article.id.get).get._1
+        principal match {
+          case currentUser: AuthenticatedUser if currentUser.can(Update, persistentArticle) =>
+              articleValidator.validate(article).fold(
+                  fail = nel => Failure(nel),
+                  succ = created => {
+                    articlesRepository.update(article.id.get, articleToUpdate(article, DateTime.now))
+                    tagsService.updateTagsForArticle(article.id.get, article.tags)
+                    article.successNel
+                  }
+                )
+          case _ => "Authorization failure".failureNel
+        }
     }
 
-
-    def updateArticle(article: Article) = withTransaction { implicit session =>
-      articleValidator.validate(article).map { _ =>
-        val modificationTime = DateTime.now
-        //TODO: handle id, tags validation
-        articlesRepository.update(article.id.get, articleToUpdate(article, modificationTime))
-        article
+    def removeArticle(id: Int)(implicit principal: Principal) = withTransaction {
+      implicit session =>
+      // todo: handle non-existent id properly
+        val article = articlesRepository.get(id).get._1
+        principal match {
+          case currentUser: AuthenticatedUser if currentUser.can(Delete, article) =>
+            articlesRepository.remove(id).successNel
+          case _ => "Authorization failure".failureNel
       }
-    }
-
-    def removeArticle(id: Int) = withTransaction { implicit session =>
-      articlesRepository.remove(id)
     }
 
     def get(id: Int) = withSession { implicit session =>
@@ -84,6 +112,16 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def getPageForUser(page: Int, userName: String, tag : Option[String] = None): Page[ArticleListModel] = withSession { implicit session =>
       val userId = usersRepository.getByUsername(userName).get.id
       fetchPageFromDb(page, userId, tag)
+    }
+
+    def searchByTag(tag: String): ValidationNel[String, List[Article]] = {
+      tagValidator.validate(tag).fold(
+        fail = nel => Failure(nel),
+        succ = created => {
+          //TODO provide a real implementation
+          List().successNel
+        }
+      )
     }
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tag : Option[String] = None)(implicit s: JdbcBackend#Session) = {

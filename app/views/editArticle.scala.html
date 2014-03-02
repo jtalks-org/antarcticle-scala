@@ -1,13 +1,32 @@
 @(form: Form[ArticleModels.Article])(implicit user: Principal)
 @templates.main("Edit article") {
   <div class="row">
-    <div class="col-md-7 col-md-offset-2 well2">
+    <div class="col-md-9 center well2">
       <header class="page-header">
         <h2><i class="glyphicon glyphicon-pencil"></i>Edit article</h2>
       </header>
       <form class="default-form" method="POST" action="@routes.ArticleController.postArticleEdits">
         <input type="hidden" name="id" value="@form("id").value">
-        @templates.articleEditor(form, "Save edit")
+        <div class="form-group input-group article-input">
+          <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
+        </div>
+        <div class="form-group input-group article-input">
+          <i class="glyphicon glyphicon-info-sign"></i>
+          <label for="content" class="editor-hint">
+            Editor uses Markdown markup language. You can read reference
+            <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">here</a>.
+          </label>
+          <textarea id="content" name="content" class="form-control article-input"
+              placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
+        </div>
+        <div class="form-group input-group article-input">
+          <input name="tags" class="form-control article-input" placeholder="Tags (comma-separated)" type="text" value="@form("tags").value"/>
+        </div>
+        <div class="btn-toolbar pull-right clearfix">
+          <input class="btn btn-primary btn" type="submit" value="Save"/>
+          <a class="btn btn-success btn" href="@routes.ArticleController.viewArticle(form("id").value.get.toInt)">Discard</a>
+        </div>
+        <div class="clearfix"></div>
       </form>
     </div>
   </div>

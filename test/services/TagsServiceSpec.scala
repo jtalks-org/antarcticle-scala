@@ -10,7 +10,6 @@ import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.ArgumentCapture
 import validators.Validator
-import util.ScalazValidationTestUtils._
 import scalaz._
 import Scalaz._
 
@@ -37,7 +36,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns (1 to tags.size)
       tagValidator.validate(any[String]) returns "".successNel
 
-      tagsService.createTagsForArticle(1, tags)
+      tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
 
       val trimmedTags = List("tag", "tag1", "tag2")
       there was one(tagsRepository).getByNames(trimmedTags)(FakeSessionValue)
@@ -51,7 +50,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(newTagId)
       tagValidator.validate(any[String]) returns "".successNel
 
-      tagsService.createTagsForArticle(1, tags)
+      tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
 
       there was one(tagsRepository).insertAll(List(newTag))(FakeSessionValue)
     }
@@ -62,7 +61,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns tagsIds
       tagValidator.validate(any[String]) returns "".successNel
 
-      tagsService.createTagsForArticle(1, tags)
+      tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
 
       val assocListCapture = new ArgumentCapture[Seq[(Int, Int)]]()
       val expectedArticleTagsAssociations = Seq((1, 1), (1, 2), (1, 3))
@@ -77,7 +76,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns newTagsIds
       tagValidator.validate(any[String]) returns "".successNel
 
-      tagsService.createTagsForArticle(1, tags)
+      tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
 
       val assocListCapture = new ArgumentCapture[Seq[(Int, Int)]]()
       val expectedArticleTagsAssociations = Seq((1, 1), (1, 2), (1, 3))

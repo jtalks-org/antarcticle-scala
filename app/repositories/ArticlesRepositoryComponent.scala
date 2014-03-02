@@ -68,16 +68,16 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def getList(offset: Int, portionSize: Int, tagId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
       tagId.cata(
-        some = articles.byTag(_).portion(offset, portionSize).list.map(fetchTags),
-        none = articles.portion(offset, portionSize).list.map(fetchTags)
-      )
+        some = articles.byTag(_),
+        none = articles
+      ).portion(offset, portionSize).list.map(fetchTags)
     }
 
     def getListForUser(userId: Int, offset: Int, portionSize: Int, tagId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
       tagId.cata(
-        some = articles.byAuthor(userId).byTag(_).portion(offset, portionSize).list.map(fetchTags),
-        none = articles.byAuthor(userId).portion(offset, portionSize).list.map(fetchTags)
-      )
+        some = articles.byAuthor(userId).byTag(_),
+        none = articles.byAuthor(userId)
+      ).portion(offset, portionSize).list.map(fetchTags)
     }
 
     def get(id: Int)(implicit s: JdbcBackend#Session) = {
@@ -99,16 +99,16 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def count(tagId: Option[Int] = None)(implicit s: Session) = {
       tagId.cata(
-        some = articles.byTag(_).length.run,
-        none = articles.length.run
-      )
+        some = articles.byTag(_),
+        none = articles
+      ).length.run
     }
 
     def countForUser(userId: Int, tagId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
       tagId.cata(
-        some = articles.byTag(_).filter(_.authorId === userId).length.run,
-        none = articles.filter(_.authorId === userId).length.run
-      )
+        some = articles.byTag(_),
+        none = articles
+      ).filter(_.authorId === userId).length.run
     }
 
     private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {

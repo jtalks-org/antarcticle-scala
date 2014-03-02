@@ -1,22 +1,21 @@
-package security
+package controllers
 
-import play.api.mvc._
+import play.api.mvc.{DiscardingCookie, Cookie, Action, Controller}
+import security.{Authentication, SecurityServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import views.html
-import play.api.mvc.Cookie
 import scala.Some
-import play.api.libs.concurrent.Execution.Implicits._
-import java.util.concurrent.TimeUnit
-import org.joda.time.{DateTimeConstants, Weeks}
+import views.html
+import conf.Constants._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  *  Handles sign in and sign out user actions.
+ *  After successful sign in a new session is created with http-only "remember me" 
+ *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
   this: Controller with SecurityServiceComponent with Authentication  =>
-
-  val rememberMeExpirationTime = DateTimeConstants.SECONDS_PER_WEEK * 4
 
   val loginForm = Form(
     tuple(
@@ -25,11 +24,11 @@ trait AuthenticationController {
     )
   )
 
-  def signin = Action { implicit request =>
+  def showLoginPage = Action { implicit request =>
     Ok(html.signin(loginForm))
   }
 
-  def authenticate = Action.async { implicit request =>
+  def login = Action.async { implicit request =>
     val (username, password) = loginForm.bindFromRequest.get
     for {
       signInResult <- securityService.signInUser(username, password)
@@ -37,18 +36,17 @@ trait AuthenticationController {
       signInResult.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
         succ = { case (token, authUser) =>
-          Redirect(controllers.routes.ArticleController.listAllArticles())
+          Ok(routes.ArticleController.listAllArticles().absoluteURL())
             // http only to prevent session hijacking with XSS
-            .withCookies(Cookie(Constants.RememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
+            .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }
       )
     }
   }
 
-  def signout = Action {
+  def logout = Action {
     Redirect(controllers.routes.ArticleController.listAllArticles())
       .withNewSession
-      // TODO: move this constant
-      .discardingCookies(DiscardingCookie(Constants.RememberMeCookie))
+      .discardingCookies(DiscardingCookie(rememberMeCookie))
   }
 }

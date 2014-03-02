@@ -35,4 +35,20 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
     }
   }
 
+  "get tag by name" should {
+    "return existing tag" in withTestDb { implicit session =>
+      val tag = tagsRepository.getByName(Some("tag1"))
+
+      tag.get.name must_== "tag1"
+      tag.get.id must_== 1
+    }
+
+    "handle None" in withTestDb { implicit session =>
+      tagsRepository.getByName(None) must_== None
+    }
+
+    "handle nonexistent tag" in withTestDb { implicit session =>
+      tagsRepository.getByName(Some("lolwut")) must_== None
+    }
+  }
 }

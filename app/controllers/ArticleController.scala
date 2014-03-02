@@ -5,7 +5,6 @@ import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
-import views.html
 import security.Authentication
 import security.Result._
 
@@ -26,6 +25,12 @@ trait ArticleController {
       "tags" -> text
     )((id, title, content, tags) => Article(id, title, content, tags.split(",").filter(!_.isEmpty)))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
+  )
+
+  val tagSearchForm = Form(
+    mapping(
+      "tag" ->  text
+    )((tag)=>tag)((tag)=>Some(tag))
   )
 
   def listAllArticles(page: Int) = Action { implicit request =>
@@ -90,5 +95,20 @@ trait ArticleController {
         },
         succ = created => Ok(routes.ArticleController.listAllArticles().absoluteURL())
       )
+  }
+
+  def searchByTag() = Action { implicit request =>
+    tagSearchForm.bindFromRequest().fold(
+      formWithErrors => BadRequest("Invalid request"),
+      tag => {
+        articlesService.searchByTag(tag).fold(
+          fail = nel => {
+            BadRequest(nel.list.mkString("<br>"))
+          },
+          //TODO provide a real implementation
+          succ = result => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+        )
+      }
+    )
   }
 }

@@ -30,3 +30,5 @@ class FormHandler
     )
 
 new FormHandler('.default-form')
+tagSearchHandler = new FormHandler('.tags-search-form')
+tagSearchHandler.onFail = ((data) => bootbox.alert(data.responseText))

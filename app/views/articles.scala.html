@@ -5,9 +5,9 @@
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">
         <div class="tag-search pull-left">
-          <form>
+          <form class="tags-search-form" method="POST" action="@routes.ArticleController.searchByTag">
             <div class="bootstrap-tagsinput">
-              <input type="text" class="form-control tags-inner-input" id="tags_filter" placeholder="Tags filter">
+              <input type="text" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter">
             </div>
             <button class="btn btn-sm btn-info tag-search-button">Find</button>
           </form>

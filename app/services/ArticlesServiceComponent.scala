@@ -11,7 +11,7 @@ import conf.Constants
 import models.Page
 import scalaz._
 import Scalaz._
-import validators.Validator
+import validators.{TagValidator, Validator}
 import scala.slick.jdbc.JdbcBackend
 import security.Principal
 import security.Entities
@@ -29,6 +29,7 @@ trait ArticlesServiceComponent {
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
     def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, Article]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
+    def searchByTag(tag: String): ValidationNel[String, List[Article]]
   }
 }
 
@@ -38,6 +39,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
   val articlesService = new ArticlesServiceImpl
   val articleValidator: Validator[Article]
+  val tagValidator: TagValidator
 
   class ArticlesServiceImpl extends ArticlesService {
 
@@ -110,6 +112,16 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def getPageForUser(page: Int, userName: String, tag : Option[String] = None): Page[ArticleListModel] = withSession { implicit session =>
       val userId = usersRepository.getByUsername(userName).get.id
       fetchPageFromDb(page, userId, tag)
+    }
+
+    def searchByTag(tag: String): ValidationNel[String, List[Article]] = {
+      tagValidator.validate(tag).fold(
+        fail = nel => Failure(nel),
+        succ = created => {
+          //TODO provide a real implementation
+          List().successNel
+        }
+      )
     }
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tag : Option[String] = None)(implicit s: JdbcBackend#Session) = {

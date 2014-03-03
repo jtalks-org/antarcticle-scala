@@ -18,18 +18,28 @@ import security.Entities
 import security.Permissions._
 import security.AuthenticatedUser
 import security.Result._
+import scala.math._
+import models.database.ArticleToUpdate
+import models.Page
+import scala.Some
+import models.ArticleModels.ArticleDetailsModel
+import models.UserModels.UserModel
+import security.AuthenticatedUser
+import models.ArticleModels.ArticleListModel
+import models.database.UserRecord
+import models.database.ArticleRecord
+import models.ArticleModels.Article
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
     def get(id: Int): Option[ArticleDetailsModel]
-    def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
-    def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
+    def getPage(page: Int, tag : Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
+    def getPageForUser(page: Int, userName : String, tag : Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
     def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[ValidationNel[String, Unit]]]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
-    def searchByTag(tag: String): ValidationNel[String, List[Article]]
   }
 }
 
@@ -73,7 +83,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
     def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
         //TODO: create NotFound Result to prevent nested ValidataionNel?
-        article.id.flatMap(articlesRepository.get(_)).map { case (article, _, _) => article }.cata(
+        article.id.flatMap(articlesRepository.get).map { case (article, _, _) => article }.cata(
           some = persistentArticle => {
             principal.doAuthorizedOrFail(Update, persistentArticle) { () =>
               for {
@@ -108,35 +118,29 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       fetchPageFromDb(page, None, tag)
     }
 
-    def getPageForUser(page: Int, userName: String, tag : Option[String] = None): Page[ArticleListModel] = withSession { implicit session =>
+    def getPageForUser(page: Int, userName: String, tag : Option[String] = None) = withSession { implicit session =>
       val userId = usersRepository.getByUsername(userName).get.id
       fetchPageFromDb(page, userId, tag)
-    }
-
-    def searchByTag(tag: String): ValidationNel[String, List[Article]] = {
-      tagValidator.validate(tag).fold(
-        fail = nel => Failure(nel),
-        succ = created => {
-          //TODO provide a real implementation
-          List().successNel
-        }
-      )
     }
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tag : Option[String] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * (page - 1)
       val tagId = tagsRepository.getByName(tag).map(_.id)
-      val list = userId.cata(
-        some = articlesRepository.getListForUser(_, offset, pageSize, tagId),
-        none = articlesRepository.getList(offset, pageSize, tagId)
-      )
-      val modelsList = list.map((recordToListModel _).tupled)
       val total = userId.cata(
         some = articlesRepository.countForUser(_, tagId),
         none = articlesRepository.count(tagId)
       )
-      Page(page, total, modelsList)
+      total match {
+        case it if 1 until Page.getPageCount(it) + 1 contains page =>
+          val list = userId.cata(
+            some = articlesRepository.getListForUser(_, offset, pageSize, tagId),
+            none = articlesRepository.getList(offset, pageSize, tagId)
+          )
+          val modelsList = list.map((recordToListModel _).tupled)
+          Page(page, total, modelsList).successNel
+        case _ => "No such page exists".failureNel
+      }
     }
 
     //TODO: Extract conversions and write tests for them

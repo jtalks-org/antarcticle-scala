@@ -10,6 +10,9 @@ import play.api.test.Helpers._
 import models.database.UserRecord
 import models.Page
 import security.{Entities, Permissions, AuthenticatedUser}
+import scalaz._
+import Scalaz._
+import models.ArticleModels.ArticleListModel
 
 class UserControllerSpec extends Specification with Mockito with AfterExample {
 
@@ -34,6 +37,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
 
     val username = "user"
     val user = new UserRecord(Some(1), username, true)
+    val articles = Page(1,0,List[ArticleListModel]()).successNel
     implicit def principal = {
       val usr = mock[AuthenticatedUser]
       usr.userId returns 1
@@ -44,7 +48,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
 
     "fetch articles for profile owner" in {
       usersService.getByName(username) returns Some(user)
-      articlesService.getPageForUser(1, username, None) returns Page(1,0,List())
+      articlesService.getPageForUser(1, username, None) returns articles
 
       val page = controller.viewProfile(username, 1)(FakeRequest())
 
@@ -64,7 +68,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
 
     "support searching by tag" in {
       usersService.getByName(username) returns Some(user)
-      articlesService.getPageForUser(1, username, Some("tag")) returns Page(1,0,List())
+      articlesService.getPageForUser(1, username, Some("tag")) returns articles
 
       val page = controller.viewProfile(username, 1, Some("tag"))(FakeRequest())
 

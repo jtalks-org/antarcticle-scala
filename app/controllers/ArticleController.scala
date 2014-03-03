@@ -36,7 +36,10 @@ trait ArticleController {
   )
 
   def listAllArticles(page: Int) = Action { implicit request =>
-    Ok(views.html.articles(articlesService.getPage(page)))
+    articlesService.getPage(page).fold(
+      fail => NotFound(views.html.errors.notFound()),
+      succ = articlesPage => Ok(views.html.articles(articlesPage))
+    )
   }
 
   def viewArticle(id: Int) = Action { implicit request =>
@@ -77,15 +80,15 @@ trait ArticleController {
   def postArticleEdits() = Action { implicit request =>
     def updateArticle(article: Article) = {
       articlesService.updateArticle(article).fold(
-        fail = errors(_),
-        succ = _ match {
+        fail = errors,
+        succ = {
           case Authorized(result) =>
             result.fold(
-              fail = errors(_),
+              fail = errors,
               succ = _ => Ok(routes.ArticleController.viewArticle(article.id.get).absoluteURL())
             )
           case NotAuthorized() =>
-              Unauthorized("Not authorized to update this article")
+            Unauthorized("Not authorized to update this article")
         }
       )
     }
@@ -102,7 +105,7 @@ trait ArticleController {
 
   def removeArticle(id: Int) = Action { implicit request =>
       articlesService.removeArticle(id).fold(
-        fail = errors(_),
+        fail = errors,
         succ = created => Ok(routes.ArticleController.listAllArticles().absoluteURL())
       )
   }
@@ -111,7 +114,7 @@ trait ArticleController {
     tagSearchForm.bindFromRequest().fold(
       formWithErrors => BadRequest("Invalid request"),
       tag => {
-        articlesService.searchByTag(tag).fold(
+        articlesService.getPage(1, Some(tag)).fold(
           fail = nel => {
             BadRequest(nel.list.mkString("<br>"))
           },

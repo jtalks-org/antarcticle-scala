@@ -11,7 +11,10 @@ import conf.Constants
  */
 case class Page[T](currentPage: Int, totalItems: Int, list: Seq[T]) {
 
-  val totalPages = ceil(totalItems / Constants.PAGE_SIZE.toDouble).toInt
-
+  val totalPages = Page.getPageCount(totalItems)
   require(currentPage > 0, "Pages are numbered starting from 1")
+}
+
+object Page{
+  def getPageCount(totalItems : Int) = ceil(totalItems / Constants.PAGE_SIZE.toDouble).toInt
 }

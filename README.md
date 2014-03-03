@@ -66,7 +66,7 @@ To setup antarcticle to use Poulpe ensure the following properties are set:
 
 
     security.authentication.useFake=false
-    security.authentication.poulpe.url='http://mydomain.com/poulpeContext'
+    security.authentication.poulpe.url="http://mydomain.com/poulpeContext"
 
 To configure fake authentication manager (contains only admin/admin user) set properties as follows:
 

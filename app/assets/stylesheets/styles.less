@@ -57,17 +57,54 @@ h6 {
   font-family: "Ubuntu", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-pre, code {
-  overflow: auto;
-  white-space: pre;
-  word-wrap: normal;
-  font-family: Consolas, "Liberation Mono", Courier, monospace;
-}
-
 .global-block {
   float: none;
   margin: 0 auto;
 }
+
+// global footer
+.footer {
+  bottom: 0;
+  position:absolute;
+  padding-top: 10px;
+  width: 100%;
+  height: 60px;
+  border-top: 1px solid rgb(229, 229, 229);
+  background: url("../images/bg_tan_grid.png") repeat scroll center top transparent;
+  background-color: rgb(235, 235, 235);
+  box-shadow: inset 0 5px 5px -5px #000000;
+  text-align: center;
+  font-family: "Josefin Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  a {
+    color: rgb(51, 51, 51);
+  }
+}
+
+.main-container {
+  padding-bottom: 100px;
+}
+
+.page-wrapper {
+  position: relative;
+  min-height: 100%;
+}
+
+.navbar .nav > li > a {
+  padding: 15px 15px 0px 15px;
+}
+
+.centralized-inputs {
+  text-align: center;
+}
+
+.page-header {
+  margin: 12px 0px;
+  padding-bottom: 0px;
+}
+
+/***********************************************
+* BUTTONS
+***********************************************/
 
 .btn-primary {
   color: #fff;
@@ -117,47 +154,31 @@ pre, code {
   filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
 }
 
+/***********************************************
+* MARKDOWN
+***********************************************/
 
-// global footer
-.footer {
-  bottom: 0;
-  position:absolute;
-  padding-top: 10px;
-  width: 100%;
-  height: 60px;
-  border-top: 1px solid rgb(229, 229, 229);
-  background: url("../images/bg_tan_grid.png") repeat scroll center top transparent;
-  background-color: rgb(235, 235, 235);
-  box-shadow: inset 0 5px 5px -5px #000000;
-  text-align: center;
-  font-family: "Josefin Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  a {
-    color: rgb(51, 51, 51);
+pre, code {
+  overflow: auto;
+  white-space: pre;
+  word-wrap: normal;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+  color: #000000;
+}
+
+table{
+  border-collapse: collapse;
+  border: 1px solid black;
+
+  tr:nth-child(even) {
+    background-color: #f8f8f8
+  }
+
+  td{
+    border: 1px solid black;
+    padding: 10px;
   }
 }
-
-.main-container {
-  padding-bottom: 100px;
-}
-
-.page-wrapper {
-  position: relative;
-  min-height: 100%;
-}
-
-.navbar .nav > li > a {
-  padding: 15px 15px 0px 15px;
-}
-
-.centralized-inputs {
-  text-align: center;
-}
-
-.page-header {
-  margin: 12px 0px;
-  padding-bottom: 0px;
-}
-
 
 /***********************************************
  * USER PROFILE

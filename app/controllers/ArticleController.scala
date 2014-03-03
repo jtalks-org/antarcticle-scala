@@ -7,6 +7,8 @@ import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
 import security.Authentication
 import security.Result._
+import scalaz._
+import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -50,14 +52,12 @@ trait ArticleController {
 
   def postNewArticle = Action { implicit request =>
       articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(views.html.templates.formErrors(List("Invalid request"))),
+        formWithErrors => errors(NonEmptyList("Incorrect request data")),
         article => {
           articlesService.insert(article) match {
             case Authorized(result) =>
               result.fold(
-                fail = nel => {
-                  BadRequest(views.html.templates.formErrors(nel.list))
-                },
+                fail = nel => errors(nel),
                 succ = created => Ok(routes.ArticleController.viewArticle(created.id).absoluteURL())
               )
             case NotAuthorized() =>
@@ -75,24 +75,34 @@ trait ArticleController {
   }
 
   def postArticleEdits() = Action { implicit request =>
-      articleForm.bindFromRequest.fold(
-        formWithErrors => BadRequest,
-        article => {
-          articlesService.updateArticle(article).fold(
-            fail = nel => {
-              BadRequest(views.html.templates.formErrors(nel.list))
-            },
-            succ = created => Ok(routes.ArticleController.viewArticle(created.id.get).absoluteURL())
-          )
+    def updateArticle(article: Article) = {
+      articlesService.updateArticle(article).fold(
+        fail = errors(_),
+        succ = _ match {
+          case Authorized(result) =>
+            result.fold(
+              fail = errors(_),
+              succ = _ => Ok(routes.ArticleController.viewArticle(article.id.get).absoluteURL())
+            )
+          case NotAuthorized() =>
+              Unauthorized("Not authorized to update this article")
         }
       )
+    }
+
+    articleForm.bindFromRequest.fold(
+      formWithErrors => BadRequest,
+      article => updateArticle(article)
+    )
+  }
+
+  private def errors(errors: NonEmptyList[String]) = {
+    BadRequest(views.html.templates.formErrors(errors.list))
   }
 
   def removeArticle(id: Int) = Action { implicit request =>
       articlesService.removeArticle(id).fold(
-        fail = nel => {
-          BadRequest(views.html.templates.formErrors(nel.list))
-        },
+        fail = errors(_),
         succ = created => Ok(routes.ArticleController.listAllArticles().absoluteURL())
       )
   }

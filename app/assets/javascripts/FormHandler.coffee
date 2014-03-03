@@ -17,12 +17,13 @@ class FormHandler
     if (window.location.href.split('#')[0] == data.split('#')[0])
       window.location.reload(true)
 
-  defaultOnFail: (data) => this.form.prepend(data.responseText)
+  defaultOnFail: (data) =>
+    $('.clear-on-resubmit').remove() # clear old validation messages, if any
+    this.form.prepend(data.responseText)
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
     this.form = $(@selector)
     this.form.submit( =>
-      $('.clear-on-resubmit').remove() # clear old validation messages, of any
       $.post(this.form.attr('action'), this.form.serialize())
         .done((data) => @onSuccess(data))
         .fail((data) => @onFail(data))

@@ -240,43 +240,82 @@ class ArticlesServiceSpec extends Specification
   }
 
   "article update" should {
-    val article = Article(1.some, "", "", List("tag"))
-    val record = ArticleRecord(None, "", "", null, null, "", 1)
+    val articleId = 1
+    val tags = List("tag")
+    val article = Article(articleId.some, "", "", tags)
+    val record = ArticleRecord(articleId.some, "", "", null, null, "", 1)
     implicit def getCurrentUser = {
-      val usr = mock[AuthenticatedUser]
-      usr.userId returns 1
-      usr.username returns "user"
-      usr.can(Permissions.Update, record) returns true
+      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(true)
+        .when(usr)
+        .can(Matchers.eq(Permissions.Update), Matchers.eq(record))
       usr
     }
 
     "update existing article" in {
-      articlesRepository.get(1)(session) returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns Option(record, null, null)
       articleValidator.validate(any[Article]) returns article.successNel
+      tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
       articlesService.updateArticle(article)
 
-      there was one(articlesRepository).update(Matchers.eq(1), any[ArticleToUpdate])(Matchers.eq(session))
+      there was one(articlesRepository).update(Matchers.eq(articleId), any[ArticleToUpdate])(Matchers.eq(session))
     }
 
     "update modification time" in {
       TimeFridge.withFrozenTime() { now =>
-        articlesRepository.get(1)(session)  returns Option(record, null, null)
+        articlesRepository.get(articleId)(session)  returns Option(record, null, null)
         articleValidator.validate(any[Article]) returns article.successNel
+        tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
         articlesService.updateArticle(article)
 
-        there was one(articlesRepository).update(1, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
+        there was one(articlesRepository).update(articleId, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
       }
     }
 
-    "not update article when validation failed" in {
-      articlesRepository.get(1)(session)  returns Option(record, null, null)
+    "update tags" in {
+      articlesRepository.get(articleId)(session)  returns Option(record, null, null)
+      articleValidator.validate(any[Article]) returns article.successNel
+      tagsService.updateTagsForArticle(articleId, tags)(session) returns Seq.empty.successNel
+
+      articlesService.updateArticle(article)
+
+      there was one(tagsService).updateTagsForArticle(articleId, tags)(session)
+    }
+
+    "return failure when tags validation failed" in pending
+    "return failure when article validation failed" in pending
+    "return failure when article not found" in pending
+
+    "not update article when tags validation failed" in {
+      articlesRepository.get(articleId)(session)  returns Option(record, null, null)
+      articleValidator.validate(any[Article]) returns article.successNel
+      tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns "".failNel
+
+      articlesService.updateArticle(article)
+
+      there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
+    }
+
+    "not update article when article validation failed" in {
+      articlesRepository.get(articleId)(session) returns Option(record, null, null)
       articleValidator.validate(any[Article]) returns "".failNel
 
       articlesService.updateArticle(article)
 
       there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
+    }
+
+    "fail when user is not authorized to do it" in {
+      val currentUser = mock[AuthenticatedUser]
+      articlesRepository.get(articleId)(session) returns Option(record, null, null)
+      currentUser.can(Permissions.Update, article) returns false
+
+      articlesService.updateArticle(article)(AnonymousPrincipal) must beSuccessful.like {
+        case NotAuthorized() => ok
+        case _ => ko
+      }
     }
   }
 

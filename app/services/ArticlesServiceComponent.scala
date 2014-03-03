@@ -27,7 +27,7 @@ trait ArticlesServiceComponent {
     def getPage(page: Int, tag : Option[String] = None): Page[ArticleListModel]
     def getPageForUser(page: Int, userName : String, tag : Option[String] = None): Page[ArticleListModel]
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
-    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, Article]
+    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[ValidationNel[String, Unit]]]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
     def searchByTag(tag: String): ValidationNel[String, List[Article]]
   }
@@ -71,23 +71,22 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         }
       }
 
-    def updateArticle(article: Article)(implicit principal: Principal) = withTransaction {
-      implicit session =>
-        //incoming article may have no user information set
-        // todo: handle non-existent id properly
-        val persistentArticle = articlesRepository.get(article.id.get).get._1
-        principal match {
-          case currentUser: AuthenticatedUser if currentUser.can(Update, persistentArticle) =>
-              articleValidator.validate(article).fold(
-                  fail = nel => Failure(nel),
-                  succ = created => {
-                    articlesRepository.update(article.id.get, articleToUpdate(article, DateTime.now))
-                    tagsService.updateTagsForArticle(article.id.get, article.tags)
-                    article.successNel
-                  }
-                )
-          case _ => "Authorization failure".failureNel
-        }
+    def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
+        //TODO: create NotFound Result to prevent nested ValidataionNel?
+        article.id.flatMap(articlesRepository.get(_)).map { case (article, _, _) => article }.cata(
+          some = persistentArticle => {
+            principal.doAuthorizedOrFail(Update, persistentArticle) { () =>
+              for {
+                _ <- articleValidator.validate(article)
+                _ <- tagsService.updateTagsForArticle(persistentArticle.id.get, article.tags)
+              } yield {
+                articlesRepository.update(persistentArticle.id.get, articleToUpdate(article, DateTime.now))
+                ()
+              }
+            }.successNel
+          },
+          none = "Article not found".failureNel
+        )
     }
 
     def removeArticle(id: Int)(implicit principal: Principal) = withTransaction {

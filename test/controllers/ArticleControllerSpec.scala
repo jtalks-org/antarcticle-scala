@@ -124,6 +124,14 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
     }
+
+    "return Unauthorized on authorization failure" in {
+      articlesService.insert(article) returns NotAuthorized()
+
+      val page = controller.postNewArticle(validRequest)
+
+      status(page) must equalTo(401)
+    }
   }
 
   "get edit article page" should {
@@ -158,7 +166,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     val article = controller.articleForm.bindFromRequest()(validRequest).get
 
     "save an article if data is valid" in {
-      articlesService.updateArticle(article) returns article.successNel
+      articlesService.updateArticle(article) returns Authorized(().successNel).successNel
 
       val page = controller.postArticleEdits()(validRequest)
 
@@ -180,6 +188,24 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
+    }
+
+    //TODO: get rid of this ugly nesting
+    "report error list on service operation error 2" in {
+      articlesService.updateArticle(article) returns Authorized("bad request".failureNel).successNel
+
+      val page = controller.postArticleEdits()(validRequest)
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+
+    "return Unauthorized on authorization failure" in {
+      articlesService.updateArticle(article) returns NotAuthorized().successNel
+
+      val page = controller.postArticleEdits()(validRequest)
+
+      status(page) must equalTo(401)
     }
   }
 

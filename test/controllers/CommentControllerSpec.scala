@@ -65,7 +65,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       there was no(commentsService).insert(articleId, comment)
     }
 
-    "authorization failure" in {
+    "return Unauthorized on authorization failure" in {
       commentsService.insert(articleId, comment) returns NotAuthorized()
 
       val page = controller.postNewComment(articleId)(request)
@@ -96,7 +96,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       there was one(commentsService).removeComment(commentId)
     }
 
-    "authorization failure" in {
+    "return Unauthorized on authorization failure" in {
       commentsService.removeComment(commentId) returns NotAuthorized().successNel
 
       val page = controller.removeComment(articleId,commentId)(FakeRequest("DELETE", "/"))
@@ -160,7 +160,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
       contentType(page) must beSome("text/html")
     }
 
-    "authorization failure" in {
+    "return Unauthorized on authorization failure" in {
       commentsService.update(commentId, comment) returns NotAuthorized().successNel
 
       val page = controller.postCommentEdits(articleId, commentId)(request)

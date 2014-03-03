@@ -26,6 +26,8 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
     if (!StringUtils.isEmpty(node.getType)) {
       printer.print(s" class='lang-${node.getType}'")
     }
-    printer.print(s">${node.getText}</code></pre>")
+    printer.print(">")
+    printer.printEncoded(node.getText)
+    printer.print("</code></pre>")
   }
 }

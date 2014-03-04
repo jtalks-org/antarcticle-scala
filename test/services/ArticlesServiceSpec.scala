@@ -110,6 +110,20 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
+    "contain list models" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
+
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list(0).id must_== 1
+          model.list(0).author.id must_== 1
+        }
+      )
+    }
+
     "contain current page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
@@ -130,6 +144,20 @@ class ArticlesServiceSpec extends Specification
       articlesService.getPage(1).fold(
         fail = nel => ko,
         succ = model => model.totalPages must_== 2
+      )
+    }
+
+    "correctly return empty article list" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns 0
+
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list(0).id must_== 1
+          model.list(0).author.id must_== 1
+        }
       )
     }
 

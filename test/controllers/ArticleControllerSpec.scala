@@ -46,7 +46,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "list all articles" should {
     "return a page with articles" in {
-      articlesService.getPage(2, null) returns new Page(2,1, Seq(articleListModel))
+      articlesService.getPage(2, null) returns new Page(2,1, Seq(articleListModel)).successNel
 
       val page = controller.listAllArticles(2)(FakeRequest())
 

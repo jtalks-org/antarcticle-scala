@@ -89,6 +89,7 @@ class ArticlesServiceSpec extends Specification
     "request second page with correct parameters" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List()
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE * 2
 
       articlesService.getPage(2)
 
@@ -98,20 +99,40 @@ class ArticlesServiceSpec extends Specification
     "contain list models" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
-      val model: Page[ArticleListModel] = articlesService.getPage(1)
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list(0).id must_== 1
+          model.list(0).author.id must_== 1
+        }
+      )
+    }
 
-      model.list(0).id must_== 1
-      model.list(0).author.id must_== 1
+    "contain list models" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
+
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list(0).id must_== 1
+          model.list(0).author.id must_== 1
+        }
+      )
     }
 
     "contain current page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
-      val model = articlesService.getPage(1)
-
-      model.currentPage must_== 1
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => model.currentPage must_== 1
+      )
     }
 
     "contain total pages count" in {
@@ -120,9 +141,24 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
-      val model = articlesService.getPage(1)
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => model.totalPages must_== 2
+      )
+    }
 
-      model.totalPages must_== 2
+    "correctly return empty article list" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns 0
+
+      articlesService.getPage(1).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list(0).id must_== 1
+          model.list(0).author.id must_== 1
+        }
+      )
     }
 
     "filter articles by tag" in {
@@ -131,20 +167,25 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.getList(0, PAGE_SIZE, Some(1))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
-      val model: Page[ArticleListModel] = articlesService.getPage(1, Some("tag"))
-
-      model.list.nonEmpty must beTrue
-      model.currentPage must_== 1
-      model.totalItems must_== count
+     articlesService.getPage(1, Some("tag")).fold(
+       fail = nel => ko,
+       succ = model => {
+         model.list.nonEmpty must beTrue
+         model.currentPage must_== 1
+         model.totalItems must_== count
+       }
+     )
     }
 
     "handle nonexistent tags" in {
       tagsRepository.getByName(Some("tag"))(session) returns None
       articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
-      val model: Page[ArticleListModel] = articlesService.getPage(1, Some("tag"))
-
-      model.list.nonEmpty must beTrue
+      articlesService.getPage(1, Some("tag")).fold(
+        fail = nel => ko,
+        succ = model => model.list.nonEmpty must beTrue
+      )
     }
   }
 

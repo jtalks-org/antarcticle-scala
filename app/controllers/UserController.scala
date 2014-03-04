@@ -16,7 +16,10 @@ trait UserController {
   def viewProfile(userName: String, page: Int, tag : Option[String] = None) = Action { implicit request =>
     usersService.getByName(userName) match {
       case user : Some[UserRecord] =>
-        Ok(views.html.profile(articlesService.getPageForUser(page, userName, tag), user.get))
+        articlesService.getPageForUser(page, userName, tag).fold(
+          fail => NotFound(views.html.errors.notFound()),
+          succ = articles => Ok(views.html.profile(articles, user.get))
+        )
       case None =>
         NotFound(views.html.errors.notFound())
     }

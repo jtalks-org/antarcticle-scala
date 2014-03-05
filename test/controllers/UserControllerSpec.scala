@@ -66,6 +66,16 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       contentType(page) must beSome("text/html")
     }
 
+    "return 404 for non-existing page" in {
+      usersService.getByName(username) returns Some(user)
+      articlesService.getPageForUser(1, username, None) returns "Not found".failureNel
+
+      val page = controller.viewProfile(username, 1)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
+
     "support searching by tag" in {
       usersService.getByName(username) returns Some(user)
       articlesService.getPageForUser(1, username, Some("tag")) returns articles

@@ -161,6 +161,17 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
+    "return failure for non-exising page" in {
+      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns 1
+
+      articlesService.getPage(-15).fold(
+        fail = nel => ok,
+        succ = model => ko
+      )
+    }
+
     "filter articles by tag" in {
       val count = 3 * PAGE_SIZE/2
       tagsRepository.getByName(Some("tag"))(session) returns Some(new Tag(1, "tag"))

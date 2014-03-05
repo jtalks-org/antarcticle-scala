@@ -56,6 +56,15 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       contentAsString(page).contains(articleListModel.description) must beTrue
       there was one(articlesService).getPage(2, null)
     }
+
+    "return 404 for non-existing page" in {
+      articlesService.getPage(2, null) returns "Not found".failureNel
+
+      val page = controller.listAllArticles(2)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
   }
 
   "view article" should {

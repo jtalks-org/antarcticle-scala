@@ -14,16 +14,16 @@ class DeleteLinkHandler
   defaultOnSuccess: (data) => window.location = data
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess) ->
-    this.link = $(@selector)
-    this.link.click(=>
+    that = this
+    $(@selector).click( ->
       bootbox.confirm("Are you sure? This operation cannot be undone", (result) =>
         if result
           $.ajax({
-            url: this.link.attr('href'),
+            url: $(this).attr('href'),
             type: 'DELETE'
           })
-          .done((data) => @onSuccess(data))
-          .fail((data) => console.log("Operation " + this.link.attr('href') + " failed: " + data))
+          .done((data) =>  that.onSuccess(data))
+          .fail((data) => console.log("Operation " + $(this).attr('href') + " failed: " + data))
       )
       return false
     )

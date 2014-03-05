@@ -161,7 +161,7 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
-    "return failure for non-exising page" in {
+    "return failure for non-existing page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns 1

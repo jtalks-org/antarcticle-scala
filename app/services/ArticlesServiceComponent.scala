@@ -35,11 +35,11 @@ trait ArticlesServiceComponent {
 
   trait ArticlesService {
     def get(id: Int): Option[ArticleDetailsModel]
-    def getPage(page: Int, tag : Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
-    def getPageForUser(page: Int, userName : String, tag : Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
+    def getPage(page: Int, tag: Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
+    def getPageForUser(page: Int, userName: String, tag: Option[String] = None): ValidationNel[String, Page[ArticleListModel]]
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
     def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[ValidationNel[String, Unit]]]
-    def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, Boolean]
+    def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
   }
 }
 
@@ -99,15 +99,16 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         )
     }
 
-    def removeArticle(id: Int)(implicit principal: Principal) = withTransaction {
-      implicit session =>
-      // todo: handle non-existent id properly
-        val article = articlesRepository.get(id).get._1
-        principal match {
-          case currentUser: AuthenticatedUser if currentUser.can(Delete, article) =>
-            articlesRepository.remove(id).successNel
-          case _ => "Authorization failure".failureNel
-      }
+    def removeArticle(id: Int)(implicit principal: Principal) = withTransaction { implicit session =>
+      articlesRepository.get(id).map { case (article, _, _) => article }.cata(
+        some = persistentArticle => {
+          principal.doAuthorizedOrFail(Delete, persistentArticle) { () =>
+            articlesRepository.remove(id)
+            ()
+          }.successNel
+        },
+        none = "Article not found".failureNel
+      )
     }
 
     def get(id: Int) = withSession { implicit session =>

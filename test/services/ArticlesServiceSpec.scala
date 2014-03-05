@@ -281,10 +281,12 @@ class ArticlesServiceSpec extends Specification
     }
 
     "fail when user is not authorized to do it" in {
-      val currentUser = mock[AuthenticatedUser]
-      currentUser.can(Permissions.Create, Entities.Article) returns false
+      val currentUser = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(false)
+        .when(currentUser)
+        .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Article))
 
-      articlesService.insert(article)(AnonymousPrincipal) must beLike {
+      articlesService.insert(article)(currentUser) must beLike {
         case NotAuthorized() => ok
         case _ => ko
       }
@@ -293,19 +295,18 @@ class ArticlesServiceSpec extends Specification
 
   "article update" should {
     val articleId = 1
-    val tags = List("tag")
+    val tags = dbRecord._3
     val article = Article(articleId.some, "", "", tags)
-    val record = ArticleRecord(articleId.some, "", "", null, null, "", 1)
     implicit def getCurrentUser = {
       val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
       org.mockito.Mockito.doReturn(true)
         .when(usr)
-        .can(Matchers.eq(Permissions.Update), Matchers.eq(record))
+        .can(Matchers.eq(Permissions.Update), Matchers.eq(dbRecord._1))
       usr
     }
 
     "update existing article" in {
-      articlesRepository.get(articleId)(session) returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
@@ -316,7 +317,7 @@ class ArticlesServiceSpec extends Specification
 
     "update modification time" in {
       TimeFridge.withFrozenTime() { now =>
-        articlesRepository.get(articleId)(session)  returns Option(record, null, null)
+        articlesRepository.get(articleId)(session) returns dbRecord.some
         articleValidator.validate(any[Article]) returns article.successNel
         tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
@@ -327,7 +328,7 @@ class ArticlesServiceSpec extends Specification
     }
 
     "update tags" in {
-      articlesRepository.get(articleId)(session)  returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(articleId, tags)(session) returns Seq.empty.successNel
 
@@ -336,12 +337,35 @@ class ArticlesServiceSpec extends Specification
       there was one(tagsService).updateTagsForArticle(articleId, tags)(session)
     }
 
-    "return failure when tags validation failed" in pending
-    "return failure when article validation failed" in pending
-    "return failure when article not found" in pending
+    "return failure when tags validation failed" in {
+      articlesRepository.get(articleId)(session) returns dbRecord.some
+      articleValidator.validate(any[Article]) returns article.successNel
+      tagsService.updateTagsForArticle(articleId, tags)(session) returns "".failNel
+
+      articlesService.updateArticle(article) must beSuccessful.like {
+        case Authorized(Failure(_)) => ok
+        case _ => ko
+      }
+    }
+
+    "return failure when article validation failed" in {
+      articlesRepository.get(articleId)(session) returns dbRecord.some
+      articleValidator.validate(any[Article]) returns "".failNel
+
+      articlesService.updateArticle(article) must beSuccessful.like {
+        case Authorized(Failure(_)) => ok
+        case _ => ko
+      }
+    }
+
+    "return failure when article not found" in {
+      articlesRepository.get(articleId)(session) returns None
+
+      articlesService.updateArticle(article) must beFailing
+    }
 
     "not update article when tags validation failed" in {
-      articlesRepository.get(articleId)(session)  returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns "".failNel
 
@@ -351,7 +375,7 @@ class ArticlesServiceSpec extends Specification
     }
 
     "not update article when article validation failed" in {
-      articlesRepository.get(articleId)(session) returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns "".failNel
 
       articlesService.updateArticle(article)
@@ -359,12 +383,14 @@ class ArticlesServiceSpec extends Specification
       there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
     }
 
-    "fail when user is not authorized to do it" in {
-      val currentUser = mock[AuthenticatedUser]
-      articlesRepository.get(articleId)(session) returns Option(record, null, null)
-      currentUser.can(Permissions.Update, article) returns false
+    "return authorization failure when user is not authorized to do it" in {
+      val currentUser = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(false)
+        .when(currentUser)
+        .can(Matchers.eq(Permissions.Update), Matchers.eq(dbRecord._1))
+      articlesRepository.get(articleId)(session) returns dbRecord.some
 
-      articlesService.updateArticle(article)(AnonymousPrincipal) must beSuccessful.like {
+      articlesService.updateArticle(article)(currentUser) must beSuccessful.like {
         case NotAuthorized() => ok
         case _ => ko
       }
@@ -372,21 +398,43 @@ class ArticlesServiceSpec extends Specification
   }
 
   "article removal" should {
-    val record = ArticleRecord(None, "", "", null, null, "", 1)
+    val articleId = 1
     implicit def getCurrentUser = {
-      val usr = mock[AuthenticatedUser]
-      usr.userId returns 1
-      usr.username returns "user"
-      usr.can(Permissions.Delete, record) returns true
+      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(true)
+        .when(usr)
+        .can(Matchers.eq(Permissions.Delete), Matchers.eq(dbRecord._1))
       usr
     }
 
     "remove article" in {
-      articlesRepository.get(1)(session)  returns Option(record, null, null)
+      articlesRepository.get(articleId)(session) returns dbRecord.some
 
-      articlesService.removeArticle(1)
+      articlesService.removeArticle(articleId)
 
-      there was one(articlesRepository).remove(1)(session)
+      there was one(articlesRepository).remove(articleId)(session)
+    }
+
+    "return successful result" in {
+      articlesRepository.get(articleId)(session) returns dbRecord.some
+
+      articlesService.removeArticle(articleId) must beSuccessful.like {
+        case Authorized(()) => ok
+        case _ => ko
+      }
+    }
+
+    "return authorization failure when user is not authorized to do it" in {
+      val currentUser = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(false)
+        .when(currentUser)
+        .can(Matchers.eq(Permissions.Delete), Matchers.eq(dbRecord._1))
+      articlesRepository.get(articleId)(session) returns dbRecord.some
+
+      articlesService.removeArticle(articleId)(currentUser) must beSuccessful.like {
+        case NotAuthorized() => ok
+        case _ => ko
+      }
     }
   }
 }

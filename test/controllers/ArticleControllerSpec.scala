@@ -221,7 +221,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   "remove article" should {
 
     "delete requested article" in {
-      articlesService.removeArticle(articleId) returns true.successNel
+      articlesService.removeArticle(articleId) returns Authorized(()).successNel
 
       val page = controller.removeArticle(articleId)(FakeRequest("DELETE", "/"))
 
@@ -238,6 +238,14 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
       there was one(articlesService).removeArticle(articleId)
+    }
+
+    "return Unauthorized on authorization failure" in {
+      articlesService.removeArticle(articleId) returns NotAuthorized().successNel
+
+      val page = controller.removeArticle(articleId)(FakeRequest("DELETE", "/"))
+
+      status(page) must equalTo(401)
     }
   }
 }

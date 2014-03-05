@@ -102,10 +102,12 @@ class CommentsServiceSpec extends Specification
     }
 
     "fail when user is not authorized to do it" in {
-      val currentUser = mock[AuthenticatedUser]
-      currentUser.can(Permissions.Create, Entities.Comment) returns false
+      val currentUser = spy(AuthenticatedUser(1, "username", Authorities.User))
+      org.mockito.Mockito.doReturn(false)
+        .when(currentUser)
+        .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Comment))
 
-      commentsService.insert(articleId, content)(AnonymousPrincipal) must beLike {
+      commentsService.insert(articleId, content)(currentUser) must beLike {
         case NotAuthorized() => ok
         case _ => ko
       }

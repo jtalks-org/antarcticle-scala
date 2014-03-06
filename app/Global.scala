@@ -5,7 +5,6 @@ import play.api.mvc.Results._
 import play.api.mvc.RequestHeader
 import scala.concurrent.Future
 import security.AnonymousPrincipal
-import security.Authentication
 
 object Global extends play.api.GlobalSettings {
 
@@ -27,6 +26,6 @@ object Global extends play.api.GlobalSettings {
    * Setup global 404 (Not Found) page
    */
   override def onHandlerNotFound(request: RequestHeader): Future[play.api.mvc.SimpleResult] = {
-    Future(NotFound(views.html.errors.notFound()(AnonymousPrincipal)))
+    Future.successful(NotFound(views.html.errors.notFound()(AnonymousPrincipal)))
   }
 }

@@ -23,6 +23,9 @@ POST          /articles/:id/comments/:commentId    @controllers.CommentControlle
 # Users
 GET           /users/:name                         @controllers.UserController.viewProfile(name: String, page: Int ?= 1)
 # Static resources: styles, scripts, images, fonts, etc
-GET           /*file                               controllers.Assets.at(path="/public", file)
+GET           /stylesheets/:file                   controllers.Assets.at(path="/public/stylesheets", file)
+GET           /javascripts/:file                   controllers.Assets.at(path="/public/javascripts", file)
+GET           /images/:file                        controllers.Assets.at(path="/public/images", file)
+GET           /fonts/:file                         controllers.Assets.at(path="/public/fonts", file)
 
     

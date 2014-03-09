@@ -22,7 +22,7 @@ class Example(name: String) {
 
   "markdown to html" should {
     "produce extended syntax highlighting for code blocks" in {
-      val expectedCodeTag = "<code>"
+      val expectedCodeTag = "<code class='scala'>"
 
       Markdown.toHtml(fencedScalaBlock) must contain(expectedCodeTag)
     }
@@ -34,7 +34,7 @@ class Example(name: String) {
     }
 
     "recognize code blocks with preceding text" in {
-      val expectedCodeTag = "<code>"
+      val expectedCodeTag = "<code class='scala'>"
       val textWithCode = "\n" + fencedScalaBlock
 
       Markdown.toHtml(textWithCode) must contain(expectedCodeTag)

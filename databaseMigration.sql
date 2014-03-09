@@ -63,7 +63,7 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
     EXECUTE articles_tags_stmt;
     DEALLOCATE PREPARE articles_tags_stmt;
 
-    # 2nd step, correct the errors
+    # 2nd step, correct errors
 
     UPDATE articles
     SET content = REPLACE(content, '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
@@ -72,6 +72,10 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
     UPDATE comments
     SET content = REPLACE(content, '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
     WHERE content LIKE '%(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]%';
+
+    UPDATE articles
+    SET content = REPLACE(content, '```java', '```xml')
+    WHERE id=20;
 END
 //
 

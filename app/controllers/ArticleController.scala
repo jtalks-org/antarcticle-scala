@@ -106,7 +106,7 @@ trait ArticleController {
   def removeArticle(id: Int) = Action { implicit request =>
       articlesService.removeArticle(id).fold(
         fail = errors,
-        succ =  _ match {
+        succ =  {
           case Authorized(_) => Ok(routes.ArticleController.listAllArticles().absoluteURL())
           case NotAuthorized() => Unauthorized("Not authorized to remove this article")
         }

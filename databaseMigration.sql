@@ -22,6 +22,9 @@ delimiter //
 CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
 
   BEGIN
+
+    # 1st step, migrate existing data
+
     SET @database = old_database_name;
 
     SET @users_sql = concat(
@@ -60,6 +63,15 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
     EXECUTE articles_tags_stmt;
     DEALLOCATE PREPARE articles_tags_stmt;
 
+    # 2nd step, correct the errors
+
+    UPDATE articles
+    SET content = REPLACE(content, '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
+    WHERE content LIKE '%(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]%';
+
+    UPDATE comments
+    SET content = REPLACE(content, '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
+    WHERE content LIKE '%(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]%';
 END
 //
 

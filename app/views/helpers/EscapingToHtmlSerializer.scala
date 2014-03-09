@@ -23,7 +23,7 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
 
   override def visit(node: VerbatimNode) = {
     printer.print("<br><pre><code>")
-    printer.printEncoded(node.getText)
+    printer.printEncoded(node.getText.replaceAll("\\n\\n","\n").trim)
     printer.print("</code></pre>")
   }
 

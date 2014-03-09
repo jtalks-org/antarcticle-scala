@@ -3,12 +3,8 @@ package services
 import org.joda.time.DateTime
 import java.sql.Timestamp
 import repositories.{TagsRepositoryComponent, UsersRepositoryComponent, ArticlesRepositoryComponent}
-import models.database.{ArticleToUpdate, UserRecord, ArticleRecord}
-import models.ArticleModels.{Article, ArticleDetailsModel, ArticleListModel}
-import models.UserModels.UserModel
 import utils.Implicits._
 import conf.Constants
-import models.Page
 import scalaz._
 import Scalaz._
 import validators.{TagValidator, Validator}
@@ -16,9 +12,7 @@ import scala.slick.jdbc.JdbcBackend
 import security.Principal
 import security.Entities
 import security.Permissions._
-import security.AuthenticatedUser
 import security.Result._
-import scala.math._
 import models.database.ArticleToUpdate
 import models.Page
 import scala.Some

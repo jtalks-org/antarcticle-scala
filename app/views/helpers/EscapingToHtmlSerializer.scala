@@ -1,7 +1,7 @@
 package views.helpers
 
 import org.pegdown.{LinkRenderer, ToHtmlSerializer}
-import org.pegdown.ast.{VerbatimNode, InlineHtmlNode, HtmlBlockNode}
+import org.pegdown.ast.{CodeNode, VerbatimNode, InlineHtmlNode, HtmlBlockNode}
 import org.apache.commons.lang3.StringUtils
 
 /**
@@ -22,12 +22,10 @@ class EscapingToHtmlSerializer extends ToHtmlSerializer(new LinkRenderer){
   override def visit(node : InlineHtmlNode ) = printer.printEncoded(node.getText)
 
   override def visit(node: VerbatimNode) = {
-    printer.println().print("<pre class='prettyprint linenums'><code")
-    if (!StringUtils.isEmpty(node.getType)) {
-      printer.print(s" class='lang-${node.getType}'")
-    }
-    printer.print(">")
+    printer.print("<br><pre><code>")
     printer.printEncoded(node.getText)
     printer.print("</code></pre>")
   }
+
+  override def visit(node: CodeNode): Unit = super.visit(node)
 }

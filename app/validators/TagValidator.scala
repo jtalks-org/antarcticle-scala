@@ -1,12 +1,11 @@
 package validators
 
-import models.database.Tag
 import scalaz._
 import Scalaz._
 
 object TagValidator {
   val TAG_MAX_LENGTH = 30
-  val TAG_FORMAT = """(^[^\.][\p{L}\d\-#\s\?\+`'\.]+$)|(^\.[\p{L}\d\-#\s\?\+`'][\p{L}\d\-#\s\?\+`'\.]*$)"""
+  val TAG_FORMAT = """(^[\w\d]$)|(^[^\.][\p{L}\d\-#\s\?\+`'\.]+$)|(^\.[\p{L}\d\-#\s\?\+`'][\p{L}\d\-#\s\?\+`'\.]*$)"""
 }
 
 class TagValidator extends Validator[String] {
@@ -14,7 +13,7 @@ class TagValidator extends Validator[String] {
 
   def validate(tag: String): ValidationNel[String, String] = {
     def checkLength = if (tag.trim.length > TAG_MAX_LENGTH)
-                        s"Tag $tag is too long".failNel
+                        s"Tag $tag is too long, should not exceed $TAG_MAX_LENGTH characters".failNel
                       else
                         tag.successNel
 

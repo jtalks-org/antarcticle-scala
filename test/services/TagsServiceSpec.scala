@@ -33,7 +33,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
 
     "trim tags with trailing spaces" in {
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List[Tag]()
-      tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns (1 to tags.size)
+      tagsRepository.insertTags(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns (1 to tags.size)
       tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
@@ -47,18 +47,18 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val newTag = "tag1"
       val newTagId = 5
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns existingTags
-      tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(newTagId)
+      tagsRepository.insertTags(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(newTagId)
       tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
 
-      there was one(tagsRepository).insertAll(List(newTag))(FakeSessionValue)
+      there was one(tagsRepository).insertTags(List(newTag))(FakeSessionValue)
     }
 
     "create article association with new tags" in {
       val tagsIds = 1 to tags.size
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List[Tag]()
-      tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns tagsIds
+      tagsRepository.insertTags(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns tagsIds
       tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)(FakeSessionValue)
@@ -73,7 +73,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       val existingTag = Tag(1, "tag1")
       val newTagsIds = List(2, 3)
       tagsRepository.getByNames(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns List(existingTag)
-      tagsRepository.insertAll(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns newTagsIds
+      tagsRepository.insertTags(any[Seq[String]])(Matchers.eq(FakeSessionValue)) returns newTagsIds
       tagValidator.validate(any[String]) returns "".successNel
 
       tagsService.createTagsForArticle(1, tags)(FakeSessionValue)

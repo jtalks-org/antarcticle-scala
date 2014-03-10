@@ -38,10 +38,6 @@ Intellij Idea-like styling (c) Vasily Polovnyov <vast@whiteants.net>
   color: #808000;
 }
 
-.hljs-pi {
-  background: #efefef;
-}
-
 .hljs-tag .hljs-title,
 .hljs-id,
 .hljs-attr_selector,

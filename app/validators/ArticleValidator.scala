@@ -15,13 +15,16 @@ class ArticleValidator(tagValidator: Validator[String]) extends Validator[Articl
 
   def validate(article: Article): ValidationNel[String, Article] = {
     def checkContentLength = {
-      if (article.content.length > MAX_CONTENT_LENGTH) "Content is too long".failNel else article.successNel
+      if (article.content.length > MAX_CONTENT_LENGTH)
+        s"Article text should not exceed $MAX_CONTENT_LENGTH characters".failNel else article.successNel
     }
     def checkTitleLength = {
       if (article.title.trim.isEmpty) "Title should not be blank".failNel
-      else if (article.title.length > MAX_TITLE_LENGTH) "Title is too long".failNel else article.successNel
+      else if (article.title.length > MAX_TITLE_LENGTH)
+        s"Title should not exceed $MAX_TITLE_LENGTH characters".failNel else article.successNel
     }
-    def checkTagsCount = if (article.tags.length > MAX_TAGS_COUNT) "Too many tags".failNel else article.successNel
+    def checkTagsCount = if (article.tags.length > MAX_TAGS_COUNT)
+      s"At most $MAX_TAGS_COUNT tags are allowed".failNel else article.successNel
 
     def checkTags = article.tags.map(tagValidator.validate).toList.sequence[({type λ[α]=ValidationNel[String, α]})#λ, String]
 

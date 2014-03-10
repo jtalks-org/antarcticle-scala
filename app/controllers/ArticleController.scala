@@ -35,7 +35,9 @@ trait ArticleController {
     )((tag)=>tag)((tag)=>Some(tag))
   )
 
-  def listAllArticles(page: Int) = Action { implicit request =>
+  def listArticles() = listArticlesPaged(1)
+
+  def listArticlesPaged(page: Int) = Action { implicit request =>
     articlesService.getPage(page).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => Ok(views.html.articles(articlesPage))
@@ -107,7 +109,7 @@ trait ArticleController {
       articlesService.removeArticle(id).fold(
         fail = errors,
         succ =  {
-          case Authorized(_) => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+          case Authorized(_) => Ok(routes.ArticleController.listArticles().absoluteURL())
           case NotAuthorized() => Unauthorized("Not authorized to remove this article")
         }
       )
@@ -122,7 +124,7 @@ trait ArticleController {
             BadRequest(nel.list.mkString("<br>"))
           },
           //TODO provide a real implementation
-          succ = result => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+          succ = result => Ok(routes.ArticleController.listArticles().absoluteURL())
         )
       }
     )

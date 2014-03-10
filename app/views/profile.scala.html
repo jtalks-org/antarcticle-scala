@@ -18,7 +18,7 @@
             </ul>
           </div>
         </header>
-        @templates.bareArticleList(page, routes.UserController.viewProfile(userDetails.username, _))
+        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _))
         <div class="centralized-inputs clearfix">
           @if(page.totalPages == 0) {
             <h3>User has no articles.</h3>

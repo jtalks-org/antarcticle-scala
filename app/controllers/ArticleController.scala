@@ -5,7 +5,7 @@ import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
-import security.{AuthenticatedUser, AnonymousPrincipal, Authentication}
+import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import scalaz._
 import Scalaz._

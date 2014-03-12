@@ -14,7 +14,7 @@
     <strong>by </strong>
     <a href="@routes.UserController.viewProfile(userName)">@userName</a>
   </li>
-  @for(tag <- article.tags) {
+  @for(tag <- article.tags.distinct) {
     <li class="pull-right">
       <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
     </li>

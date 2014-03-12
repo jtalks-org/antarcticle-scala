@@ -23,8 +23,8 @@ class ArticleValidator(tagValidator: Validator[String]) extends Validator[Articl
       else if (article.title.length > MAX_TITLE_LENGTH)
         s"Title should not exceed $MAX_TITLE_LENGTH characters".failNel else article.successNel
     }
-    def checkTagsCount = if (article.tags.length > MAX_TAGS_COUNT)
-      s"At most $MAX_TAGS_COUNT tags are allowed".failNel else article.successNel
+    def checkTagsCount = if (article.tags.distinct.length > MAX_TAGS_COUNT)
+      s"At most $MAX_TAGS_COUNT different tags are allowed".failNel else article.successNel
 
     def checkTags = article.tags.map(tagValidator.validate).toList.sequence[({type λ[α]=ValidationNel[String, α]})#λ, String]
 

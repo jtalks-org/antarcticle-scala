@@ -1,0 +1,23 @@
+@(article: models.ArticleModels.Article, userName: String)
+@import views.helpers.Markdown
+<header>
+  <h2>@article.title</h2>
+</header>
+<hr>
+<div class="body">
+  <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
+</div>
+<hr>
+<ul class="breadcrumb preview-article-tags clearfix">
+  <li>
+    <i class="glyphicon glyphicon-user"></i>
+    <strong>by </strong>
+    <a href="@routes.UserController.viewProfile(userName)">@userName</a>
+  </li>
+  @for(tag <- article.tags) {
+    <li class="pull-right">
+      <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
+    </li>
+  }
+</ul>
+<hr>

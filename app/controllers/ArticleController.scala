@@ -5,7 +5,7 @@ import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
-import security.Authentication
+import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import scalaz._
 import Scalaz._
@@ -25,7 +25,7 @@ trait ArticleController {
       "title" -> text,
       "content" -> text,
       "tags" -> text
-    )((id, title, content, tags) => Article(id, title, content, tags.split(",").filter(!_.trim.isEmpty)))
+    )((id, title, content, tags) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty)))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
@@ -53,6 +53,20 @@ trait ArticleController {
 
   def getNewArticlePage = Action { implicit request =>
     Ok(views.html.createArticle(articleForm))
+  }
+
+  def previewArticle = Action { implicit request =>
+    articleForm.bindFromRequest.fold(
+      formWithErrors => errors(NonEmptyList("Incorrect request data")),
+      article => {
+        currentPrincipal match {
+          case user : AuthenticatedUser =>
+            Ok(views.html.templates.articlePreview(article, user.username))
+          case _ =>
+            Unauthorized("Please login first to create article previews")
+        }
+      }
+    )
   }
 
   def postNewArticle = Action { implicit request =>

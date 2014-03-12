@@ -10,6 +10,7 @@ GET           /signout                             @controllers.AuthenticationCo
 # Articles
 GET           /articles/page/:page                 @controllers.ArticleController.listArticlesPaged(page: Int)
 GET           /articles/new                        @controllers.ArticleController.getNewArticlePage
+POST          /articles/preview                    @controllers.ArticleController.previewArticle
 POST          /articles/new                        @controllers.ArticleController.postNewArticle
 GET           /articles/:id                        @controllers.ArticleController.viewArticle(id: Int)
 GET           /articles/edit/:id                   @controllers.ArticleController.editArticle(id: Int)

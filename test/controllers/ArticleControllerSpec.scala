@@ -10,7 +10,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
-import security.AnonymousPrincipal
+import security.{AuthenticatedUser, AnonymousPrincipal}
 import security.Result._
 import models.Page
 import scala.Some
@@ -35,6 +35,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     org.mockito.Mockito.reset(articlesService)
     org.mockito.Mockito.reset(usersRepository)
     org.mockito.Mockito.reset(commentsService)
+    controller.reset()
   }
 
   val now = DateTime.now.toDate
@@ -163,6 +164,38 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
+    }
+  }
+
+  "article preview" should {
+
+    val validRequest = FakeRequest("POST","/")
+      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"))
+    val badRequest = FakeRequest("POST","/")
+      .withFormUrlEncodedBody(("content", ""), ("tags","#$%^&"))
+    val article = controller.articleForm.bindFromRequest()(validRequest).get
+
+    "prepare preview if data is valid" in {
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
+
+      val page = controller.previewArticle()(validRequest)
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(article.title) must beTrue
+      contentAsString(page).contains(article.content) must beTrue
+    }
+
+    "report an error on bad request" in {
+      val page = controller.previewArticle()(badRequest)
+
+      status(page) must equalTo(400)
+    }
+
+    "return Unauthorized on authorization failure" in {
+      val page = controller.previewArticle()(validRequest)
+
+      status(page) must equalTo(401)
     }
   }
 

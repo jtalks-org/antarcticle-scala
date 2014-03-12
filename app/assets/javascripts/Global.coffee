@@ -1,11 +1,12 @@
 unless String::trim then String::trim = ->
-	@replace /^\s+|\s+$/g, ""
+  @replace /^\s+|\s+$/g, ""
 jQuery(=>
-	$(document).ready(=>
-		$('.trimmed-input').bind('blur', () ->
-			input = $(this)
-			input.val(input.val().trim()))
-		hljs.initHighlightingOnLoad();
-	)
+  $(document).ready(=>
+    $('.trimmed-input').bind('blur', () ->
+      input = $(this)
+      input.val(input.val().trim()))
+    hljs.initHighlightingOnLoad()
+    $("body").css("cursor", "default")
+  )
 )
 

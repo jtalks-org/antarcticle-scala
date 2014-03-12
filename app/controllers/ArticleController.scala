@@ -25,7 +25,7 @@ trait ArticleController {
       "title" -> text,
       "content" -> text,
       "tags" -> text
-    )((id, title, content, tags) => Article(id, title, content, tags.split(",").filter(!_.trim.isEmpty)))
+    )((id, title, content, tags) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty)))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 

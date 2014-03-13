@@ -1,12 +1,13 @@
+import controllers.filters.CsrfFilter
 import play.api.Logger
 import scala.concurrent.ExecutionContext
 import ExecutionContext.Implicits.global
 import play.api.mvc.Results._
-import play.api.mvc.RequestHeader
+import play.api.mvc.{WithFilters, RequestHeader}
 import scala.concurrent.Future
 import security.AnonymousPrincipal
 
-object Global extends play.api.GlobalSettings {
+object Global extends WithFilters(CsrfFilter)  {
 
   /*
    * Get controller instances as Application instance, because all controllers

@@ -50,7 +50,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       usersService.getByName(username) returns Some(user)
       articlesService.getPageForUser(1, username, None) returns articles
 
-      val page = controller.viewProfile(username, 1)(FakeRequest())
+      val page = controller.viewProfilePaged(username, 1)(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
@@ -60,7 +60,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
     "return 404 for missing user" in {
       usersService.getByName(username) returns None
 
-      val page = controller.viewProfile(username, 1)(FakeRequest())
+      val page = controller.viewProfilePaged(username, 1)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
@@ -70,7 +70,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       usersService.getByName(username) returns Some(user)
       articlesService.getPageForUser(1, username, None) returns "Not found".failureNel
 
-      val page = controller.viewProfile(username, 1)(FakeRequest())
+      val page = controller.viewProfilePaged(username, 1)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
@@ -80,7 +80,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       usersService.getByName(username) returns Some(user)
       articlesService.getPageForUser(1, username, Some("tag")) returns articles
 
-      val page = controller.viewProfile(username, 1, Some("tag"))(FakeRequest())
+      val page = controller.viewProfilePaged(username, 1, Some("tag"))(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")

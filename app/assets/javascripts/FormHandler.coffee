@@ -13,6 +13,7 @@
 class FormHandler
 
   defaultOnSuccess: (data) =>
+    $("body").css("cursor", "default")
     window.location.href = data
     if (window.location.href.split('#')[0] == data.split('#')[0])
       window.location.reload(true)
@@ -20,16 +21,21 @@ class FormHandler
   defaultOnFail: (data) =>
     $('.clear-on-resubmit').remove() # clear old validation messages, if any
     this.form.prepend(data.responseText)
+    $("body").css("cursor", "default")
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
     this.form = $(@selector)
-    this.form.submit( =>
+    this.form.submit(=>
+      $("body").css("cursor", "progress")
       $.post(this.form.attr('action'), this.form.serialize())
-        .done((data) => @onSuccess(data))
-        .fail((data) => @onFail(data))
+      .done((data) =>
+          @onSuccess(data))
+      .fail((data) =>
+          @onFail(data))
       return false
     )
 
 new FormHandler('.default-form')
 tagSearchHandler = new FormHandler('.tags-search-form')
-tagSearchHandler.onFail = ((data) => bootbox.alert(data.responseText))
+tagSearchHandler.onFail = ((data) =>
+  bootbox.alert(data.responseText))

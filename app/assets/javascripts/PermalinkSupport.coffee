@@ -4,7 +4,7 @@ class PermalinkSupport
 
   constructor: (@selector) ->
     $(@selector).click( ->
-      bootbox.alert(window.location + $(this).attr('href'))
+      bootbox.alert(window.location.toString().split('#')[0] + $(this).attr('href'))
       return false
     )
 

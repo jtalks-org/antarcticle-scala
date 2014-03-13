@@ -29,6 +29,7 @@ trait Controllers
   with ArticleController
   with AuthenticationController
   with UserController
+  with HelpController
   with CommentController {
   this: Services with SecurityComponent =>
 }

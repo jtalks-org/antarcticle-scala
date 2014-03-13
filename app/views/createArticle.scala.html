@@ -2,30 +2,34 @@
 @templates.main("New article") {
   <div class="row">
     <div class="col-md-9 center well2">
-      <header class="page-header">
+      <header class="page-header hide-on-preview">
         <h2><i class="glyphicon glyphicon-pencil"></i> New article</h2>
       </header>
       <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
+        <div class="hide-on-preview">
           <div class="form-group input-group article-input">
-              <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
-          </div>
-          <div class="form-group input-group article-input">
-              <i class="glyphicon glyphicon-info-sign"></i>
-              <label for="content" class="editor-hint">
-                  Editor uses Markdown markup language. You can read reference
-                  <a href="https://github.com/jtalks-org/antarcticle-scala/blob/master/Markdown-reference.md" target="_blank">here</a>.
-              </label>
-              <textarea id="content" name="content" class="form-control article-input"
-              placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
+            <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
           </div>
           <div class="form-group input-group article-input">
-              <input name="tags" class="form-control article-input" placeholder="Tags (comma-separated)" type="text" value="@form("tags").value"/>
+            <i class="glyphicon glyphicon-info-sign"></i>
+            <label for="content" class="editor-hint">
+              Editor uses Markdown markup language. You can read reference
+              <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
+            </label>
+            <textarea id="content" name="content" class="form-control article-input"
+            placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
           </div>
-          <div class="btn-toolbar pull-right clearfix">
-              <input class="btn btn-primary btn" type="submit" value="Create article" />
-              <a class="btn btn-success btn" href="@routes.ArticleController.listAllArticles(1)">Discard</a>
+          <div class="form-group input-group article-input">
+            <input name="tags" class="form-control article-input" placeholder="Tags (comma-separated)" type="text" value="@form("tags").value"/>
           </div>
-          <div class="clearfix"></div>
+        </div>
+        <div class="preview-panel"></div>
+        <div class="btn-toolbar pull-right clearfix">
+          <a class="btn btn-success preview-button" href="@routes.ArticleController.previewArticle()">Show preview</a>
+          <input class="btn btn-primary" type="submit" value="Create article" />
+          <a class="btn btn-danger" href="@routes.ArticleController.listArticles()">Discard</a>
+        </div>
+        <div class="clearfix"></div>
       </form>
     </div>
   </div>

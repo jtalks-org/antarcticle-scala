@@ -30,7 +30,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
         val existingTags = tagsRepository.getByNames(trimmedTags)
         val existingTagsNames = existingTags.map(_.name)
         val newTags = trimmedTags.filterNot(existingTagsNames.contains)
-        val newTagsIds = tagsRepository.insertAll(newTags)
+        val newTagsIds = tagsRepository.insertTags(newTags)
         val allTagsId = newTagsIds ++ existingTags.map(_.id)
         val articleTags = allTagsId.map((articleId, _))
         tagsRepository.insertArticleTags(articleTags)

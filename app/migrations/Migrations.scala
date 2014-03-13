@@ -24,4 +24,17 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("alter table comments modify content longtext").execute
     }
   }
+
+  /**
+   *  Non-null timestamps in MySQL by default are assigned with 'on update CURRENT_TIMESTAMP',
+   *  we obviously don't need it for 'created_at' fields
+   */
+  val removeDefaultOnUpdateConstraintFromTimestampField = new Migration {
+    val version = 3
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table articles change created_at created_at timestamp not null default current_timestamp").execute
+      Q.updateNA("alter table comments change created_at created_at timestamp not null default current_timestamp").execute
+    }
+  }
 }

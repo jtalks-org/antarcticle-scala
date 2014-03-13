@@ -13,7 +13,9 @@ import models.database.UserRecord
 trait UserController {
   this: Controller with ArticlesServiceComponent with UsersServiceComponent with Authentication  =>
 
-  def viewProfile(userName: String, page: Int, tag : Option[String] = None) = Action { implicit request =>
+  def viewProfile(userName: String, tag : Option[String] = None) = viewProfilePaged(userName, 1, tag)
+  
+  def viewProfilePaged(userName: String, page: Int, tag : Option[String] = None) = Action { implicit request =>
     usersService.getByName(userName) match {
       case user : Some[UserRecord] =>
         articlesService.getPageForUser(page, userName, tag).fold(

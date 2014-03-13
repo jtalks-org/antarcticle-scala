@@ -5,7 +5,7 @@ import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
-import security.Authentication
+import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import scalaz._
 import Scalaz._
@@ -25,7 +25,7 @@ trait ArticleController {
       "title" -> text,
       "content" -> text,
       "tags" -> text
-    )((id, title, content, tags) => Article(id, title, content, tags.split(",").filter(!_.isEmpty)))
+    )((id, title, content, tags) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty)))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
@@ -35,7 +35,9 @@ trait ArticleController {
     )((tag)=>tag)((tag)=>Some(tag))
   )
 
-  def listAllArticles(page: Int) = Action { implicit request =>
+  def listArticles() = listArticlesPaged(1)
+
+  def listArticlesPaged(page: Int) = Action { implicit request =>
     articlesService.getPage(page).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => Ok(views.html.articles(articlesPage))
@@ -51,6 +53,20 @@ trait ArticleController {
 
   def getNewArticlePage = Action { implicit request =>
     Ok(views.html.createArticle(articleForm))
+  }
+
+  def previewArticle = Action { implicit request =>
+    articleForm.bindFromRequest.fold(
+      formWithErrors => errors(NonEmptyList("Incorrect request data")),
+      article => {
+        currentPrincipal match {
+          case user : AuthenticatedUser =>
+            Ok(views.html.templates.articlePreview(article, user.username))
+          case _ =>
+            Unauthorized("Please login first to create article previews")
+        }
+      }
+    )
   }
 
   def postNewArticle = Action { implicit request =>
@@ -106,8 +122,8 @@ trait ArticleController {
   def removeArticle(id: Int) = Action { implicit request =>
       articlesService.removeArticle(id).fold(
         fail = errors,
-        succ =  _ match {
-          case Authorized(_) => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+        succ =  {
+          case Authorized(_) => Ok(routes.ArticleController.listArticles().absoluteURL())
           case NotAuthorized() => Unauthorized("Not authorized to remove this article")
         }
       )
@@ -122,7 +138,7 @@ trait ArticleController {
             BadRequest(nel.list.mkString("<br>"))
           },
           //TODO provide a real implementation
-          succ = result => Ok(routes.ArticleController.listAllArticles().absoluteURL())
+          succ = result => Ok(routes.ArticleController.listArticles().absoluteURL())
         )
       }
     )

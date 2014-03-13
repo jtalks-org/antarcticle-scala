@@ -40,7 +40,7 @@ public class MarkdownParser extends BaseParser<Object> implements Extensions {
 
   public RootNode parse(String source) {
     try {
-      RootNode root = parseInternal((source + "\n\n").toCharArray());
+      RootNode root = parseInternal(prepareSource(source));
       root.setAbbreviations(ImmutableList.copyOf(abbreviations));
       root.setReferences(ImmutableList.copyOf(references));
       return root;
@@ -48,6 +48,10 @@ public class MarkdownParser extends BaseParser<Object> implements Extensions {
       abbreviations.clear();
       references.clear();
     }
+  }
+
+  private char[] prepareSource(String input){
+    return (input.replaceAll("(\\n(\\s)*[*+-]\\s)","\n$1") + "\n\n").toCharArray();
   }
 
   //************* BLOCKS ****************
@@ -149,7 +153,7 @@ public class MarkdownParser extends BaseParser<Object> implements Extensions {
     return NodeSequence(
             NonindentSpace(),
             FirstOf(HorizontalRule('*'), HorizontalRule('-'), HorizontalRule('_')),
-            Sp(), Newline(), OneOrMore(BlankLine()),
+            Sp(), Newline(),
             push(new SimpleNode(Type.HRule))
     );
   }

@@ -17,11 +17,14 @@
 #    > call migrateDatabase('old_and_ugly_production_antarcticle_database');
 # 5. Refresh application page in browser and enjoy all the data migrated
 
-delimiter //
+DELIMITER //
 
 CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
 
   BEGIN
+
+# 1st step, migrate existing data
+
     SET @database = old_database_name;
 
     SET @users_sql = concat(
@@ -60,7 +63,33 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
     EXECUTE articles_tags_stmt;
     DEALLOCATE PREPARE articles_tags_stmt;
 
+# 2nd step, correct errors
+
+    UPDATE articles
+    SET content = REPLACE(content,
+                          '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
+    WHERE content LIKE '%(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]%';
+
+    UPDATE comments
+    SET content = REPLACE(content, '(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]', '(https://img.youtube.com/vi/aMQJnigGvfY/0.jpg)]')
+    WHERE content LIKE '%(https://www.youtube.com/watch?feature=player_embedded&v=aMQJnigGvfY/0.jpg)]%';
+
+    UPDATE articles
+    SET content = REPLACE(content, '```java', '``` XML ')
+    WHERE id=20;
+
+    UPDATE articles
+    SET content = REPLACE(content, '```\r\ns', '```no-highlight\r\ns')
+    WHERE id=12;
+
+    UPDATE articles
+    SET content = REPLACE(content, '\r\n1.', '\r\n\r\n1.')
+    WHERE id=6 OR id=3 OR id=2;
+
+    UPDATE articles
+    SET content = REPLACE(content, 'Но прозорливый читатель', '\r\nНо прозорливый читатель')
+    WHERE id=2;
 END
 //
 
-delimiter ;
+DELIMITER ;

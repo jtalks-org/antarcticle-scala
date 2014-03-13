@@ -118,19 +118,24 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       fetchPageFromDb(page, userId, tag)
     }
 
-    private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tag : Option[String] = None)(implicit s: JdbcBackend#Session) = {
+    private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tags : Option[String] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * (page - 1)
-      val tagId = tagsRepository.getByName(tag).map(_.id)
+
+      val tagsIds = tags match {
+        case Some(x) => tagsRepository.getByNames(x.split(" ")).map(_.id)
+        case None => Seq()
+      }
+      
       val total = userId.cata(
-        some = articlesRepository.countForUser(_, tagId),
-        none = articlesRepository.count(tagId)
+        some = articlesRepository.countForUser(_, tagsIds),
+        none = articlesRepository.count(tagsIds)
       )
       total match {
         case it if 1 until Page.getPageCount(it) + 1 contains page =>
           val list = userId.cata(
-            some = articlesRepository.getListForUser(_, offset, pageSize, tagId),
-            none = articlesRepository.getList(offset, pageSize, tagId)
+            some = articlesRepository.getListForUser(_, offset, pageSize, tagsIds),
+            none = articlesRepository.getList(offset, pageSize, tagsIds)
           )
           val modelsList = list.map((recordToListModel _).tupled)
           Page(page, total, modelsList).successNel

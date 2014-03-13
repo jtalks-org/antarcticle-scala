@@ -3,13 +3,13 @@ package repositories
 import org.specs2.mutable._
 
 import models.database._
-import scala.slick.jdbc.JdbcBackend
 import utils.Implicits._
 import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import util.TestDatabaseConfigurationWithFixtures
 
 import migrations.{MigrationTool, MigrationsContainer}
+
 class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
     with SlickArticlesRepositoryComponent
@@ -27,7 +27,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val offset = 0
       val portionSize = 2
 
-      val portion = articlesRepository.getList(offset, portionSize)
+      val portion = articlesRepository.getList(offset, portionSize, Seq())
 
       portion must have size 2
     }
@@ -38,26 +38,26 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val offset = 1
       val portionSize = 2
 
-      val portion = articlesRepository.getList(offset, portionSize)
+      val portion = articlesRepository.getList(offset, portionSize, Seq())
 
       val firstArticleInPortion = asArticle(portion(0))
       firstArticleInPortion.id must beSome(thirdArticleId)
     }
 
     "be sorted by creation time" in withTestDb { implicit session =>
-      val portion = articlesRepository.getList(0, 4)
+      val portion = articlesRepository.getList(0, 4, Seq())
 
       portion.map(asArticle(_).id.get) must contain(allOf(4, 3, 1, 2).inOrder)
     }
 
     "return article tags" in withTestDb { implicit session =>
-      val portion = articlesRepository.getList(0, 4)
+      val portion = articlesRepository.getList(0, 4, Seq())
 
       portion.map(asTags(_).length) must_== Seq(0, 0, 2, 2)
     }
 
     "return article author" in withTestDb { implicit session =>
-      val portion = articlesRepository.getList(0, 4)
+      val portion = articlesRepository.getList(0, 4, Seq())
 
       portion.map(asAuthor(_).id.get) must_== Seq(2, 2, 1, 2)
     }
@@ -66,7 +66,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val tagId = 1
       val tagName = "tag1"
 
-      val portion = articlesRepository.getList(0, 10, Some(tagId))
+      val portion = articlesRepository.getList(0, 10, Seq(tagId))
 
       portion.map(asTags(_).contains(tagName)) must_== Seq(true, true)
     }
@@ -76,7 +76,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
    "return articles created by user2" in withTestDb { implicit session =>
      val userId = 2
 
-     val portion = articlesRepository.getListForUser(userId, 0, 10)
+     val portion = articlesRepository.getListForUser(userId, 0, 10, Seq())
 
      portion.map(asAuthor(_).id) must contain((id: Option[Int]) => id must beSome(userId))
    }
@@ -86,7 +86,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
      val tagId = 1
      val tagName = "tag1"
 
-     val portion = articlesRepository.getListForUser(userId, 0, 10, Some(tagId))
+     val portion = articlesRepository.getListForUser(userId, 0, 10, Seq(tagId))
 
      portion.map(asTags(_).contains(tagName)) must_== Seq(true)
    }
@@ -182,11 +182,11 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
   "articles count" should {
     "return articles count" in withTestDb { implicit session: Session =>
-      articlesRepository.count(None) must_== 4
+      articlesRepository.count(Seq()) must_== 4
     }
 
     "return articles count for certain tag" in withTestDb { implicit session: Session =>
-      articlesRepository.count(Some(1)) must_== 2
+      articlesRepository.count(Seq(1)) must_== 2
     }
   }
 

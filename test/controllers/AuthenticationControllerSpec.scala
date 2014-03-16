@@ -14,6 +14,7 @@ import conf.Constants._
 import security.AuthenticatedUser
 import play.api.mvc.Cookie
 import scala.Some
+import org.mockito.Matchers
 
 class AuthenticationControllerSpec extends Specification with Mockito with AfterExample {
 
@@ -71,6 +72,20 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
       contentType(page) must beSome("text/html")
       cookies(page).get(rememberMeCookie) must beNone
     }
+
+    "trim username" in {
+      val notTrimmedUsername: String = " " + username + " "
+      val requestForTrim = FakeRequest("POST","/")
+        .withFormUrlEncodedBody(("login", notTrimmedUsername),("password", password))
+      securityService.signInUser(Matchers.eq(username), Matchers.eq(password)) returns
+        Future.successful((rememberMeToken, user).successNel)
+
+      val page = controller.login(requestForTrim)
+      status(page) must equalTo(200)
+      there was one(securityService).signInUser(Matchers.eq(username), Matchers.eq(password))
+      there was no(securityService).signInUser(Matchers.eq(notTrimmedUsername), Matchers.eq(password))
+    }
+
   }
 
   "logout action" should {

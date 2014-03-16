@@ -38,7 +38,7 @@ class FormHandler
 new FormHandler('.default-form')
 tagSearchHandler = new FormHandler('.tags-search-form')
 tagSearchHandler.onSuccess = ((data) =>
-  $("body").replaceWith(data)
+  document.body.innerHTML = data
 )
 tagSearchHandler.onFail = ((data) =>
   bootbox.alert(data.responseText))

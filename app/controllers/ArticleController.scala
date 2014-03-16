@@ -8,7 +8,6 @@ import models.ArticleModels.{ArticleDetailsModel, Article}
 import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import scalaz._
-import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -137,8 +136,7 @@ trait ArticleController {
           fail = nel => {
             BadRequest(nel.list.mkString("<br>"))
           },
-          //TODO provide a real implementation
-          succ = result => Ok(routes.ArticleController.listArticles().absoluteURL())
+          succ = articlesPage => Ok(views.html.articles(articlesPage))
         )
       }
     )

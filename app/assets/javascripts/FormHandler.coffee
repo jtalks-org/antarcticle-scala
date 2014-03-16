@@ -37,5 +37,9 @@ class FormHandler
 
 new FormHandler('.default-form')
 tagSearchHandler = new FormHandler('.tags-search-form')
+tagSearchHandler.onSuccess = ((data) =>
+  $("body").css("cursor", "default")
+  document.body.innerHTML = data
+)
 tagSearchHandler.onFail = ((data) =>
   bootbox.alert(data.responseText))

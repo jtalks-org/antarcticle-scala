@@ -9,7 +9,7 @@ import conf.Constants
  * @param list page contents
  * @tparam T type of the page elements
  */
-case class Page[T](currentPage: Int, totalItems: Int, list: Seq[T]) {
+case class Page[T](currentPage: Int, lastUsedTag: String, totalItems: Int, list: Seq[T]) {
 
   val totalPages = Page.getPageCount(totalItems)
   require(currentPage > 0, "Pages are numbered starting from 1")

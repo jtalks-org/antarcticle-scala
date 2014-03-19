@@ -34,10 +34,13 @@ trait ArticleController {
     )((tag)=>tag)((tag)=>Some(tag))
   )
 
-  def listArticles() = listArticlesPaged(1)
+  def listArticles() = listArticlesTaggedAndPaged(None, 1)
 
-  def listArticlesPaged(page: Int) = Action { implicit request =>
-    articlesService.getPage(page).fold(
+  def listArticlesPaged(tags: String, page: Int) = listArticlesTaggedAndPaged(Some(tags), page)
+
+  private def listArticlesTaggedAndPaged(tags: Option[String], page: Int) = Action {implicit request =>
+
+    articlesService.getPage(page, tags).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => Ok(views.html.articles(articlesPage))
     )
@@ -128,7 +131,7 @@ trait ArticleController {
       )
   }
 
-  def searchByTag() = Action { implicit request =>
+  def searchByTags() = Action { implicit request =>
     tagSearchForm.bindFromRequest().fold(
       formWithErrors => BadRequest("Invalid request"),
       tag => {

@@ -138,7 +138,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             none = articlesRepository.getList(offset, pageSize, tagsIds)
           )
           val modelsList = list.map((recordToListModel _).tupled)
-          Page(page, total, modelsList).successNel
+          Page(page, tags.getOrElse(""), total, modelsList).successNel
         case _ => "No such page exists".failureNel
       }
     }

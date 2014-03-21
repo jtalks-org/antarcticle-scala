@@ -10,12 +10,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
-import security.{AuthenticatedUser, AnonymousPrincipal}
-import security.Result._
+import security.AnonymousPrincipal
 import models.Page
+import security.Result.NotAuthorized
 import scala.Some
+import security.Result.Authorized
 import models.UserModels.UserModel
 import models.ArticleModels.ArticleDetailsModel
+import security.AuthenticatedUser
 import models.ArticleModels.ArticleListModel
 
 class ArticleControllerSpec extends Specification with Mockito with AfterExample{
@@ -40,14 +42,29 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   val now = DateTime.now.toDate
   val userModel = new UserModel(1, "name")
+  val notSetLastSearchTag = ""
   val articleId = 1
   val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq())
   val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
   implicit def principal = AnonymousPrincipal
 
-  "list all articles" should {
+  "list of all articles" should {
+    "return first page of all exist articles" in {
+      articlesService.getPage(1, None) returns new Page(1, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
+
+      val page = controller.listArticles()(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(articleListModel.title) must beTrue
+      contentAsString(page).contains(articleListModel.description) must beTrue
+      there was one(articlesService).getPage(1, None)
+    }
+  }
+
+  "paged list of tagged articles" should {
     "return a page with articles" in {
-      articlesService.getPage(2, Some("")) returns new Page(2, "", 1, Seq(articleListModel)).successNel
+      articlesService.getPage(2, Some("")) returns new Page(2, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
 
       val page = controller.listArticlesTaggedAndPaged("", 2)(FakeRequest())
 
@@ -62,6 +79,29 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       articlesService.getPage(2, Some("")) returns "Not found".failureNel
 
       val page = controller.listArticlesTaggedAndPaged("", 2)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "page list of articles" should {
+    "return passed page with articles without tags usage" in {
+      articlesService.getPage(3, None) returns new Page(3, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
+
+      val page = controller.listArticlesPaged(3)(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(articleListModel.title) must beTrue
+      contentAsString(page).contains(articleListModel.description) must beTrue
+      there was one(articlesService).getPage(3, None)
+    }
+
+    "return 404 for non-existing page" in {
+      articlesService.getPage(3, None) returns "Not found".failureNel
+
+      val page = controller.listArticlesPaged(3)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")

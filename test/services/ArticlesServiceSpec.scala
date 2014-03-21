@@ -204,6 +204,22 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
+    "search articles without quotes symbols" in {
+      val count = 3 * PAGE_SIZE/2
+      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns count
+
+      articlesService.getPage(1, Some("\'t\'ag\'")).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list.nonEmpty must beTrue
+          model.currentPage must_== 1
+          model.totalItems must_== count
+        }
+      )
+    }
+
     "handle nonexistent tags" in {
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq()
       articlesRepository.getList(0, PAGE_SIZE, Some(List()))(session) returns List(dbRecord)

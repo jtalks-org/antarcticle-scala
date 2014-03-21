@@ -38,6 +38,8 @@ trait ArticleController {
 
   def listArticlesPaged(tags: String, page: Int) = listArticlesTaggedAndPaged(Some(tags), page)
 
+  def listArticlesTemp(page: Int) = listArticlesTaggedAndPaged(None, page)
+
   private def listArticlesTaggedAndPaged(tags: Option[String], page: Int) = Action {implicit request =>
 
     articlesService.getPage(page, tags).fold(

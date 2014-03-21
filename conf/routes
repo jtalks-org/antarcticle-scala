@@ -9,6 +9,7 @@ POST          /signin        @controllers.AuthenticationController.login
 GET           /signout        @controllers.AuthenticationController.logout
 # Articles
 GET           /articles/tags/:tags/page/:page        @controllers.ArticleController.listArticlesPaged(tags: String, page: Int)
+GET           /articles/page/:page        @controllers.ArticleController.listArticlesTemp(page: Int)
 GET           /articles/new        @controllers.ArticleController.getNewArticlePage
 POST          /articles/preview        @controllers.ArticleController.previewArticle
 POST          /articles/new        @controllers.ArticleController.postNewArticle

@@ -124,7 +124,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
       val tagsIds = tags match {
         case Some(tagsValues) => {
-          val foundTagsIds = tagsRepository.getByNames(tagsValues.split(" ")).map(_.id)
+          val quote = '\''
+          val foundTagsIds = tagsRepository.getByNames(tagsValues.filterNot(c => c == quote).split(" ")).map(_.id)
           if (foundTagsIds.isEmpty) {
             None
           } else {

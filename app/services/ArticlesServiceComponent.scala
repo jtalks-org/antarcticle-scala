@@ -123,8 +123,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       val offset = pageSize * (page - 1)
 
       val tagsIds = tags match {
-        case Some(x) => tagsRepository.getByNames(x.split(" ")).map(_.id)
-        case None => Seq()
+        case Some(x) => Some(tagsRepository.getByNames(x.split(" ")).map(_.id))
+        case None => None
       }
       
       val total = userId.cata(

@@ -93,7 +93,7 @@ class ArticlesServiceSpec extends Specification
 
       articlesService.getPage(2)
 
-      there was one(articlesRepository).getList(PAGE_SIZE, PAGE_SIZE, Seq())(session)
+      there was one(articlesRepository).getList(PAGE_SIZE, PAGE_SIZE, None)(session)
     }
 
     "contain list models" in {
@@ -175,7 +175,7 @@ class ArticlesServiceSpec extends Specification
     "filter articles by tag" in {
       val count = 3 * PAGE_SIZE/2
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
-      articlesRepository.getList(0, PAGE_SIZE, Seq(1))(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
      articlesService.getPage(1, Some("tag")).fold(
@@ -190,7 +190,7 @@ class ArticlesServiceSpec extends Specification
 
     "handle nonexistent tags" in {
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq()
-      articlesRepository.getList(0, PAGE_SIZE, Seq())(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1, Some("tag")).fold(

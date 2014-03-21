@@ -12,9 +12,9 @@ trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository
 
   trait ArticlesRepository {
-    def getList(offset: Int, portionSize: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
+    def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
 
-    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
+    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
 
     def get(id: Int)(implicit s: JdbcBackend#Session): Option[(ArticleRecord, UserRecord, Seq[String])]
 
@@ -24,9 +24,9 @@ trait ArticlesRepositoryComponent {
 
     def remove(id: Int)(implicit s: JdbcBackend#Session): Boolean
 
-    def count(tagsIds: Seq[Int])(implicit s: JdbcBackend#Session): Int
+    def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
 
-    def countForUser(userId: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session): Int
+    def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
   }
 
 }
@@ -70,18 +70,18 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
   class SlickArticlesRepository extends ArticlesRepository {
 
-    def getList(offset: Int, portionSize: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session) = {
+    def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Seq(x, xs @ _*) =>  articles.byTags(tagsIds).portion(offset, portionSize).list.map(fetchTags)
-        case Seq()           =>  articles.portion(offset, portionSize).list.map(fetchTags)
+        case Some(x) =>  articles.byTags(x).portion(offset, portionSize).list.map(fetchTags)
+        case None =>  articles.portion(offset, portionSize).list.map(fetchTags)
       }
 
     }
 
-    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session) = {
+    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Seq(x, xs @ _*) =>  articles.byAuthor(userId).byTags(tagsIds).portion(offset, portionSize).list.map(fetchTags)
-        case Seq()           =>  articles.byAuthor(userId).portion(offset, portionSize).list.map(fetchTags)
+        case Some(x) =>  articles.byAuthor(userId).byTags(x).portion(offset, portionSize).list.map(fetchTags)
+        case None =>  articles.byAuthor(userId).portion(offset, portionSize).list.map(fetchTags)
       }
     }
 
@@ -102,24 +102,17 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.byId(id).delete > 0
     }
 
-    def count(tagsIds: Seq[Int])(implicit s: JdbcBackend#Session) = {
+    def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Seq(x, xs @ _*) =>  articles.byTags(tagsIds).length.run
-        case Seq()           =>  articles.length.run
+        case Some(x) =>  articles.byTags(tagsIds.get).length.run
+        case None =>  articles.length.run
       }
     }
 
-    def countForUser(userId: Int, tagId: Option[Int] = None)(implicit s: JdbcBackend#Session) = {
-      tagId.cata(
-        some = articles.byTag(_),
-        none = articles
-      ).filter(_.authorId === userId).length.run
-    }
-
-    def countForUser(userId: Int, tagsIds: Seq[Int])(implicit s: JdbcBackend#Session): Int = {
+    def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int = {
       tagsIds match {
-        case Seq(x, xs @ _*) =>  articles.byTags(tagsIds).filter(_.authorId === userId).length.run
-        case Seq()           =>  articles.filter(_.authorId === userId).length.run
+        case Some(x) =>  articles.byTags(tagsIds.get).filter(_.authorId === userId).length.run
+        case None =>  articles.filter(_.authorId === userId).length.run
       }
     }
 

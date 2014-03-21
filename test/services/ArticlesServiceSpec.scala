@@ -174,11 +174,11 @@ class ArticlesServiceSpec extends Specification
 
     "filter articles by tag" in {
       val count = 3 * PAGE_SIZE/2
-      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tags"))
+      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
       articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
-     articlesService.getPage(1, Some("tag")).fold(
+      articlesService.getPage(1, Some("tag")).fold(
        fail = nel => ko,
        succ = model => {
          model.list.nonEmpty must beTrue
@@ -186,6 +186,22 @@ class ArticlesServiceSpec extends Specification
          model.totalItems must_== count
        }
      )
+    }
+
+    "filter articles by more than one tag" in {
+      val count = 3 * PAGE_SIZE/2
+      tagsRepository.getByNames(Seq("first", "second"))(session) returns Seq(new Tag(1, "first"), new Tag(2, "second"))
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1, 2)))(session) returns List(dbRecord)
+      articlesRepository.count(any)(Matchers.eq(session)) returns count
+
+      articlesService.getPage(1, Some("first second")).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list.nonEmpty must beTrue
+          model.currentPage must_== 1
+          model.totalItems must_== count
+        }
+      )
     }
 
     "handle nonexistent tags" in {

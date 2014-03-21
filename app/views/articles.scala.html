@@ -22,9 +22,9 @@
         }
       </div>
         @if(page.lastUsedTag.isEmpty) {
-            @templates.bareArticleList(page, routes.ArticleController.listArticlesTemp(_))
+            @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(_))
         } else {
-            @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(page.lastUsedTag, _))
+            @templates.bareArticleList(page, routes.ArticleController.listArticlesTaggedAndPaged(page.lastUsedTag, _))
         }
 
     </div>

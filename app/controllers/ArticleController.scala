@@ -34,14 +34,13 @@ trait ArticleController {
     )((tag)=>tag)((tag)=>Some(tag))
   )
 
-  def listArticles() = listArticlesTaggedAndPaged(None, 1)
+  def listArticles() = listArticlesBy(None, 1)
 
-  def listArticlesPaged(tags: String, page: Int) = listArticlesTaggedAndPaged(Some(tags), page)
+  def listArticlesTaggedAndPaged(tags: String, page: Int) = listArticlesBy(Some(tags), page)
 
-  def listArticlesTemp(page: Int) = listArticlesTaggedAndPaged(None, page)
+  def listArticlesPaged(page: Int) = listArticlesBy(None, page)
 
-  private def listArticlesTaggedAndPaged(tags: Option[String], page: Int) = Action {implicit request =>
-
+  private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => Ok(views.html.articles(articlesPage))

@@ -109,13 +109,13 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       articlesRepository.get(id).map((recordToDetailsModel _).tupled)
     }
 
-    def getPage(page: Int, tag : Option[String] = None) = withSession { implicit session =>
-      fetchPageFromDb(page, None, tag)
+    def getPage(page: Int, tags : Option[String] = None) = withSession { implicit session =>
+      fetchPageFromDb(page, None, tags)
     }
 
-    def getPageForUser(page: Int, userName: String, tag : Option[String] = None) = withSession { implicit session =>
+    def getPageForUser(page: Int, userName: String, tags : Option[String] = None) = withSession { implicit session =>
       val userId = usersRepository.getByUsername(userName).get.id
-      fetchPageFromDb(page, userId, tag)
+      fetchPageFromDb(page, userId, tags)
     }
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tags : Option[String] = None)(implicit s: JdbcBackend#Session) = {
@@ -123,12 +123,12 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       val offset = pageSize * (page - 1)
 
       val tagsIds = tags match {
-        case Some(x) => {
-          val ids = tagsRepository.getByNames(x.split(" ")).map(_.id)
-          if (ids.isEmpty) {
+        case Some(tagsValues) => {
+          val foundTagsIds = tagsRepository.getByNames(tagsValues.split(" ")).map(_.id)
+          if (foundTagsIds.isEmpty) {
             None
           } else {
-            Some(ids)
+            Some(foundTagsIds)
           }
         }
         case None => None

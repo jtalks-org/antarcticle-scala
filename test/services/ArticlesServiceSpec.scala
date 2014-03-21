@@ -174,7 +174,7 @@ class ArticlesServiceSpec extends Specification
 
     "filter articles by tag" in {
       val count = 3 * PAGE_SIZE/2
-      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
+      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tags"))
       articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 

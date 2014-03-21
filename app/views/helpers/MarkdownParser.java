@@ -397,8 +397,8 @@ public class MarkdownParser extends BaseParser<Object> implements Extensions {
   public Rule HtmlBlockInTags() {
     StringVar tagName = new StringVar();
     return Sequence(
-            Test(HtmlBlockOpen(tagName)), // get the type of tag if there is one
-            HtmlTagBlock(tagName) // specifically match that type of tag
+            Test(HtmlBlockOpen(tagName)), // get the type of tags if there is one
+            HtmlTagBlock(tagName) // specifically match that type of tags
     );
   }
 

@@ -80,8 +80,8 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Some(x) =>  articles.byAuthor(userId).byTags(x).portion(offset, portionSize).list.map(fetchTags)
-        case None =>  articles.byAuthor(userId).portion(offset, portionSize).list.map(fetchTags)
+        case Some(ids) => articles.byAuthor(userId).byTags(ids).portion(offset, portionSize).list.map(fetchTags)
+        case None => articles.byAuthor(userId).portion(offset, portionSize).list.map(fetchTags)
       }
     }
 
@@ -104,15 +104,15 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Some(x) =>  articles.byTags(tagsIds.get).length.run
+        case Some(ids) =>  articles.byTags(tagsIds.get).length.run
         case None =>  articles.length.run
       }
     }
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int = {
       tagsIds match {
-        case Some(x) =>  articles.byTags(tagsIds.get).filter(_.authorId === userId).length.run
-        case None =>  articles.filter(_.authorId === userId).length.run
+        case Some(ids) => articles.byTags(tagsIds.get).filter(_.authorId === userId).length.run
+        case None => articles.filter(_.authorId === userId).length.run
       }
     }
 

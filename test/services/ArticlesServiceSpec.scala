@@ -206,7 +206,7 @@ class ArticlesServiceSpec extends Specification
 
     "handle nonexistent tags" in {
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq()
-      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, Some(List()))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1, Some("tag")).fold(

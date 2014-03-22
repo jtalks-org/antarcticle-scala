@@ -230,6 +230,21 @@ class ArticlesServiceSpec extends Specification
         succ = model => model.list.nonEmpty must beTrue
       )
     }
+
+    "search all articles when tags are empty" in {
+      val count = 3 * PAGE_SIZE/2
+      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
+      articlesRepository.count(None)(session) returns count
+
+      articlesService.getPage(1, Some("")).fold(
+        fail = nel => ko,
+        succ = model => {
+          model.list.nonEmpty must beTrue
+          model.currentPage must_== 1
+          model.totalItems must_== count
+        }
+      )
+    }
   }
 
   "creating new article" should {

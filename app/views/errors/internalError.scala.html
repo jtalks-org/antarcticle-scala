@@ -1,12 +1,12 @@
 @()(implicit user: Principal = security.AnonymousPrincipal)
-@templates.main("Page not found"){
+@templates.main("Internal service error"){
   <div class="hero-unit">
     <div class="container">
       <div class="row">
         <div class="text-center">
-          <h1 class="error-title">Oops, 404!</h1>
+          <h1 class="error-title">Error 500</h1>
           <p class="lead">
-            The page you were looking for could not be found
+            Internal server error
           </p>
         </div>
       </div>
@@ -17,7 +17,7 @@
       <div class="col-md-10 col-md-offset-1">
         <h2>Why am I seeing this?</h2>
         <br/>
-        <p>It turns out that we have no suitable page for this address. This may happen due to a typo in address itself, or the page has been deleted by an administrator altogether. You may try to correct an address and hit the refresh button. </p>
+        <p>Server is not able to process your request now, it may be overloaded, under maintenance or down altogether. The error has been recorded and a team of highly-trained monkeys is already on it's way to fix the problem.</p>
         <br/>
         <p><a class="btn btn-info" href="@routes.ArticleController.listArticles()">Just take me out of here!</a></p>
       </div>

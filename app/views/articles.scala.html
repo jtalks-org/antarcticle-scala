@@ -7,7 +7,15 @@
         <div class="tag-search pull-left">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.searchByTags">
             <div class="bootstrap-tagsinput">
-              <input type="text" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter">
+              <input type="text" style="display: none;" name="tag" id="tags_filter" placeholder="Tags filter">
+              <input type="text" class="form-control tags-inner-input" placeholder="Tags filter">
+              @if(!page.lastUsedTags.isEmpty) {
+                  <ul class="tags-input">
+                  @for( tag <- page.lastUsedTags.split(" ")) {
+                    <li>@tag<a href="#" class="remove-tag">x</a></li>
+                  }
+                  </ul>
+              }
             </div>
             <button class="btn btn-sm btn-info tag-search-button">Find</button>
           </form>
@@ -21,10 +29,10 @@
           </div>
         }
       </div>
-        @if(page.lastUsedTag.isEmpty) {
+        @if(page.lastUsedTags.isEmpty) {
             @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(_))
         } else {
-            @templates.bareArticleList(page, routes.ArticleController.listArticlesTaggedAndPaged(page.lastUsedTag, _))
+            @templates.bareArticleList(page, routes.ArticleController.listArticlesTaggedAndPaged(page.lastUsedTags, _))
         }
 
     </div>

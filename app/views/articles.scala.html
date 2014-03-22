@@ -4,19 +4,13 @@
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">
-        <div class="tag-search pull-left" style="line-height:41px;margin-left:70px">
+        <div class="tag-search pull-left">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.searchByTags">
-              <input type="text" style="display: none;" name="tag" id="tags_filter" placeholder="Tags filter">
-              <ul class="tags-input">
-                  <input type="text" class="form-control tags-inner-input" placeholder="Tags filter">
-                  @for( tag <- page.lastUsedTags.split(" ")) {
-                    @if(!tag.isEmpty) {
-                        <li>@tag<a href="#" class="remove-tag">x</a></li>
-                    }
-                  }
-              </ul>
-            <button id="search_by_tags" class="btn btn-sm btn-info tag-search-button">Find</button>
-          </form>
+            <div class="bootstrap-tagsinput">
+                <input type="text" data-role="tagsinput" value="@page.lastUsedTags" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter" >
+            </div>
+            <button class="btn btn-sm btn-info tag-search-button">Find</button>
+           </form>
         </div>
         @if(user.can(Create, Article)) {
           <div class="pull-right create-article-button">

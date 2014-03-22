@@ -10,7 +10,7 @@
 # Selector and actions are customizable, just create your own FormHandler instance with
 # all necessary suff set as constructor parameters.
 
-class BaseFormHandler
+class FormHandler extends BaseFormHandler
 
   defaultOnSuccess: (data) =>
     $("body").css("cursor", "default")
@@ -22,8 +22,6 @@ class BaseFormHandler
     $('.clear-on-resubmit').remove() # clear old validation messages, if any
     this.form.prepend(data.responseText)
     $("body").css("cursor", "default")
-
-class FormHandler extends BaseFormHandler
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
     this.form = $(@selector)
@@ -37,25 +35,6 @@ class FormHandler extends BaseFormHandler
       return false
     )
 
-class GetFormHandler extends BaseFormHandler
-
-  constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
-    this.form = $(@selector)
-    this.form.submit(=>
-      $("body").css("cursor", "progress")
-      $.get(this.form.attr('action'), this.form.serialize())
-      .done((data) =>
-          @onSuccess(data))
-      .fail((data) =>
-          @onFail(data))
-      return false
-    )
 
 new FormHandler('.default-form')
-tagSearchHandler = new GetFormHandler('.tags-search-form')
-tagSearchHandler.onSuccess = ((data) =>
-  $("body").css("cursor", "default")
-  document.body.innerHTML = data
-)
-tagSearchHandler.onFail = ((data) =>
-  bootbox.alert(data.responseText))
+

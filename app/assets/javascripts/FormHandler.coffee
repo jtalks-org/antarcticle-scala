@@ -10,7 +10,7 @@
 # Selector and actions are customizable, just create your own FormHandler instance with
 # all necessary suff set as constructor parameters.
 
-class FormHandler extends BaseFormHandler
+class FormHandler
 
   defaultOnSuccess: (data) =>
     $("body").css("cursor", "default")

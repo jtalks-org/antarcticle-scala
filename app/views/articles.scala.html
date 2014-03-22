@@ -4,12 +4,12 @@
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">
-          <form class="tags-search-form" method="get" action="@routes.ArticleController.searchByTags">
-            <div class="bootstrap-tagsinput">
-                <input type="text" data-role="tagsinput" value="@page.lastUsedTags" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter" >
-            </div>
-            <button class="btn btn-sm btn-info tag-search-button">Find</button>
-           </form>
+       <form class="tags-search-form" method="get" action="@routes.ArticleController.searchByTags">
+          <div class="bootstrap-tagsinput">
+             <input type="text" data-role="tagsinput" value="@page.lastUsedTags" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter" >
+           </div>
+           <button class="btn btn-sm btn-info tag-search-button">Find</button>
+        </form>
         @if(user.can(Create, Article)) {
           <div class="pull-right create-article-button">
             <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">

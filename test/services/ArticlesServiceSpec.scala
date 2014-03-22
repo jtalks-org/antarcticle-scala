@@ -194,7 +194,7 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1, 2)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
-      articlesService.getPage(1, Some("first second")).fold(
+      articlesService.getPage(1, Some("first,second")).fold(
         fail = nel => ko,
         succ = model => {
           model.list.nonEmpty must beTrue

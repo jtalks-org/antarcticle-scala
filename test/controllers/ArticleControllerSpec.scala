@@ -42,7 +42,6 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   val now = DateTime.now.toDate
   val userModel = new UserModel(1, "name")
-  val notSetLastSearchTag = ""
   val articleId = 1
   val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq())
   val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
@@ -50,7 +49,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "list of all articles" should {
     "return first page of all exist articles" in {
-      articlesService.getPage(1, None) returns new Page(1, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
+      articlesService.getPage(1, None) returns new Page(1, 1, Seq(articleListModel)).successNel
 
       val page = controller.listArticles()(FakeRequest())
 
@@ -64,7 +63,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "paged list of tagged articles" should {
     "return a page with articles" in {
-      articlesService.getPage(2, Some("")) returns new Page(2, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
+      articlesService.getPage(2, Some("")) returns new Page(2, 1, Seq(articleListModel)).successNel
 
       val page = controller.listArticlesTaggedAndPaged("", 2)(FakeRequest())
 
@@ -87,7 +86,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "page list of articles" should {
     "return passed page with articles without tags usage" in {
-      articlesService.getPage(3, None) returns new Page(3, notSetLastSearchTag, 1, Seq(articleListModel)).successNel
+      articlesService.getPage(3, None) returns new Page(3, 1, Seq(articleListModel)).successNel
 
       val page = controller.listArticlesPaged(3)(FakeRequest())
 

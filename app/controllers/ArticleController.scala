@@ -43,7 +43,7 @@ trait ArticleController {
   private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(
       fail => NotFound(views.html.errors.notFound()),
-      succ = articlesPage => Ok(views.html.articles(articlesPage))
+      succ = articlesPage => Ok(views.html.articles(articlesPage, tags.getOrElse("")))
     )
   }
 
@@ -140,7 +140,7 @@ trait ArticleController {
           fail = nel => {
             BadRequest(nel.list.mkString("<br>"))
           },
-          succ = articlesPage => Ok(views.html.articles(articlesPage))
+          succ = articlesPage => Ok(views.html.articles(articlesPage, tag))
         )
       }
     )

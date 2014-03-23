@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel])(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], lastUsedTags: String = "")(implicit user: Principal)
 
 @templates.main("Articles") {
   <div class="row">
@@ -6,7 +6,7 @@
       <div class="clearfix">
        <form class="tags-search-form" method="get" action="@routes.ArticleController.searchByTags">
           <div class="bootstrap-tagsinput">
-             <input type="text" data-role="tagsinput" value="@page.lastUsedTags" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter" >
+             <input type="text" data-role="tagsinput" value="@lastUsedTags" class="form-control tags-inner-input" name="tag" id="tags_filter" placeholder="Tags filter" >
            </div>
            <button class="btn btn-sm btn-info tag-search-button">Find</button>
         </form>
@@ -19,12 +19,11 @@
           </div>
         }
       </div>
-        @if(page.lastUsedTags.isEmpty) {
+        @if(lastUsedTags.isEmpty) {
             @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(_))
         } else {
-            @templates.bareArticleList(page, routes.ArticleController.listArticlesTaggedAndPaged(page.lastUsedTags, _))
+            @templates.bareArticleList(page, routes.ArticleController.listArticlesTaggedAndPaged(lastUsedTags, _))
         }
-
     </div>
   </div>
 }

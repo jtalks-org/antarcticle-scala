@@ -118,18 +118,19 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       fetchPageFromDb(page, userId, tags)
     }
 
-    private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tags : Option[String] = None)(implicit s: JdbcBackend#Session) = {
+    private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tagsString : Option[String] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * (page - 1)
 
-      val tagsIds = tags match {
+      val tagsIds = tagsString match {
         case Some(tagsValues) => {
           val isTagsNotEmpty = tagsValues == null || tagsValues.isEmpty
           if (isTagsNotEmpty) {
             None
           } else {
-            val quote = '\''
-            val foundTagsIds = tagsRepository.getByNames(tagsValues.filterNot(c => c == quote).split(",")).map(_.id)
+            val tags = tagsValues.split(",")
+            val validTagsList = for(tag <- tags if tagValidator.validate(tag).isSuccess) yield tag
+            val foundTagsIds = tagsRepository.getByNames(validTagsList).map(_.id)
             Some(foundTagsIds)
           }
         }
@@ -147,7 +148,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             none = articlesRepository.getList(offset, pageSize, tagsIds)
           )
           val modelsList = list.map((recordToListModel _).tupled)
-          Page(page, tags.getOrElse(""), total, modelsList).successNel
+          Page(page, tagsString.getOrElse(""), total, modelsList).successNel
         case _ => "No such page exists".failureNel
       }
     }

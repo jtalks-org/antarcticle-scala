@@ -177,6 +177,7 @@ class ArticlesServiceSpec extends Specification
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
       articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
+      tagValidator.validate("tag") returns "tag".successNel
 
       articlesService.getPage(1, Some("tag")).fold(
        fail = nel => ko,
@@ -193,6 +194,8 @@ class ArticlesServiceSpec extends Specification
       tagsRepository.getByNames(Seq("first", "second"))(session) returns Seq(new Tag(1, "first"), new Tag(2, "second"))
       articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1, 2)))(session) returns List(dbRecord)
       articlesRepository.count(any)(Matchers.eq(session)) returns count
+      tagValidator.validate("first") returns "first".successNel
+      tagValidator.validate("second") returns "second".successNel
 
       articlesService.getPage(1, Some("first,second")).fold(
         fail = nel => ko,
@@ -204,18 +207,18 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
-    "search articles without quotes symbols" in {
-      val count = 3 * PAGE_SIZE/2
-      tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
-      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
-      articlesRepository.count(any)(Matchers.eq(session)) returns count
+    "should not search by not valid tags" in {
+      tagsRepository.getByNames(Seq())(session) returns Seq()
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq()))(session) returns List()
+      articlesRepository.count(any)(Matchers.eq(session)) returns 0
+      tagValidator.validate("\'t\'ag\'") returns "".failNel
+      tagValidator.validate("ta\\g") returns "".failNel
 
-      articlesService.getPage(1, Some("\'t\'ag\'")).fold(
+      articlesService.getPage(1, Some("\'t\'ag\',ta\\g")).fold(
         fail = nel => ko,
         succ = model => {
-          model.list.nonEmpty must beTrue
-          model.currentPage must_== 1
-          model.totalItems must_== count
+          model.list.nonEmpty must beFalse
+          model.totalItems must_== 0
         }
       )
     }

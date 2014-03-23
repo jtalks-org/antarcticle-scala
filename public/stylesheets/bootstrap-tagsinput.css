@@ -6,6 +6,7 @@
   vertical-align: middle;
   border-radius: 4px;
   max-width: 100%;
+  min-width: 25%;
   line-height: 22px;
 }
 .bootstrap-tagsinput input {

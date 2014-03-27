@@ -63,12 +63,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId === tagId).map(_._1)
     }
 
-    def byTags(tagsIds: Seq[Int]) = {
-      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1)
+    def idsByTags(tagsIds: Seq[Int]) = {
+      byTags(tagsIds).map(_.id)
     }
 
-    def idsByTags(tagsIds: Seq[Int]) = {
-      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1).map(_.id)
+    def byTags(tagsIds: Seq[Int]) = {
+      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1)
     }
   }
 

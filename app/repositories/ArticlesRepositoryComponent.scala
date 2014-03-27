@@ -66,6 +66,10 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     def byTags(tagsIds: Seq[Int]) = {
       q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1)
     }
+
+    def idsByTags(tagsIds: Seq[Int]) = {
+      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1).map(_.id)
+    }
   }
 
   class SlickArticlesRepository extends ArticlesRepository {
@@ -104,14 +108,14 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Some(ids) => articles.byTags(tagsIds.get).length.run
+        case Some(ids) => articles.idsByTags(tagsIds.get).countDistinct.run
         case None => articles.length.run
       }
     }
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int = {
       tagsIds match {
-        case Some(ids) => articles.byTags(tagsIds.get).filter(_.authorId === userId).length.run
+        case Some(ids) => articles.filter(_.authorId === userId).idsByTags(tagsIds.get).countDistinct.run
         case None => articles.filter(_.authorId === userId).length.run
       }
     }

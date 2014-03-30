@@ -26,7 +26,8 @@
           </div>
           <div class="preview-panel"></div>
           <div class="btn-toolbar pull-right clearfix">
-            <a class="btn btn-success preview-button" href="@routes.ArticleController.previewArticle()">Show preview</a>
+           @* Our "boss" doesn't want to have preview enabled for 2.0 release *@
+           @* <a class="btn btn-success preview-button" href="@routes.ArticleController.previewArticle()">Show preview</a>*@
             <input class="btn btn-primary btn" type="submit" value="Save"/>
             <a class="btn btn-danger btn" href="@routes.ArticleController.viewArticle(form("id").value.get.toInt)">
               Discard</a>

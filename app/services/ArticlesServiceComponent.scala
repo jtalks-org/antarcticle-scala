@@ -52,7 +52,6 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         withTransaction { implicit session =>
           def createRecord = {
             val creationTime = DateTime.now
-            //TODO:
             val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
             articleToInsert(article, creationTime, currentUserId)
           }
@@ -123,7 +122,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       val offset = pageSize * (page - 1)
 
       val tagsIds = tagsString match {
-        case Some(tagsValues) => {
+        case Some(tagsValues) =>
           val isTagsNotEmpty = tagsValues == null || tagsValues.isEmpty
           if (isTagsNotEmpty) {
             None
@@ -133,7 +132,6 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             val foundTagsIds = tagsRepository.getByNames(validTagsList).map(_.id)
             Some(foundTagsIds)
           }
-        }
         case None => None
       }
       

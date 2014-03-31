@@ -9,6 +9,10 @@ trait TagsRepositoryComponent {
 
   val tagsRepository: TagsRepository
 
+  /**
+   * Provides basic tag-related operations over a database.
+   * Database session should be provided by a caller via implicit parameter.
+   */
   trait TagsRepository {
     def getByName(name: Option[String])(implicit session: JdbcBackend#Session): Option[Tag]
 
@@ -29,14 +33,33 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
 
   import profile.simple._
 
+  /**
+   * Slick tag dao implementation based on precompiled queries.
+   * For information about precompiled queries refer to
+   * <p> http://slick.typesafe.com/doc/2.0.0/queries.html#compiled-queries
+   * <p> http://stackoverflow.com/questions/21422394/why-cannot-use-compiled-insert-statement-in-slick
+   */
   class TagsRepositoryImpl extends TagsRepository {
     implicit val getTagResult = GetResult(r => Tag(r.<<, r.<<))
 
+    val compiledByName = Compiled((name: Column[Option[String]]) => tags.filter(_.name === name))
+    val compiledByArticleId = Compiled((id: Column[Int]) => articlesTags.filter(_.articleId === id))
+    val compiledForInsert = tags.map(t => t.name).returning(tags.map(_.id)).insertInvoker
+    val compiledArticleTagsForInsert = articlesTags.insertInvoker
 
-    override def getByName(name: Option[String])(implicit session: JdbcBackend#Session) = {
-      tags.filter(_.name === name).firstOption.map(r => Tag(r._1.get, r._2))
-    }
+    override def getByName(name: Option[String])(implicit session: JdbcBackend#Session) =
+      compiledByName(name).firstOption.map(r => Tag(r._1.get, r._2))
 
+    override def insertTags(names: Seq[String])(implicit session: JdbcBackend#Session) =
+      compiledForInsert.insertAll(names.distinct: _*)
+
+    override def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) =
+      compiledArticleTagsForInsert.insertAll(articleTags.distinct: _*)
+
+    override def removeArticleTags(articleId: Int)(implicit session: JdbcBackend#Session) =
+      compiledByArticleId(articleId).delete
+
+    //dynamic subquery probably can't be precompiled at all
     override def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       import models.database.Tag
       if (names.isEmpty) {
@@ -45,18 +68,6 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
         val inClause = names.map(name => s"'$name'").mkString(",")
         sql"select id, name from tags where name in (#$inClause)".as[Tag].list
       }
-    }
-
-    override def insertTags(names: Seq[String])(implicit session: JdbcBackend#Session) = {
-      tags.map(t => t.name).returning(tags.map(_.id)).insertAll(names.distinct: _*)
-    }
-
-    override def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) = {
-      articlesTags.insertAll(articleTags.distinct: _*)
-    }
-
-    override def removeArticleTags(articleId: Int)(implicit session: JdbcBackend#Session): Unit = {
-      articlesTags.filter(_.articleId === articleId).delete
     }
   }
 }

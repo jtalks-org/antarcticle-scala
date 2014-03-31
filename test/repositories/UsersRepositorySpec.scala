@@ -53,13 +53,13 @@ class UsersRepositorySpec extends Specification {
       val userId = 1
       usersRepository.updateRememberToken(userId, token)
 
-      val user = usersRepository.getByRemeberToken(token)
+      val user = usersRepository.getByRememberToken(token)
 
       user must beSome
     }
 
     "return None when user not found" in withTestDb { implicit session =>
-      val user = usersRepository.getByRemeberToken("user124234")
+      val user = usersRepository.getByRememberToken("user124234")
 
       user must beNone
     }

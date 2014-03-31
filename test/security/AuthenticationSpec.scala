@@ -35,29 +35,29 @@ class AuthenticationSpec extends Specification with Mockito with AfterExample {
       val user = auth.currentPrincipal(FakeRequest())
 
       user must be(AnonymousPrincipal)
-      there was no(usersRepository).getByRemeberToken(anyString)(any[JdbcBackend#Session])
+      there was no(usersRepository).getByRememberToken(anyString)(any[JdbcBackend#Session])
     }
 
     "return user if request has a valid cookie for user" in {
       val userRecord = Some(UserRecord(Some(1), "testUserName", false))
       val tokenCookie = Cookie(Constants.rememberMeCookie, "user", Some(1000), "/", None, false, false)
-      usersRepository.getByRemeberToken(Matchers.eq("user"))(any[JdbcBackend#Session]) returns userRecord
+      usersRepository.getByRememberToken(Matchers.eq("user"))(any[JdbcBackend#Session]) returns userRecord
 
       val user = auth.currentPrincipal(FakeRequest().withCookies(tokenCookie))
 
       user must beEqualTo(AuthenticatedUser(1, "testUserName", Authorities.User))
-      there was one(usersRepository).getByRemeberToken(Matchers.eq("user"))(any[JdbcBackend#Session])
+      there was one(usersRepository).getByRememberToken(Matchers.eq("user"))(any[JdbcBackend#Session])
     }
 
     "return admin if request has a valid cookie for admin" in {
       val adminCookie = Cookie(Constants.rememberMeCookie, "admin", Some(1000), "/", None, false, false)
       val adminRecord = Some(UserRecord(Some(2), "testUserName", true))
-      usersRepository.getByRemeberToken(Matchers.eq("admin"))(any[JdbcBackend#Session]) returns adminRecord
+      usersRepository.getByRememberToken(Matchers.eq("admin"))(any[JdbcBackend#Session]) returns adminRecord
 
       val user = auth.currentPrincipal(FakeRequest().withCookies(adminCookie))
 
       user must beEqualTo(AuthenticatedUser(2, "testUserName", Authorities.Admin))
-      there was one(usersRepository).getByRemeberToken(Matchers.eq("admin"))(any[JdbcBackend#Session])
+      there was one(usersRepository).getByRememberToken(Matchers.eq("admin"))(any[JdbcBackend#Session])
     }
   }
 }

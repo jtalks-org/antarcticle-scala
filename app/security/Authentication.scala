@@ -18,7 +18,7 @@ trait Authentication {
 
   // TODO: move AuthenticatedUser creation to sec. service
   def currentUser(implicit request: RequestHeader): Option[AuthenticatedUser] = {
-    def getUserByToken(token: String) = withSession(usersRepository.getByRemeberToken(token)(_))
+    def getUserByToken(token: String) = withSession(usersRepository.getByRememberToken(token)(_))
 
     for {
       tokenCookie <- request.cookies.get(Constants.rememberMeCookie)

@@ -29,7 +29,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   import profile.simple._
 
   /**
-   * Query extensions to avoid duplicating query criteria
+   * Query extensions to avoid criteria duplication
    */
   implicit class UsersExtension[C](val q: Query[Users, C]) {
     def byId(id: Column[Int]): Query[Users, C] = {

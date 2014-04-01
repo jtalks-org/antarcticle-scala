@@ -11,6 +11,10 @@ import Scalaz._
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository
 
+  /**
+   * Provides basic articles-related operations over a database.
+   * Database session should be provided by a caller via implicit parameter.
+   */
   trait ArticlesRepository {
     def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
 
@@ -28,7 +32,6 @@ trait ArticlesRepositoryComponent {
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
   }
-
 }
 
 trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
@@ -38,7 +41,9 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
   import profile.simple._
 
-
+  /**
+   * Query extensions to avoid criteria duplication
+   */
   implicit class ArticlesExtension[E](val q: Query[Articles, E]) {
     def withAuthor = {
       q.leftJoin(users).on(_.authorId === _.id)
@@ -72,14 +77,28 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
   }
 
+  /**
+   * Slick article dao implementation based on precompiled queries.
+   * For information about precompiled queries refer to
+   * <p> http://slick.typesafe.com/doc/2.0.0/queries.html#compiled-queries
+   * <p> http://stackoverflow.com/questions/21422394/why-cannot-use-compiled-insert-statement-in-slick
+   */
   class SlickArticlesRepository extends ArticlesRepository {
+
+    val forInsertCompiled = articles.returning(articles.map(_.id)).insertInvoker
+    val forRemoveCompiled = Compiled((id: Column[Int]) => articles.byId(id))
+    val forUpdateCompiled = Compiled((id: Column[Int]) =>
+      articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description)))
+    val articleTagsCompiled = Compiled((id: Column[Int]) => for {
+      articleTag <- articlesTags if articleTag.articleId === id
+      tag <- tags if articleTag.tagId === tag.id
+    } yield tag.name)
 
     def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
-        case Some(x) =>  articles.byTags(x).portion(offset, portionSize).list.distinct.map(fetchTags)
-        case None =>  articles.portion(offset, portionSize).list.distinct.map(fetchTags)
+        case Some(x) => articles.byTags(x).portion(offset, portionSize).list.distinct.map(fetchTags)
+        case None => articles.portion(offset, portionSize).list.distinct.map(fetchTags)
       }
-
     }
 
     def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
@@ -93,18 +112,12 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.byId(id).withAuthor().firstOption.map(fetchTags)
     }
 
-    def insert(article: ArticleRecord)(implicit s: Session) = {
-      articles.returning(articles.map(_.id)) += article
-    }
+    def insert(article: ArticleRecord)(implicit s: Session) = forInsertCompiled.insert(article)
 
-    def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: JdbcBackend#Session) = {
-      articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description))
-        .update(ArticleToUpdate.unapply(articleToUpdate).get) > 0
-    }
+    def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: JdbcBackend#Session) =
+      forUpdateCompiled(id).update(ArticleToUpdate.unapply(articleToUpdate).get) > 0
 
-    def remove(id: Int)(implicit s: JdbcBackend#Session) = {
-      articles.byId(id).delete > 0
-    }
+    def remove(id: Int)(implicit s: JdbcBackend#Session) = forRemoveCompiled(id).delete > 0
 
     def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       tagsIds match {
@@ -121,14 +134,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
 
     private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {
-      case (article, author) => (article, author, articleTags(article.id.get).list)
+      case (article, author) => (article, author, articleTagsCompiled(article.id.get).list)
     }
-
-    //TODO: convert to compiled query?
-    private def articleTags(articleId: Int) = for {
-      articleTag <- articlesTags if articleTag.articleId === articleId
-      tag <- tags if articleTag.tagId === tag.id
-    } yield tag.name
   }
-
 }

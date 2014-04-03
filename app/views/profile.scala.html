@@ -1,5 +1,5 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord)(implicit user: Principal)
-@templates.main("My articles") {
+@templates.main(s"Articles by ${userDetails.username}") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="user-profile clearfix">

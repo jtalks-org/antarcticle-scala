@@ -36,7 +36,7 @@ trait ArticleController {
 
   def listArticles() = listArticlesBy(None, 1)
 
-  def listArticlesTaggedAndPaged(tags: Option[String], page: Int) = listArticlesBy(tags, page)
+  def listArticlesTaggedAndPaged(tags: Option[String], page: Int = 0) = listArticlesBy(tags, page)
 
   private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(
@@ -128,19 +128,5 @@ trait ArticleController {
           case NotAuthorized() => Unauthorized("Not authorized to remove this article")
         }
       )
-  }
-
-  def searchByTags() = Action { implicit request =>
-    tagSearchForm.bindFromRequest().fold(
-      formWithErrors => BadRequest("Invalid request"),
-      tag => {
-        articlesService.getPage(1, Some(tag)).fold(
-          fail = nel => {
-            BadRequest(nel.list.mkString("<br>"))
-          },
-          succ = articlesPage => Ok(views.html.articles(articlesPage, tag))
-        )
-      }
-    )
   }
 }

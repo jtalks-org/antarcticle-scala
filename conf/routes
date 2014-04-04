@@ -8,7 +8,7 @@ GET           /signin        @controllers.AuthenticationController.showLoginPage
 POST          /signin        @controllers.AuthenticationController.login
 GET           /signout        @controllers.AuthenticationController.logout
 # Articles
-GET           /articles/page/:page        @controllers.ArticleController.listArticlesTaggedAndPaged(tags: Option[String], page: Int)
+GET           /articles        @controllers.ArticleController.listArticlesTaggedAndPaged(tags: Option[String], page: Int)
 GET           /articles/new        @controllers.ArticleController.getNewArticlePage
 POST          /articles/preview        @controllers.ArticleController.previewArticle
 POST          /articles/new        @controllers.ArticleController.postNewArticle
@@ -16,7 +16,7 @@ GET           /articles/:id        @controllers.ArticleController.viewArticle(id
 GET           /articles/edit/:id        @controllers.ArticleController.editArticle(id: Int)
 POST          /articles/edit        @controllers.ArticleController.postArticleEdits
 DELETE        /articles/:id        @controllers.ArticleController.removeArticle(id: Int)
-GET           /articles/search/byTags        @controllers.ArticleController.searchByTags
+
 # Comments
 POST          /articles/:id/comments/new        @controllers.CommentController.postNewComment(id:Int)
 DELETE        /articles/:id/comments/:commentId        @controllers.CommentController.removeComment(id:Int, commentId: Int)

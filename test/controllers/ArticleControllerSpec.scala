@@ -65,7 +65,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     "return a page with articles" in {
       articlesService.getPage(2, Some("")) returns new Page(2, 1, Seq(articleListModel)).successNel
 
-      val page = controller.listArticlesTaggedAndPaged("", 2)(FakeRequest())
+      val page = controller.listArticlesTaggedAndPaged(Some(""), 2)(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
@@ -77,30 +77,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     "return 404 for non-existing page" in {
       articlesService.getPage(2, Some("")) returns "Not found".failureNel
 
-      val page = controller.listArticlesTaggedAndPaged("", 2)(FakeRequest())
-
-      status(page) must equalTo(404)
-      contentType(page) must beSome("text/html")
-    }
-  }
-
-  "page list of articles" should {
-    "return passed page with articles without tags usage" in {
-      articlesService.getPage(3, None) returns new Page(3, 1, Seq(articleListModel)).successNel
-
-      val page = controller.listArticlesPaged(3)(FakeRequest())
-
-      status(page) must equalTo(200)
-      contentType(page) must beSome("text/html")
-      contentAsString(page).contains(articleListModel.title) must beTrue
-      contentAsString(page).contains(articleListModel.description) must beTrue
-      there was one(articlesService).getPage(3, None)
-    }
-
-    "return 404 for non-existing page" in {
-      articlesService.getPage(3, None) returns "Not found".failureNel
-
-      val page = controller.listArticlesPaged(3)(FakeRequest())
+      val page = controller.listArticlesTaggedAndPaged(Some(""), 2)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")

@@ -36,9 +36,7 @@ trait ArticleController {
 
   def listArticles() = listArticlesBy(None, 1)
 
-  def listArticlesTaggedAndPaged(tags: String, page: Int) = listArticlesBy(Some(tags), page)
-
-  def listArticlesPaged(page: Int) = listArticlesBy(None, page)
+  def listArticlesTaggedAndPaged(tags: Option[String], page: Int) = listArticlesBy(tags, page)
 
   private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(

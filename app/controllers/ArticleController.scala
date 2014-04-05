@@ -28,15 +28,9 @@ trait ArticleController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
-  val tagSearchForm = Form(
-    mapping(
-      "tag" ->  text
-    )((tag)=>tag)((tag)=>Some(tag))
-  )
-
   def listArticles() = listArticlesBy(None, 1)
 
-  def listArticlesTaggedAndPaged(tags: Option[String], page: Int = 0) = listArticlesBy(tags, page)
+  def listArticlesTaggedAndPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
 
   private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(

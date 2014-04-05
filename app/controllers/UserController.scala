@@ -13,12 +13,12 @@ import models.database.UserRecord
 trait UserController {
   this: Controller with ArticlesServiceComponent with UsersServiceComponent with Authentication  =>
 
-  def viewProfile(userName: String, tag : Option[String] = None) = viewProfilePaged(userName, 1, tag)
+  def viewProfile(userName: String, tags : Option[String] = None) = viewProfilePaged(userName, 1, tags)
   
-  def viewProfilePaged(userName: String, page: Int, tag : Option[String] = None) = Action { implicit request =>
+  def viewProfilePaged(userName: String, page: Int, tags : Option[String] = None) = Action { implicit request =>
     usersService.getByName(userName) match {
       case user : Some[UserRecord] =>
-        articlesService.getPageForUser(page, userName, tag).fold(
+        articlesService.getPageForUser(page, userName, tags).fold(
           fail => NotFound(views.html.errors.notFound()),
           succ = articles => Ok(views.html.profile(articles, user.get))
         )

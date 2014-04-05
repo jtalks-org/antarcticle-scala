@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord)(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: String = "")(implicit user: Principal)
 @templates.main(s"Articles by ${userDetails.username}") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
@@ -18,6 +18,17 @@
             </ul>
           </div>
         </header>
+        <br/>
+        <div class="clearfix">
+            <div class="pull-left tag-search-container">
+                <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username)">
+                    <div class="bootstrap-tagsinput">
+                          <input data-role="tagsinput" value="@lastUsedTags" class="form-control tags-input" name="tags" placeholder="Tags filter" />
+                    </div>
+                    <button class="btn btn-sm btn-info tag-search-button">Find</button>
+                </form>
+            </div>
+        </div>
         @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _))
         <div class="centralized-inputs clearfix">
           @if(page.totalPages == 0) {

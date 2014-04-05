@@ -8,7 +8,7 @@ GET           /signin        @controllers.AuthenticationController.showLoginPage
 POST          /signin        @controllers.AuthenticationController.login
 GET           /signout        @controllers.AuthenticationController.logout
 # Articles
-GET           /articles        @controllers.ArticleController.listArticlesTaggedAndPaged(tags: Option[String], page: Int)
+GET           /articles        @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
 GET           /articles/new        @controllers.ArticleController.getNewArticlePage
 POST          /articles/preview        @controllers.ArticleController.previewArticle
 POST          /articles/new        @controllers.ArticleController.postNewArticle

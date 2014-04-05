@@ -30,7 +30,7 @@ trait ArticleController {
 
   def listArticles() = listArticlesBy(None, 1)
 
-  def listArticlesTaggedAndPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
+  def listArticlesPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
 
   private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
     articlesService.getPage(page, tags).fold(

@@ -25,7 +25,7 @@
               </li>
               @for(tag <- article.tags) {
                 <li class="pull-right">
-                  <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticlesTaggedAndPaged(Some(tag), 1)"> @tag</a>
+                  <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticlesPaged(Some(tag), 1)"> @tag</a>
                 </li>
               }
             </ul>

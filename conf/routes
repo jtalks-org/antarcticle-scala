@@ -2,13 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET           /        @controllers.ArticleController.listArticles()
+GET           /        @controllers.ArticleController.allArticles()
 # Authentication
 GET           /signin        @controllers.AuthenticationController.showLoginPage
 POST          /signin        @controllers.AuthenticationController.login
 GET           /signout        @controllers.AuthenticationController.logout
 # Articles
-GET           /articles        @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
+GET           /articles         @controllers.ArticleController.listArticles(tags: Option[String])
+GET           /articles/page/:page        @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
 GET           /articles/new        @controllers.ArticleController.getNewArticlePage
 POST          /articles/preview        @controllers.ArticleController.previewArticle
 POST          /articles/new        @controllers.ArticleController.postNewArticle

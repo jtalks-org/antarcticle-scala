@@ -28,7 +28,9 @@ trait ArticleController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
-  def listArticles() = listArticlesBy(None, 1)
+  def allArticles() = listArticlesBy(None, 1)
+
+  def listArticles(tags: Option[String]) = listArticlesBy(tags, 1);
 
   def listArticlesPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
 
@@ -118,7 +120,7 @@ trait ArticleController {
       articlesService.removeArticle(id).fold(
         fail = errors,
         succ =  {
-          case Authorized(_) => Ok(routes.ArticleController.listArticles().absoluteURL())
+          case Authorized(_) => Ok(routes.ArticleController.allArticles().absoluteURL())
           case NotAuthorized() => Unauthorized("Not authorized to remove this article")
         }
       )

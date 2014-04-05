@@ -48,7 +48,7 @@ trait AuthenticationController {
       signInResult.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
         succ = { case (token, authUser) =>
-          Ok(routes.ArticleController.listArticles().absoluteURL())
+          Ok(routes.ArticleController.allArticles().absoluteURL())
             // http only to prevent session hijacking with XSS
             .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }
@@ -57,7 +57,7 @@ trait AuthenticationController {
   }
 
   def logout = Action {
-    Redirect(controllers.routes.ArticleController.listArticles())
+    Redirect(controllers.routes.ArticleController.allArticles())
       .withNewSession
       .discardingCookies(DiscardingCookie(rememberMeCookie))
   }

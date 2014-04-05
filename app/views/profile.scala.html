@@ -29,7 +29,7 @@
                 </form>
             </div>
         </div>
-        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _))
+        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, Some(lastUsedTags)))
         <div class="centralized-inputs clearfix">
           @if(page.totalPages == 0) {
             <h3>User has no articles.</h3>

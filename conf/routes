@@ -25,7 +25,7 @@ GET           /articles/:id/comments/:commentId        @controllers.CommentContr
 POST          /articles/:id/comments/:commentId        @controllers.CommentController.postCommentEdits(id:Int, commentId: Int)
 # Users
 GET           /users/:name        @controllers.UserController.viewProfile(name: String, tags: Option[String])
-GET           /users/:name/page/:page        @controllers.UserController.viewProfilePaged(name: String, page: Int)
+GET           /users/:name/page/:page        @controllers.UserController.viewProfilePaged(name: String, page: Int, tags: Option[String])
 # Help pages
 GET           /help/markdown        @controllers.HelpController.markdownHelp()
 # Static resources: styles, scripts, images, fonts, etc

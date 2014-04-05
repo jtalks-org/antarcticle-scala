@@ -30,7 +30,7 @@ trait ArticleController {
 
   def allArticles() = listArticlesBy(None, 1)
 
-  def listArticles(tags: Option[String]) = listArticlesBy(tags, 1);
+  def listArticles(tags: Option[String]) = listArticlesBy(tags, 1)
 
   def listArticlesPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
 

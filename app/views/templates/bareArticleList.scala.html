@@ -21,7 +21,7 @@
               <li>
                 <i class="glyphicon glyphicon-user"></i>
                 <strong>by </strong>
-                <a href="@routes.UserController.viewProfile(article.author.username)">@article.author.username</a>
+                <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
               </li>
               @for(tag <- article.tags) {
                 <li class="pull-right">

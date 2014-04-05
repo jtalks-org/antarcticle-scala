@@ -20,7 +20,7 @@ trait UserController {
       case user : Some[UserRecord] =>
         articlesService.getPageForUser(page, userName, tags).fold(
           fail => NotFound(views.html.errors.notFound()),
-          succ = articles => Ok(views.html.profile(articles, user.get))
+          succ = articles => Ok(views.html.profile(articles, user.get, tags.getOrElse("")))
         )
       case None =>
         NotFound(views.html.errors.notFound())

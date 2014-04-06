@@ -43,7 +43,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   val now = DateTime.now.toDate
   val userModel = new UserModel(1, "name")
   val articleId = 1
-  val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq())
+  val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq(), 1)
   val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
   implicit def principal = AnonymousPrincipal
 

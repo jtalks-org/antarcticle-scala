@@ -26,6 +26,10 @@
               <strong>by </strong>
               <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
             </li>
+            <li>
+              <i class="glyphicon glyphicon-comment"></i>
+              <span class="comments-size"><strong>@article.commentsCount</strong></span>
+            </li>
             @for(tag <- article.tags) {
               <li class="pull-right">
                 <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>

@@ -28,13 +28,11 @@ trait ArticleController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","))))
   )
 
-  def allArticles() = listArticlesBy(None, 1)
+  def allArticles() = listArticles(None)
 
-  def listArticles(tags: Option[String]) = listArticlesBy(tags, 1)
+  def listArticles(tags: Option[String]) = listArticlesPaged(tags)
 
-  def listArticlesPaged(tags: Option[String], page: Int = 1) = listArticlesBy(tags, page)
-
-  private def listArticlesBy(tags: Option[String], page: Int) = Action {implicit request =>
+  def listArticlesPaged(tags: Option[String], page: Int = 1)  = Action {implicit request =>
     articlesService.getPage(page, tags).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => Ok(views.html.articles(articlesPage, tags.getOrElse("")))

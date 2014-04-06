@@ -56,6 +56,12 @@ trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
     val insertCompiled = comments.returning(comments.map(_.id)).insertInvoker
     val updateCompiled = Compiled((id: Column[Int]) => comments.byId(id).map(c => (c.content, c.updatedAt)))
     val byIdCompiled = Compiled((id: Column[Int]) => comments.byId(id))
+    val byArticleCompiled = Compiled((id: Column[Int]) => comments
+      .filter(_.articleId === id)
+      .withAuthor
+      // sorting after join as a workaround for https://github.com/slick/slick/issues/746
+      .sortBy(_._1.createdAt.asc)
+    )
 
     def insert(comment: CommentRecord)(implicit session: JdbcBackend#Session) = insertCompiled.insert(comment)
 
@@ -66,14 +72,7 @@ trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
 
     def get(id: Int)(implicit session: JdbcBackend#Session) = byIdCompiled(id).firstOption
 
-    // todo: for some reason query with tuple return type cannot be compiled, investigate it
-    def getByArticle(id: Int)(implicit session: JdbcBackend#Session) = {
-      comments
-        .filter(_.articleId === id)
-        .sortBy(_.createdAt.asc)
-        .withAuthor
-        .list
-    }
+    def getByArticle(id: Int)(implicit session: JdbcBackend#Session) = byArticleCompiled(id).list
   }
 
 }

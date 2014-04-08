@@ -77,11 +77,9 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return articles with count of comments" in withTestDb { implicit session =>
-      val userId = 2
+      val portion = articlesRepository.getList(0, 4, None)
 
-      val portion = articlesRepository.getListForUser(userId, 0, 10, None)
-
-      portion.map(asCommentsCount(_)) must_== Seq(4, 2, 1, 1)
+      portion.map(asCommentsCount(_)) must_== Seq(1, 1, 4, 2)
     }
   }
 
@@ -107,9 +105,9 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
    "return articles with count of comments" in withTestDb { implicit session =>
      val userId = 2
 
-     val portion = articlesRepository.getListForUser(userId, 0, 10, None)
+     val portion = articlesRepository.getListForUser(userId, 0, 3, None)
 
-     portion.map(asCommentsCount(_)) must_== Seq(4, 2, 1, 1)
+     portion.map(asCommentsCount(_)) must_== Seq(1, 1, 2)
    }
  }
 

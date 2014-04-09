@@ -64,6 +64,8 @@ $.fn.extend
       updateValue()
       tagInput.focus()
       updatePlaceholder()
+      # remove error highlighting, if any
+      $('ul.' + settings.class).css('border','none')
 
     # focus on tag input when clicked anywhere inside <ul>
     tagsList.on 'click', (e) ->
@@ -107,4 +109,9 @@ $.fn.extend
     # create tag (if valid) when pressed enter. event will be propagated further
     tagInput.closest('form').on 'submit', (e) ->
       addTag() # TODO: don't propagate when validation fails
-      true
+      if (tags.length == 0)
+        $('ul.' + settings.class).css('border','1px dotted red')
+        e.preventDefault()
+        false
+      else
+        true

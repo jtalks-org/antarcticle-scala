@@ -1,9 +1,9 @@
 $.fn.extend
   tags_input: (options) ->
     settings =
-      delimiter: ','           # tags delimiting character
-      class: 'tags-input'      # css class for styles
-      validate: (tag) -> true  # custom validation function
+      delimiter: ','                                  # tags delimiting character
+      class: 'tags-input'                             # css class for styles
+      validate: (tag) -> tag && !/^\s*$/.test(tag)     # custom validation function
 
     settings = $.extend settings, options
     input = $(this)
@@ -54,10 +54,10 @@ $.fn.extend
 
     # add tag if validation passed
     addTag = ->
-      newTagValue = tagInput.val()
+      newTagValue = tagInput.val().trim()
+      tagInput.val('')
       if (!tagValid(newTagValue))
         return false
-      tagInput.val('')
       tags.push(newTagValue)
       tagsList.append(createTag(newTagValue))
       tagsList.append(tagInput)

@@ -120,21 +120,15 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tagsString : Option[String] = None)(implicit s: JdbcBackend#Session) = {
       val pageSize = Constants.PAGE_SIZE
       val offset = pageSize * (page - 1)
-
       val tagsIds = tagsString match {
         case Some(tagsValues) =>
-          val isTagsNotEmpty = tagsValues == null || tagsValues.isEmpty
-          if (isTagsNotEmpty) {
+          if (tagsValues == null || tagsValues.isEmpty) {
             None
           } else {
-            val tags = tagsValues.split(",")
-            val validTagsList = for(tag <- tags if tagValidator.validate(tag).isSuccess) yield tag
-            val foundTagsIds = tagsRepository.getByNames(validTagsList).map(_.id)
-            Some(foundTagsIds)
+            Some(tagsRepository.getByNames(tagsValues.split(",")).map(_.id))
           }
         case None => None
       }
-      
       val total = userId.cata(
         some = articlesRepository.countForUser(_, tagsIds),
         none = articlesRepository.count(tagsIds)

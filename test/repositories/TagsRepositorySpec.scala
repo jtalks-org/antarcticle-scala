@@ -56,6 +56,13 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
         tags must be empty
     }
+
+    "perform correct escaping for terminal symbols" in withTestDb {
+      implicit session =>
+        val tags = tagsRepository.getByNames(List("'`||\\//\"^%$~"))
+
+        tags must be empty
+    }
   }
 
   "get tag by name" should {

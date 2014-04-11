@@ -207,22 +207,6 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
-    "should not search by not valid tags" in {
-      tagsRepository.getByNames(Seq())(session) returns Seq()
-      articlesRepository.getList(0, PAGE_SIZE, Some(Seq()))(session) returns List()
-      articlesRepository.count(any)(Matchers.eq(session)) returns 0
-      tagValidator.validate("\'t\'ag\'") returns "".failNel
-      tagValidator.validate("ta\\g") returns "".failNel
-
-      articlesService.getPage(1, Some("\'t\'ag\',ta\\g")).fold(
-        fail = nel => ko,
-        succ = model => {
-          model.list.nonEmpty must beFalse
-          model.totalItems must_== 0
-        }
-      )
-    }
-
     "handle nonexistent tags" in {
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq()
       articlesRepository.getList(0, PAGE_SIZE, Some(List()))(session) returns List(dbRecord)

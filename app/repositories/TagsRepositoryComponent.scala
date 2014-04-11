@@ -2,7 +2,6 @@ package repositories
 
 import models.database.{Profile, Tag, TagsSchemaComponent}
 import scala.slick.jdbc.{GetResult, StaticQuery => Q}
-import Q.interpolation
 import scala.slick.jdbc.JdbcBackend
 
 trait TagsRepositoryComponent {
@@ -59,15 +58,10 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
     override def removeArticleTags(articleId: Int)(implicit session: JdbcBackend#Session) =
       compiledByArticleId(articleId).delete
 
-    //dynamic subquery probably can't be precompiled at all
     override def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
-      import models.database.Tag
-      if (names.isEmpty) {
-        Vector[Tag]()
-      } else {
-        val inClause = names.map(name => s"'$name'").mkString(",")
-        sql"select id, name from tags where name in (#$inClause)".as[Tag].list
-      }
+      (for {
+        tag <- tags if tag.name inSet names
+      } yield tag).list().map(tag => Tag(tag._1.get, tag._2))
     }
   }
 }

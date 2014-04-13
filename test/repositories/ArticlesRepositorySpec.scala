@@ -63,12 +63,16 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return articles tagged with tag1" in withTestDb { implicit session =>
-      val tagId = 1
-      val tagName = "tag1"
+      val portion = articlesRepository.getList(0, 10, Some(Seq(1)))
 
-      val portion = articlesRepository.getList(0, 10, Some(Seq(tagId)))
+      portion.map(asTags(_).contains("tag1")) must_== Seq(true, true)
+    }
 
-      portion.map(asTags(_).contains(tagName)) must_== Seq(true, true)
+    "return articles tagged with tag1 AND tag2" in withTestDb { implicit session =>
+      val portion = articlesRepository.getList(0, 10, Some(Seq(1,2)))
+
+      portion.map(asTags(_).contains("tag1")) must_== Seq(true)
+      portion.map(asTags(_).contains("tag2")) must_== Seq(true)
     }
   }
 
@@ -186,6 +190,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return articles count for certain tag" in withTestDb { implicit session: Session =>
+      println(articlesRepository.count(Some(Seq(1))))
       articlesRepository.count(Some(Seq(1))) must_== 2
     }
   }

@@ -32,6 +32,7 @@ trait ArticlesRepositoryComponent {
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
   }
+
 }
 
 trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
@@ -65,15 +66,10 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
 
     def byTag(tagId: Column[Int]) = {
-      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId === tagId).map(_._1)
-    }
-
-    def idsByTags(tagsIds: Seq[Int]) = {
-      byTags(tagsIds).map(_.id)
-    }
-
-    def byTags(tagsIds: Seq[Int]) = {
-      q.leftJoin(articlesTags).on(_.id === _.articleId).filter(_._2.tagId.inSet(tagsIds)).map(_._1)
+      q.leftJoin(articlesTags)
+        .on(_.id === _.articleId)
+        .filter(_._2.tagId === tagId)
+        .map(_._1)
     }
   }
 
@@ -95,17 +91,17 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     } yield tag.name)
 
     def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
-      tagsIds match {
-        case Some(x) => articles.byTags(x).portion(offset, portionSize).list.distinct.map(fetchTags)
-        case None => articles.portion(offset, portionSize).list.distinct.map(fetchTags)
-      }
+      (tagsIds match {
+        case Some(x) => articlesByTags(x)
+        case None => articles
+      }).portion(offset, portionSize).list.map(fetchTags)
     }
 
     def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
-      tagsIds match {
-        case Some(ids) => articles.byAuthor(userId).byTags(ids).portion(offset, portionSize).list.distinct.map(fetchTags)
-        case None => articles.byAuthor(userId).portion(offset, portionSize).list.distinct.map(fetchTags)
-      }
+      (tagsIds match {
+        case Some(x) => articlesByTags(x).byAuthor(userId)
+        case None => articles.byAuthor(userId)
+      }).portion(offset, portionSize).list.map(fetchTags)
     }
 
     def get(id: Int)(implicit s: JdbcBackend#Session) = {
@@ -120,21 +116,43 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     def remove(id: Int)(implicit s: JdbcBackend#Session) = forRemoveCompiled(id).delete > 0
 
     def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
-      tagsIds match {
-        case Some(ids) => articles.idsByTags(tagsIds.get).countDistinct.run
-        case None => articles.length.run
-      }
+      (tagsIds match {
+        case Some(ids) => articlesByTags(ids)
+        case None => articles
+      }).length.run
     }
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int = {
-      tagsIds match {
-        case Some(ids) => articles.filter(_.authorId === userId).idsByTags(tagsIds.get).countDistinct.run
-        case None => articles.filter(_.authorId === userId).length.run
-      }
+      (tagsIds match {
+        case Some(ids) => articlesByTags(ids).byAuthor(userId)
+        case None => articles.filter(_.authorId === userId)
+      }).length.run
     }
 
     private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {
       case (article, author) => (article, author, articleTagsCompiled(article.id.get).list)
     }
+
+    /**
+     * Returns only articles containing all the tags given.
+     * For empty set will return an article empty set.
+     *
+     * select * from article_tags
+     * where tag_id in (tagIds)
+     * join articles
+     * on article.id = article_tags.articleId
+     * group by article_tags.articleId
+     * having count(*) = tagIds.size
+     */
+    private def articlesByTags(tagsIds: Seq[Int])(implicit s: JdbcBackend#Session) = {
+      articlesTags.filter(_.tagId.inSet(tagsIds))
+        .groupBy {_.articleId}
+        .map {case (articleId, tagIdGroup) => (articleId, tagIdGroup.length)}
+        .filter(_._2 === tagsIds.size)
+        .join(articles)
+        .on(_._1 === _.id)
+        .map(_._2)
+    }
   }
+
 }

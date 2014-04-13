@@ -21,7 +21,7 @@ $.fn.extend
 
     createTag = (tag) ->
       escapedTag = $('<div></div>').text(tag).html()
-      "<li>#{escapedTag}<a href=\"#\" class=\"remove-tag\">x</a></li>"
+      "<li><span>#{escapedTag}</span><a href=\"#\" class=\"remove-tag\">x</a></li>"
 
     # construct tags list and input for new tag
     html = "<ul class=\"#{settings.class}\">"
@@ -99,7 +99,7 @@ $.fn.extend
     tagsList.on 'click','.remove-tag', (e) ->
       ths = $(this)
       e.preventDefault()
-      tag = ths.parent().val()
+      tag = ths.prev().text()
       ths.parent().remove()
       tags.splice($.inArray(tag, tags), 1)
       updateValue()

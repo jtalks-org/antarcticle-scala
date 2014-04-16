@@ -110,7 +110,7 @@ $.fn.extend
     tagInput.closest('form').on 'submit', (e) ->
       addTag() # TODO: don't propagate when validation fails
       if (tags.length == 0)
-        $('ul.' + settings.class).css('border','1px dotted red')
+        document.location=document.location.toString().split('?')[0]
         e.preventDefault()
         false
       else

@@ -21,7 +21,9 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.0.5",
   "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
   // production database
-  "mysql" % "mysql-connector-java" % "5.1.28"
+  "mysql" % "mysql-connector-java" % "5.1.28",
+  // http client for tests
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 )
 
 playScalaSettings

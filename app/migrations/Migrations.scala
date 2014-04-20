@@ -37,4 +37,14 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("alter table comments change created_at created_at timestamp not null default current_timestamp").execute
     }
   }
+
+  val addReadByArticleAuthorFlagForArticleComments = new Migration {
+    val version = 4
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table comments add column read_by_article_author boolean not null default false").execute()
+    }
+
+  }
+
 }

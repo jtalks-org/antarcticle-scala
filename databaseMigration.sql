@@ -37,7 +37,7 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
 
     SET @articles_sql = concat(
         'INSERT INTO articles (id, title, content, author_id, created_at, updated_at, description)
-        SELECT * FROM ', @database, '.articles');
+        SELECT (id, title, content, author_id, created_at, updated_at, content) FROM ', @database, '.articles');
     PREPARE articles_stmt FROM @articles_sql;
     EXECUTE articles_stmt;
     DEALLOCATE PREPARE articles_stmt;

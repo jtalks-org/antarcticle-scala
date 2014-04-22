@@ -14,7 +14,7 @@ object ArticleModels {
   // article form
   case class Article(id: Option[Int] = None, title: String, content: String, tags: Seq[String]) {
     //TODO: strip tags
-    lazy val description = content.take(300)
+    lazy val description = content
   }
 
   implicit def detailsAsArticle(details: ArticleDetailsModel) =

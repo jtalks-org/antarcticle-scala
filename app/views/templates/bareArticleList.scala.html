@@ -1,45 +1,47 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)
-@import views.helpers.Markdown
-@if(!page.list.isEmpty) {
+  @import views.helpers.Markdown
+  @if(!page.list.isEmpty) {
     <section class="articles-list">
-      @for(article <- page.list) {
-        <article id="@article.id" class="entry">
-          <div class="main-content">
-            <header>
-              @templates.prettyDate(article.createdAt)
-            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
-            </header>
-            <div class="body">
-              <div class="content">@Html(Markdown.toHtml(article.description))</div>
-              <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
-              <div class="clearfix"></div>
+    @for(article <- page.list) {
+      <article id="@article.id" class="entry">
+        <div class="main-content">
+          <header>
+            @templates.prettyDate(article.createdAt)
+          <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+          </header>
+          <div class="body">
+            <div class="content description">
+              @Html(Markdown.toHtml(article.description))
             </div>
+            <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
+            <div class="clearfix"></div>
           </div>
+        </div>
 
-          <footer>
-            <ul class="footer-elements breadcrumb clearfix">
-              <li>
-                <i class="glyphicon glyphicon-user"></i>
-                <strong>by </strong>
-                <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
+        <footer>
+          <ul class="footer-elements breadcrumb clearfix">
+            <li>
+              <i class="glyphicon glyphicon-user"></i>
+              <strong>by </strong>
+              <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
+            </li>
+            @for(tag <- article.tags) {
+              <li class="pull-right">
+                <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>
               </li>
-              @for(tag <- article.tags) {
-                <li class="pull-right">
-                  <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>
-                </li>
-              }
-            </ul>
-          </footer>
-        </article>
-      }
+            }
+          </ul>
+        </footer>
+      </article>
+    }
     </section>
-} else {
+  } else {
     <br>
 
     <div class="articles-not-found" style="">
-        <h3>There is no articles</h3>
+      <h3>There is no articles</h3>
     </div>
-}
+  }
 
-@templates.pagination(page, paginationHandler)
+  @templates.pagination(page, paginationHandler)
 

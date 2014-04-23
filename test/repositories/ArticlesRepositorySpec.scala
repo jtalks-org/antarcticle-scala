@@ -76,7 +76,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       portion.map(asTags(_).contains("tag2")) must_== Seq(true)
     }
 
-    "return articles with count of comments" in withTestDb { implicit session =>
+    "return limited number of articles with count of comments" in withTestDb { implicit session =>
       val portion = articlesRepository.getList(0, 4, None)
 
       portion.map(asCommentsCount(_)) must_== Seq(1, 1, 4, 2)
@@ -102,7 +102,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
      portion.map(asTags(_).contains(tagName)) must_== Seq(true)
    }
 
-   "return articles with count of comments" in withTestDb { implicit session =>
+   "return limited number of articles with count of comments for specified user" in withTestDb { implicit session =>
      val userId = 2
 
      val portion = articlesRepository.getListForUser(userId, 0, 3, None)

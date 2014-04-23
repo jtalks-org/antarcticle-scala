@@ -114,36 +114,7 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
-    "contain list models" in {
-      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
-      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
-
-      articlesService.getPage(1).fold(
-        fail = nel => ko,
-        succ = model => {
-          model.list(0).id must_== 1
-          model.list(0).author.id must_== 1
-        }
-      )
-    }
-
-    "contain correct count of comments" in {
-      tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
-      articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
-
-      articlesService.getPage(1).fold(
-        fail = nel => ko,
-        succ = model => {
-          model.list(0).id must_== 1
-          model.list(0).commentsCount must_== 1
-        }
-      )
-    }
-
-    "contain correct count of comments" in {
-//      val articles = List(dbRecord._1, dbRecord._2, dbRecord._3, 0)
+    "contain article models with correct count of comments for specified page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE

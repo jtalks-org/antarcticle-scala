@@ -13,6 +13,7 @@
             <div class="content description">
               @Html(Markdown.toHtml(article.description))
             </div>
+            <div class="faded-out"></div>
             <a href="@routes.ArticleController.viewArticle(article.id)" class="pull-right read-more">Read more</a>
             <div class="clearfix"></div>
           </div>

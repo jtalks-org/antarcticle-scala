@@ -37,4 +37,17 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("alter table comments change created_at created_at timestamp not null default current_timestamp").execute
     }
   }
+
+  /**
+   * Current description building strategy (cutoff after 300 chars) cannot guarantee proper markup preservation
+   * for the description. Until better content shortening strategy is developed we're temporary setting
+   * description equal to full content.
+   */
+  val setDescriptionToFullContent = new Migration {
+    val version = 4
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("UPDATE articles SET description = content").execute
+    }
+  }
 }

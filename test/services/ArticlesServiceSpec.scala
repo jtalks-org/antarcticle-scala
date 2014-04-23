@@ -55,6 +55,10 @@ class ArticlesServiceSpec extends Specification
     (article, user, tags)
   }
 
+  var articleList = {
+    List((dbRecord._1, dbRecord._2, dbRecord._3, 1))
+  }
+
   "get article" should {
     val article = dbRecord.some
 
@@ -98,7 +102,7 @@ class ArticlesServiceSpec extends Specification
 
     "contain list models" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1).fold(
@@ -110,23 +114,23 @@ class ArticlesServiceSpec extends Specification
       )
     }
 
-    "contain list models" in {
+    "contain article models with correct count of comments for specified page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1).fold(
         fail = nel => ko,
         succ = model => {
           model.list(0).id must_== 1
-          model.list(0).author.id must_== 1
+          model.list(0).commentsCount must_== 1
         }
       )
     }
 
     "contain current page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1).fold(
@@ -138,7 +142,7 @@ class ArticlesServiceSpec extends Specification
     "contain total pages count" in {
       val count = 3 * PAGE_SIZE/2
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns count
 
       articlesService.getPage(1).fold(
@@ -149,7 +153,7 @@ class ArticlesServiceSpec extends Specification
 
     "correctly return empty article list" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns 0
 
       articlesService.getPage(1).fold(
@@ -163,7 +167,7 @@ class ArticlesServiceSpec extends Specification
 
     "return failure for non-existing page" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
-      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns List(dbRecord)
+      articlesRepository.getList(anyInt, anyInt, any)(Matchers.eq(session)) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns 1
 
       articlesService.getPage(-15).fold(
@@ -175,7 +179,7 @@ class ArticlesServiceSpec extends Specification
     "filter articles by tag" in {
       val count = 3 * PAGE_SIZE/2
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq(new Tag(1, "tag"))
-      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1)))(session) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns count
       tagValidator.validate("tag") returns "tag".successNel
 
@@ -192,7 +196,7 @@ class ArticlesServiceSpec extends Specification
     "filter articles by more than one tag" in {
       val count = 3 * PAGE_SIZE/2
       tagsRepository.getByNames(Seq("first", "second"))(session) returns Seq(new Tag(1, "first"), new Tag(2, "second"))
-      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1, 2)))(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, Some(Seq(1, 2)))(session) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns count
       tagValidator.validate("first") returns "first".successNel
       tagValidator.validate("second") returns "second".successNel
@@ -209,7 +213,7 @@ class ArticlesServiceSpec extends Specification
 
     "handle nonexistent tags" in {
       tagsRepository.getByNames(Seq("tag"))(session) returns Seq()
-      articlesRepository.getList(0, PAGE_SIZE, Some(List()))(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, Some(List()))(session) returns articleList
       articlesRepository.count(any)(Matchers.eq(session)) returns PAGE_SIZE
 
       articlesService.getPage(1, Some("tag")).fold(
@@ -220,7 +224,7 @@ class ArticlesServiceSpec extends Specification
 
     "search all articles when tags are empty" in {
       val count = 3 * PAGE_SIZE/2
-      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns List(dbRecord)
+      articlesRepository.getList(0, PAGE_SIZE, None)(session) returns articleList
       articlesRepository.count(None)(session) returns count
 
       articlesService.getPage(1, Some("")).fold(

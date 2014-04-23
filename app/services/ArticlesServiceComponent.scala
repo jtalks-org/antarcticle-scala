@@ -161,10 +161,11 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         UserModel(authorRecord.id.get, authorRecord.username), tags)
     }
 
-    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {
+    private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String],
+                                  commentsCount: Int) = {
       ArticleListModel(articleRecord.id.get, articleRecord.title,
         articleRecord.description, articleRecord.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username), tags)
+        UserModel(authorRecord.id.get, authorRecord.username), tags, commentsCount)
     }
   }
 }

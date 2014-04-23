@@ -18,9 +18,10 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
   import repository._
   import profile.simple._
 
-  def asArticle(t: (ArticleRecord, UserRecord, Seq[String])) = t._1
-  def asAuthor(t: (ArticleRecord, UserRecord, Seq[String])) = t._2
-  def asTags(t: (ArticleRecord, UserRecord, Seq[String])) = t._3
+  def asArticle(t: (ArticleRecord, UserRecord, Seq[String], Int)) = t._1
+  def asAuthor(t: (ArticleRecord, UserRecord, Seq[String], Int)) = t._2
+  def asTags(t: (ArticleRecord, UserRecord, Seq[String], Int)) = t._3
+  def asCommentsCount(t: (ArticleRecord, UserRecord, Seq[String], Int)) = t._4
 
   "list portion" should {
     "return portion with size 2" in withTestDb { implicit session =>
@@ -74,6 +75,12 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       portion.map(asTags(_).contains("tag1")) must_== Seq(true)
       portion.map(asTags(_).contains("tag2")) must_== Seq(true)
     }
+
+    "return limited number of articles with count of comments" in withTestDb { implicit session =>
+      val portion = articlesRepository.getList(0, 4, None)
+
+      portion.map(asCommentsCount(_)) must_== Seq(1, 1, 4, 2)
+    }
   }
 
  "list portion for user" should {
@@ -94,6 +101,14 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
      portion.map(asTags(_).contains(tagName)) must_== Seq(true)
    }
+
+   "return limited number of articles with count of comments for specified user" in withTestDb { implicit session =>
+     val userId = 2
+
+     val portion = articlesRepository.getListForUser(userId, 0, 3, None)
+
+     portion.map(asCommentsCount(_)) must_== Seq(1, 1, 2)
+   }
  }
 
 
@@ -102,7 +117,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val article = articlesRepository.get(2)
 
       article must beSome
-      asArticle(article.get).id must beSome(2)
+      article.get._1.id must beSome(2)
     }
 
     "return None when there are no article with id 2000" in withTestDb { implicit session =>

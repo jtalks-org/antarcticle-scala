@@ -260,6 +260,18 @@ blockquote p {
 
 .articles-list {
   margin: 5px 0px 10px 0px;
+
+  .comments-size {
+    border: 1px solid rgb(200, 200, 200);
+    -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    padding: 3px;
+    min-width: 25px;
+    display: inline-block;
+    text-align: center;
+    margin-left: 5px;
+  }
 }
 
 .article-input {
@@ -428,6 +440,10 @@ article.entry .manage-buttons {
 
 .comments .comments-header {
   border-bottom: 1px dashed #646464;
+
+  b {
+    margin-right: 10px;
+  }
 }
 
 .comments .comment-bubble {

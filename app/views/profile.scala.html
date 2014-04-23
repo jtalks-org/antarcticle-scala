@@ -1,46 +1,48 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: String = "")(implicit user: Principal)
 @templates.main(s"Articles by ${userDetails.username}") {
-  <div class="row">
-    <div class="col-md-10 col-md-offset-1">
-      <div class="user-profile clearfix">
-        <header class="user-profile-header clearfix">
-          <div class="pull-left">
-            <h2 class="username"><i class="glyphicon glyphicon-user"></i>
-                @userDetails.username
-                @if(!userDetails.firstName.isEmpty || !userDetails.lastName.isEmpty){
-                    (@userDetails.firstName @userDetails.lastName)
-                }
-            </h2>
-          </div>
-          <div class="pull-right">
-            <ul class="user-stats">
-              <li class="">Articles<strong>@page.totalItems</strong></li>
-            </ul>
-          </div>
-        </header>
-        <br/>
-        <div class="clearfix">
-            <div class="pull-left tag-search-container">
-                <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
-                    <div class="bootstrap-tagsinput">
-                          <input data-role="tagsinput" value="@lastUsedTags" class="form-control tags-input" name="tags" placeholder="Tags filter" />
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="user-profile clearfix">
+                <header class="user-profile-header clearfix">
+                    <div class="pull-left">
+                        <h2 class="username"><i class="glyphicon glyphicon-user"></i>
+                            @userDetails.username
+                        </h2>
+                        <h3 class="name">
+                        @if(!userDetails.firstName.isEmpty || !userDetails.lastName.isEmpty) {
+                            (@userDetails.firstName @userDetails.lastName)
+                        }
+                        </h3>
                     </div>
-                    <button class="btn btn-sm btn-info tag-search-button">Find</button>
-                </form>
+                    <div class="pull-right">
+                        <ul class="user-stats">
+                            <li class="">Articles<strong>@page.totalItems</strong></li>
+                        </ul>
+                    </div>
+                </header>
+                <br/>
+                <div class="clearfix">
+                    <div class="pull-left tag-search-container">
+                        <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
+                            <div class="bootstrap-tagsinput">
+                                <input data-role="tagsinput" value="@lastUsedTags" class="form-control tags-input" name="tags" placeholder="Tags filter" />
+                            </div>
+                            <button class="btn btn-sm btn-info tag-search-button">Find</button>
+                        </form>
+                    </div>
+                </div>
+                @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, Some(lastUsedTags)))
+                <div class="centralized-inputs clearfix">
+                    @if(page.totalPages == 0) {
+                        <h3>User has no articles.</h3>
+                    }
+                    @if(user.can(Create, Article)) {
+                        <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
+                            <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+                        </a>
+                    }
+                </div>
             </div>
         </div>
-        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, Some(lastUsedTags)))
-        <div class="centralized-inputs clearfix">
-          @if(page.totalPages == 0) {
-            <h3>User has no articles.</h3>
-          }
-          @if(user.can(Create, Article)) {
-            <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
-              <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
-            </a>
-          }
-        </div>
-      </div>
     </div>
-  </div>
 }

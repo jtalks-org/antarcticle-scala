@@ -57,7 +57,7 @@
         } else {
           @for(comment <- comments) {
             <article class="clearfix comment comment-other">
-              <div class="comment-bubble comment-bubble-other">
+              <div id="comment@comment.id" class="comment-bubble comment-bubble-other">
                 <header>
                   <span class="glyphicon glyphicon-user"></span>
                   <a href="@routes.UserController.viewProfile(comment.author.username, None)">@comment.author.username</a>

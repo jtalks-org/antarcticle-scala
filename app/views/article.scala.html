@@ -1,22 +1,24 @@
 @(article: models.ArticleModels.ArticleDetailsModel,
-   comments: Seq[models.CommentModels.Comment])(implicit user: Principal)
+   comments: Seq[models.CommentModels.Comment])(implicit user: Principal, request: play.api.mvc.Request[Any])
 @import views.helpers.Markdown
 
 @templates.main(article.title) {
-  @if(user.can(Manage, article)) {
-    <div class="row">
-      <div class="col-md-10 col-md-offset-1">
-        <div class="pull-right page-header">
-          <a class="btn btn-sm btn-primary" href="@routes.ArticleController.editArticle(article.id)">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <div class="pull-right page-header">
+        @if(user.can(Manage, article)) {
+          <a class="btn btn-sm btn-primary article-toolbar" href="@routes.ArticleController.editArticle(article.id)">
             <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
           </a>
-          <a class="btn btn-sm btn-danger delete-link" href="@routes.ArticleController.removeArticle(article.id)">
+          <a class="btn btn-sm btn-danger delete-link article-toolbar" href="@routes.ArticleController.removeArticle(article.id)">
             <i class="glyphicon glyphicon-remove icon-white"></i> Delete
           </a>
-        </div>
+        }
+        <div class="share42init" data-url="@routes.ArticleController.viewArticle(article.id).absoluteURL()"
+                                data-title="@article.title" data-path="@routes.Assets.at("/public/images", "")"></div>
       </div>
     </div>
-  }
+  </div>
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <article class="entry">
@@ -36,6 +38,7 @@
               <strong>by </strong>
               <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
             </li>
+
             @for(tag <- article.tags) {
               <li class="pull-right">
                 <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>

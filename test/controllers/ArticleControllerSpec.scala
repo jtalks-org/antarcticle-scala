@@ -203,6 +203,20 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       contentAsString(page).contains(article.content) must beTrue
     }
 
+    "include validation errors in preview data" in {
+      val validationFailureVessage = "your article is stupid"
+      articlesService.validate(article) returns validationFailureVessage.failureNel
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
+
+      val page = controller.previewArticle()(validRequest)
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(article.title) must beTrue
+      contentAsString(page).contains(article.content) must beTrue
+      contentAsString(page).contains(validationFailureVessage) must beTrue
+    }
+
     "report an error on bad request" in {
       val page = controller.previewArticle()(badRequest)
 

@@ -1,7 +1,7 @@
 package migrations
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend, GetResult}
+import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
 
 class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 

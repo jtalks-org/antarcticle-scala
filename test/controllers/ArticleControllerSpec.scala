@@ -192,6 +192,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     val article = controller.articleForm.bindFromRequest()(validRequest).get
 
     "prepare preview if data is valid" in {
+      articlesService.validate(article) returns article.successNel
       controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
       val page = controller.previewArticle()(validRequest)

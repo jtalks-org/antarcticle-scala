@@ -31,6 +31,7 @@ trait ArticlesServiceComponent {
     def get(id: Int): Option[ArticleDetailsModel]
     def getPage(page: Int, tag: Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
     def getPageForUser(page: Int, userName: String, tag: Option[String] = None): ValidationNel[String, Page[ArticleListModel]]
+    def validate(article: Article):  ValidationNel[String, Article]
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
     def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[ValidationNel[String, Unit]]]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
@@ -73,6 +74,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
           result
         }
       }
+
+    def validate(article: Article) = articleValidator.validate(article)
 
     def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
         //TODO: create NotFound Result to prevent nested ValidataionNel?

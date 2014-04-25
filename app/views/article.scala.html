@@ -14,13 +14,14 @@
             <i class="glyphicon glyphicon-remove icon-white"></i> Delete
           </a>
         }
-        <div class="share42init" data-url="@routes.ArticleController.viewArticle(article.id).absoluteURL()"
-                                data-title="@article.title" data-path="@routes.Assets.at("/public/images", "")"></div>
       </div>
     </div>
   </div>
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
+        <div class="share42init pull-right" data-top1="@{if(user.can(Manage, article)) 128 else 98}" data-top2="20"
+        data-margin="20" data-url="@routes.ArticleController.viewArticle(article.id).absoluteURL()"
+        data-title="@article.title" data-path="@routes.Assets.at("/public/images", "")"></div>
       <article class="entry">
         <div class="main-content">
           <header>

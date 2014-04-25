@@ -27,6 +27,9 @@ GET           /users/:name                       @controllers.UserController.vie
 GET           /users/:name/page/:page            @controllers.UserController.viewProfilePaged(name: String, page: Int, tags: Option[String])
 # Help pages
 GET           /help/markdown                     @controllers.HelpController.markdownHelp()
+# Notifications
+GET           /notifications                     @controllers.NotificationsController.notificationsForCurrentUser()
+DELETE        /notification/:id                  @controllers.NotificationsController.removeNotification(id: Int)
 # Static resources: styles, scripts, images, fonts, etc
 GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)
 GET           /javascripts/:file                 controllers.Assets.at(path="/public/javascripts", file)

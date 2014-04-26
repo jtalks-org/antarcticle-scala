@@ -51,7 +51,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
     private def getOrCreateAuthenticatedUser(userInfo: UserInfo) =
       withSession { implicit s: JdbcBackend#Session =>
         def createUser = {
-          val userToInsert = UserRecord(None, userInfo.username, false,
+          val userToInsert = UserRecord(None, userInfo.username, userInfo.password, false,
             userInfo.firstName, userInfo.lastName)
           usersRepository.insert(userToInsert)
         }
@@ -67,6 +67,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
   }
 }
 
-private[security] case class UserInfo(username: String, firstName: Option[String], lastName: Option[String])
+private[security] case class UserInfo(username: String, password:String, firstName: Option[String], lastName: Option[String])
 
 

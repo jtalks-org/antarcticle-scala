@@ -39,7 +39,7 @@ class AuthenticationSpec extends Specification with Mockito with AfterExample {
     }
 
     "return user if request has a valid cookie for user" in {
-      val userRecord = Some(UserRecord(Some(1), "testUserName", false))
+      val userRecord = Some(UserRecord(Some(1), "testUserName", "testpassword", false))
       val tokenCookie = Cookie(Constants.rememberMeCookie, "user", Some(1000), "/", None, false, false)
       usersRepository.getByRememberToken(Matchers.eq("user"))(any[JdbcBackend#Session]) returns userRecord
 
@@ -51,7 +51,7 @@ class AuthenticationSpec extends Specification with Mockito with AfterExample {
 
     "return admin if request has a valid cookie for admin" in {
       val adminCookie = Cookie(Constants.rememberMeCookie, "admin", Some(1000), "/", None, false, false)
-      val adminRecord = Some(UserRecord(Some(2), "testUserName", true))
+      val adminRecord = Some(UserRecord(Some(2), "testUserName", "testPassword", true))
       usersRepository.getByRememberToken(Matchers.eq("admin"))(any[JdbcBackend#Session]) returns adminRecord
 
       val user = auth.currentPrincipal(FakeRequest().withCookies(adminCookie))

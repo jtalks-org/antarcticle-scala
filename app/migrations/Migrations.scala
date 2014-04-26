@@ -1,7 +1,7 @@
 package migrations
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
+import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend, GetResult}
 
 class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
@@ -48,6 +48,15 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("UPDATE articles SET description = content").execute
+    }
+  }
+
+  val addPasswordColumnToUsersTable = new Migration {
+    val version = 4
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table users add password varchar(255)").execute
+      Q.updateNA("update users set password=''").execute
     }
   }
 }

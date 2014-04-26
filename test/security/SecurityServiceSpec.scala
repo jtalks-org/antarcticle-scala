@@ -40,9 +40,9 @@ class SecurityServiceSpec extends Specification
     "success" should {
       val username = "userdfsd"
       val password = "rerfev"
-      val userInfo = UserInfo(username, "fn".some, "ln".some)
+      val userInfo = UserInfo(username, password, "fn".some, "ln".some)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
-      val userFromDb = UserRecord(Some(1), username)
+      val userFromDb = UserRecord(Some(1), username, password)
       val generatedToken = "2314"
 
       "return remember me token and authenticated user" in {
@@ -70,7 +70,7 @@ class SecurityServiceSpec extends Specification
 
         Await.result(securityService.signInUser(username, password), 10 seconds)
 
-        there was one(usersRepository).insert(UserRecord(None, username, false, "fn".some, "ln".some))(FakeSessionValue)
+        there was one(usersRepository).insert(UserRecord(None, username, password, false, "fn".some, "ln".some))(FakeSessionValue)
       }
 
       "created user should have User authority" in {

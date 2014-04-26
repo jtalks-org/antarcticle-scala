@@ -40,7 +40,7 @@ class CommentsServiceSpec extends Specification
     org.mockito.Mockito.reset(commentsRepository)
   }
 
-  val userRecord = UserRecord(1.some, "user1")
+  val userRecord = UserRecord(1.some, "user1", "password1")
   val commentRecord = CommentRecord(99.some, userRecord.id.get, 1, "x", DateTime.now)
 
   "get comments for article" should {

@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <title>@title</title>
+    <link rel="stylesheet" media="screen" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public/stylesheets", "styles.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public/stylesheets", "idea.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public/stylesheets", "bootstrap-tagsinput.css")">
@@ -21,11 +22,11 @@
             case au: security.AuthenticatedUser => {
               <ul class="nav navbar-nav">
                 <li class="dropdown">
-                  <a id="notifications-link" href="@routes.NotificationsController.notificationsForCurrentUser()"
+                  <a id="notifications-link" href="@routes.NotificationsController.getNotifications()"
                     data-target="#" class="dropdown-toggle" data-toggle="dropdown" title="Recent notifications">
                     <i class="glyphicon glyphicon-inbox"></i>
                   </a>
-                  <ul id="notifications-dropdown" class="dropdown-menu">
+                  <ul id="notifications-dropdown" class="dropdown-menu inbox-dialog">
                 </ul>
                 </li>
               </ul>

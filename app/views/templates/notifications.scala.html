@@ -1,13 +1,30 @@
-@()(implicit user: Principal)
-<li>
-  <a href="#">
-     Notification 1
-     <i class="glyphicon glyphicon-remove"></i>
-  </a>
-</li>
-<li>
-  <a href="#">
-    Notification 2
-    <i class="glyphicon glyphicon-remove"></i>
-  </a>
-</li>
+@(notifications : Seq[database.Notification])(implicit user: Principal)
+<div class="dropdown-header">
+  <span>Unread notifications</span>
+  <span class="pull-right">
+    <a class="btn btn-xs btn-default" href="#">
+      <i class="glyphicon glyphicon-ok"></i> Mark all read
+    </a>
+  </span>
+</div>
+@for(notification <- notifications) {
+  <li class="inbox-item">
+    <a href="@{routes.ArticleController.viewArticle(notification.articleId) + "#" + notification.commentId}">
+      <div class="site-icon favicon favicon-stackoverflow" title="Stack Overflow"></div>
+      <div class="item-content">
+        <div class="item-header">
+          <span class="item-type">comment</span>
+          <span class="item-creation">
+            <span>@notification.createdAt.format("MMM dd HH:mm")</span>
+          </span>
+        </div>
+        <div class="item-location">
+        @notification.title
+        </div>
+        <div class="item-summary">
+        @notification.content
+        </div>
+      </div>
+    </a>
+  </li>
+}

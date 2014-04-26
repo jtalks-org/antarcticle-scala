@@ -28,7 +28,8 @@ GET           /users/:name/page/:page            @controllers.UserController.vie
 # Help pages
 GET           /help/markdown                     @controllers.HelpController.markdownHelp()
 # Notifications
-GET           /notifications                     @controllers.NotificationsController.notificationsForCurrentUser()
+GET           /notifications                     @controllers.NotificationsController.getNotifications()
+DELETE        /notifications                     @controllers.NotificationsController.removeAllNotifications()
 DELETE        /notification/:id                  @controllers.NotificationsController.removeNotification(id: Int)
 # Static resources: styles, scripts, images, fonts, etc
 GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)

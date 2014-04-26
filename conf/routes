@@ -30,7 +30,7 @@ GET           /help/markdown                     @controllers.HelpController.mar
 # Notifications
 GET           /notifications                     @controllers.NotificationsController.getNotifications()
 DELETE        /notifications                     @controllers.NotificationsController.removeAllNotifications()
-DELETE        /notification/:id                  @controllers.NotificationsController.removeNotification(id: Int)
+GET           /notification/:id                  @controllers.NotificationsController.getNotification(id: Int)
 # Static resources: styles, scripts, images, fonts, etc
 GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)
 GET           /javascripts/:file                 controllers.Assets.at(path="/public/javascripts", file)

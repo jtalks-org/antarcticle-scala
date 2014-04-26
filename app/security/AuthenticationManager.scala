@@ -15,7 +15,7 @@ class FakeAuthenticationManager extends AuthenticationManager {
   def authenticate(username: String, password: String) = {
     future {
       (username, password) match {
-        case ("admin", "admin") => UserInfo("admin", "firstName".some, "lastName".some).some
+        case ("admin", "admin") => UserInfo("admin", password, "firstName".some, "lastName".some).some
         case _ => none[UserInfo]
       }
     }
@@ -35,7 +35,8 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
          enabled <- (xmlResponseBody \\ "enabled").headOption.map(_.text) if enabled == "true"
          firstName = (xmlResponseBody \\ "firstName").headOption.map(_.text)
          lastName = (xmlResponseBody \\ "lastName").headOption.map(_.text)
-      } yield UserInfo(username, firstName, lastName)
+         password = (xmlResponseBody \\ "password").headOption.map(_.text)
+      } yield UserInfo(username, password.get,  firstName, lastName)
     }
   }
 

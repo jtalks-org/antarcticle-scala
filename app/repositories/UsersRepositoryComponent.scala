@@ -2,6 +2,7 @@ package repositories
 
 import models.database._
 import scala.slick.jdbc.JdbcBackend
+import scala.slick.lifted
 
 trait UsersRepositoryComponent {
   val usersRepository: UsersRepository
@@ -18,6 +19,8 @@ trait UsersRepositoryComponent {
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
+
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
   }
 }
 
@@ -35,6 +38,10 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def byId(id: Column[Int]): Query[Users, C] = {
       q.filter(_.id === id)
     }
+    type SColumn = Column[String]
+    def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
+      q.filter(user => f(user.username) === f(username))
+    }
   }
 
   /**
@@ -45,7 +52,10 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
    */
   class SlickUsersRepository extends UsersRepository {
 
-    val byUsernameCompiled = Compiled((username: Column[String]) => users.filter(_.username === username))
+    val byUsernameCompiled = Compiled((username: Column[String]) => users.byUsername(username))
+    val byUsernameIgnoreCaseCompiled = Compiled {
+      username: Column[String] => users.byUsername(username, {_.toLowerCase})
+    }
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
@@ -61,5 +71,8 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
+
+    override def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
+      byUsernameIgnoreCaseCompiled(username).list
   }
 }

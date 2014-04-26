@@ -37,4 +37,13 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("alter table comments change created_at created_at timestamp not null default current_timestamp").execute
     }
   }
+
+  val addPasswordColumnToUsersTable = new Migration {
+    val version = 4
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table users add password varchar(255)").execute
+      Q.updateNA("update users set password=''").execute
+    }
+  }
 }

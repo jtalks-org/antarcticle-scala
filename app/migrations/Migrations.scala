@@ -52,7 +52,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
   }
 
   val addPasswordColumnToUsersTable = new Migration {
-    val version = 4
+    val version = 5
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("alter table users add password varchar(255)").execute

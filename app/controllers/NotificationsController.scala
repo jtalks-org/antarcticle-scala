@@ -4,7 +4,6 @@ import play.api.mvc.{Action, Controller}
 import security.Authentication
 import models.database.Notification
 import java.sql.Timestamp
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -32,7 +31,13 @@ trait NotificationsController {
       Found(routes.ArticleController.viewArticle(notification.articleId).absoluteURL() + "#" + notification.commentId)
   }
 
-  def removeAllNotifications = Action {
+  def dismissNotification(id: Int) = Action {
+    implicit request =>
+      data = data.filter((notification) => notification.id != Some(id))
+      Ok(views.html.templates.notifications(List()))
+  }
+
+  def dismissAllNotifications = Action {
     implicit request =>
       data.clear()
       Ok(views.html.templates.notifications(List()))

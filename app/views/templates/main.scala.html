@@ -20,11 +20,12 @@
           </a>
           @user match {
             case au: security.AuthenticatedUser => {
-              <ul class="nav navbar-nav">
+              <ul  class="nav navbar-nav">
                 <li class="dropdown">
                   <a id="notifications-link" href="@routes.NotificationsController.getNotifications()"
                     data-target="#" class="dropdown-toggle" data-toggle="dropdown" title="Recent notifications">
                     <i class="glyphicon glyphicon-inbox"></i>
+                    <span class="badge notifications-badge"></span>
                   </a>
                   <ul id="notifications-dropdown" class="dropdown-menu inbox-dialog">
                 </ul>

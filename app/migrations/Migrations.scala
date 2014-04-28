@@ -61,7 +61,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
   }
 
   val addReadByArticleAuthorFlagForArticleComments = new Migration {
-    val version = 4
+    val version = 6
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("alter table comments add column read_by_article_author boolean not null default false").execute()

@@ -63,14 +63,14 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     )
 
     comments ++= Seq(
-      CommentRecord(None, 1, 1, "<b>content</b>", time + 1.hour),
-      CommentRecord(None, 2, 1, "content", time + 1.day),
-      CommentRecord(None, 2, 1, "dsf sdf s$#$ 4#%#$", time),
-      CommentRecord(None, 1, 2, "42342", time + 1.week),
-      CommentRecord(None, 2, 2, "", time + 1.second),
-      CommentRecord(None, 2, 3, "dsfasdfsdaf", time),
-      CommentRecord(None, 1, 4, "<b>content2</b>", time - 10.days),
-      CommentRecord(None, 1, 1, "<b>content42342</b>", time + 5.minutes)
+      CommentRecord(None, 1, 1, "<b>content</b>", time + 1.hour, None, Some(false)),
+      CommentRecord(None, 2, 1, "content", time + 1.day, None, Some(false)),
+      CommentRecord(None, 2, 1, "dsf sdf s$#$ 4#%#$", time, None, Some(false)),
+      CommentRecord(None, 1, 2, "42342", time + 1.week, None, Some(false)),
+      CommentRecord(None, 2, 2, "", time + 1.second, None, Some(false)),
+      CommentRecord(None, 2, 3, "dsfasdfsdaf", time, None, Some(false)),
+      CommentRecord(None, 1, 4, "<b>content2</b>", time - 10.days, None, Some(false)),
+      CommentRecord(None, 1, 1, "<b>content42342</b>", time + 5.minutes, None, Some(false))
     )
   }
 }

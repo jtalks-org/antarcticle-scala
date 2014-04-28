@@ -8,7 +8,7 @@
 # error description and markup. See also formErrors.scala.html template
 #
 # Selector and actions are customizable, just create your own FormHandler instance with
-# all necessary suff set as constructor parameters.
+# all necessary stuff set as constructor parameters.
 
 class FormHandler
 

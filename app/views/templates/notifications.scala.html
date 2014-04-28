@@ -1,0 +1,43 @@
+@(notifications: Seq[database.Notification])(implicit user: Principal)
+@if(notifications.isEmpty) {
+  <div class="dropdown-header" data-count="">
+    <span>You have no pending notifications</span>
+    <span class="pull-right">
+      <i class="glyphicon glyphicon-thumbs-up"></i>
+    </span>
+  </div>
+} else {
+  <div class="dropdown-header" data-count="@notifications.size">
+    <span>Unread notifications</span>
+    <span class="pull-right">
+      <a id="drop-notifications-button" class="btn btn-xs btn-default"
+          href="@routes.NotificationsController.dismissAllNotifications()">
+        <i class="glyphicon glyphicon-ok"></i> Dismiss all
+      </a>
+    </span>
+  </div>
+  @for(notification <- notifications) {
+    <li class="inbox-item">
+      <a href="@routes.NotificationsController.getNotification(notification.id.get)">
+        <div class="notification-toolbar">
+          <i title="Dismiss notification" class="glyphicon glyphicon-remove dismiss-notification"
+             data-href="@routes.NotificationsController.dismissNotification(notification.id.get)"></i>
+        </div>
+        <div class="item-content">
+          <div class="item-header">
+            <span class="item-type"> comment</span>
+            <span class="item-creation">
+              <span>@notification.createdAt.format("MMM dd HH:mm")</span>
+            </span>
+          </div>
+          <div class="item-location">
+          @notification.title
+          </div>
+          <div class="item-summary">
+          @notification.content
+          </div>
+        </div>
+      </a>
+    </li>
+  }
+}

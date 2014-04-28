@@ -56,7 +56,10 @@ trait ArticleController {
       article => {
         currentPrincipal match {
           case user : AuthenticatedUser =>
-            Ok(views.html.templates.articlePreview(article, user.username))
+            articlesService.validate(article).fold(
+              fail => Ok(views.html.templates.articlePreview(article, user.username, fail.list)),
+              succ => Ok(views.html.templates.articlePreview(article, user.username, List()))
+            )
           case _ =>
             Unauthorized("Please login first to create article previews")
         }

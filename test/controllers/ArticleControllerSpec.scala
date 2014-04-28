@@ -43,7 +43,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   val now = DateTime.now.toDate
   val userModel = new UserModel(1, "name")
   val articleId = 1
-  val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq())
+  val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq(), 1)
   val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
   implicit def principal = AnonymousPrincipal
 
@@ -192,6 +192,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     val article = controller.articleForm.bindFromRequest()(validRequest).get
 
     "prepare preview if data is valid" in {
+      articlesService.validate(article) returns article.successNel
       controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
       val page = controller.previewArticle()(validRequest)
@@ -200,6 +201,20 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       contentType(page) must beSome("text/html")
       contentAsString(page).contains(article.title) must beTrue
       contentAsString(page).contains(article.content) must beTrue
+    }
+
+    "include validation errors in preview data" in {
+      val validationFailureVessage = "your article is stupid"
+      articlesService.validate(article) returns validationFailureVessage.failureNel
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
+
+      val page = controller.previewArticle()(validRequest)
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+      contentAsString(page).contains(article.title) must beTrue
+      contentAsString(page).contains(article.content) must beTrue
+      contentAsString(page).contains(validationFailureVessage) must beTrue
     }
 
     "report an error on bad request" in {

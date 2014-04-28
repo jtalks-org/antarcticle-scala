@@ -20,7 +20,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
       tags.map(_.name) ++= Seq("tag1", "tag2", "tag3")
 
-      users ++= Seq(UserRecord(None, "user1"))
+      users ++= Seq(UserRecord(None, "user1", "fakePassword"))
 
       articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(
         ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),

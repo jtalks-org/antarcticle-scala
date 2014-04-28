@@ -4,29 +4,19 @@ class PreviewSupport
 
   inPreview = false;
 
-  constructor: (@editPanelSelector, @previewPanelSelector, @formSelector, @previewButtonSelector) ->
-    $(@previewButtonSelector).click (e) =>
-      editPanel = $(@editPanelSelector)
+  constructor: (@previewLinkSelector, @previewPanelSelector, @formSelector) ->
+    $(@previewLinkSelector).click (e) =>
       previewPanel = $(@previewPanelSelector)
-      previewButton = $(@previewButtonSelector)
       form = $(@formSelector)
-      $.post(previewButton.attr('href'), form.serialize())
+      $.post($(@previewLinkSelector).attr('data-href'), form.serialize())
       .done((data) =>
-          if (inPreview)
-            previewPanel.html("")
-            previewButton.text("Show preview")
-          else
-            previewPanel.html(data)
-            previewButton.text("Back to edit")
-          inPreview = !inPreview
-          editPanel.toggle()
-        )
+        previewPanel.html(data)
+      )
       .fail((data) =>
-          $(@formSelector).prepend(data.responseText)
-        )
-      e.preventDefault()
+        $(@formSelector).prepend(data.responseText)
+      )
 
-new PreviewSupport(".hide-on-preview", ".preview-panel", ".default-form", ".preview-button")
+new PreviewSupport("#preview-tab", "#preview", ".default-form")
 
 
 

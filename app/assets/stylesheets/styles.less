@@ -1,4 +1,3 @@
-@import "http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css";
 @import "font-awesome.css";
 @import url('http://fonts.googleapis.com/css?family=Ubuntu:400,300&subset=latin,cyrillic');
 
@@ -17,6 +16,38 @@
 .dropdown-menu > .active > a > [class*=" icon-"] {
   background-image: none;
 }
+
+.navbar-inverse {
+  border-radius: 0px;
+  min-height: 35px !important;
+}
+.navbar-brand {
+  padding-top:7px !important;
+  padding-bottom:7px !important;
+}
+
+.navbar-nav > li > a {
+  padding-top:10px !important;
+  padding-bottom:6px !important;
+}
+
+.dropdown-header {
+  background-color: #f0f0f0;
+  width: 100%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  padding: 7px 10px 4px 10px;
+  position: relative;
+  clear: both;
+  margin: 0;
+  span {
+    font-size: 18px;
+  }
+  a {
+    margin-bottom: 7px;
+  }
+}
+
 
 html,
 body {
@@ -110,6 +141,70 @@ h6 {
   word-wrap: break-word;
 }
 
+
+/***************/
+.inbox-dialog {
+    width: 375px;
+    max-height: 505px;
+    padding: 0;
+}
+
+.inbox-dialog .inbox-item{
+  border-top: 1px solid #e5e5e5;
+
+  .notification-toolbar{
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 5px;
+    margin-top: 3px;
+    color: #999;
+  }
+
+  a {
+    padding-left: 10px;
+  }
+}
+
+.inbox-dialog .message-text {
+    width: 313px
+}
+
+.inbox-dialog .timestamp {
+    color: #999;
+    border-top: 1px solid;
+}
+
+.inbox-dialog .inbox-item .item-content {
+    display: inline-block;
+    width: 313px;
+}
+
+.inbox-dialog .inbox-item .item-content .item-header {
+    color: #888;
+}
+
+.inbox-dialog .inbox-item .item-content .item-creation {
+    float: right
+}
+
+.inbox-dialog .inbox-item .item-content .item-location {
+    margin: 4px 0;
+    color: #07c;
+}
+
+.inbox-dialog .inbox-item .item-content .item-summary{
+    color: #3d3d3d
+}
+
+.inbox-dialog .inbox-item.inbox-se-link {
+    text-align: center
+}
+
+.notifications-badge {
+  margin-left: 5px;
+  vertical-align: top;
+}
+
 /***********************************************
 * MARKDOWN
 ***********************************************/
@@ -162,6 +257,12 @@ blockquote p {
 .user-profile .user-profile-header .username {
   margin-top: 5px;
   margin-bottom: 0;
+  display: inline-block;
+}
+
+.user-profile .user-profile-header .name {
+  margin: 0 0 0 10px;
+  color: #666;
   display: inline-block;
 }
 
@@ -254,6 +355,18 @@ blockquote p {
 
 .articles-list {
   margin: 5px 0px 10px 0px;
+
+  .comments-size {
+    border: 1px solid rgb(200, 200, 200);
+    -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
+    padding: 3px;
+    min-width: 25px;
+    display: inline-block;
+    text-align: center;
+    margin-left: 5px;
+  }
 }
 
 .article-input {
@@ -352,6 +465,15 @@ article.entry .manage-buttons {
   padding: 0 15px;
 }
 
+ul.nav-tabs {
+  margin-bottom: 10px;
+}
+
+.share42init {
+  display:inline;
+}
+
+
 /***********************************************
 * Tag filter
 ***********************************************/
@@ -422,6 +544,10 @@ article.entry .manage-buttons {
 
 .comments .comments-header {
   border-bottom: 1px dashed #646464;
+
+  b {
+    margin-right: 10px;
+  }
 }
 
 .comments .comment-bubble {
@@ -507,6 +633,10 @@ article.entry .manage-buttons {
   padding: 0;
 }
 
+.comment-highlighted {
+  border: 2px solid rgba(103, 175, 233, 0.8);
+}
+
 /***********************************************
  * MODAL DIALOGS
  ***********************************************/
@@ -522,4 +652,19 @@ article.entry .manage-buttons {
 
 .modal-open {
   overflow: auto;
+}
+
+.description {
+ /* margin-top: -200px;*/
+  height: 200px;
+  overflow: hidden;
+}
+
+.faded-out {
+  position: relative;
+  margin-top: -200px;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  pointer-events: none;
 }

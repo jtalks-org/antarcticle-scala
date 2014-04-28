@@ -89,6 +89,8 @@ CREATE PROCEDURE migrateDatabase(old_database_name VARCHAR(255))
     UPDATE articles
     SET content = REPLACE(content, 'Но прозорливый читатель', '\r\nНо прозорливый читатель')
     WHERE id=2;
+
+    UPDATE articles SET description = content;
 END
 //
 

@@ -1,5 +1,6 @@
-@(article: models.ArticleModels.Article, userName: String)
+@(article: models.ArticleModels.Article, userName: String, errors: List[String])
 @import views.helpers.Markdown
+@templates.formErrors(errors)
 <header>
   <h2>@article.title</h2>
 </header>
@@ -16,7 +17,7 @@
   </li>
   @for(tag <- article.tags.distinct) {
     <li class="pull-right">
-      <i class="glyphicon glyphicon-tags"></i> <a href="#"> @tag</a>
+      <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>
     </li>
   }
 </ul>

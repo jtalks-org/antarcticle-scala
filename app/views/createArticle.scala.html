@@ -5,28 +5,41 @@
       <header class="page-header hide-on-preview">
         <h2><i class="glyphicon glyphicon-pencil"></i> New article</h2>
       </header>
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#write" data-toggle="tab">Write</a></li>
+        <li><a id="preview-tab" data-href="@routes.ArticleController.previewArticle()" href="#preview" data-toggle="tab">Preview</a></li>
+        <li><a href="#cat" data-toggle="tab">Cat</a></li>
+      </ul>
+
       <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
-        <div class="hide-on-preview">
-          <div class="form-group input-group article-input">
-            <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
+
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="write">
+            <div class="form-group input-group article-input">
+              <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
+            </div>
+            <div class="form-group input-group article-input">
+              <i class="glyphicon glyphicon-info-sign"></i>
+              <label for="content" class="editor-hint">
+                Editor uses Markdown markup language. You can read reference
+                <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
+              </label>
+              <textarea id="content" name="content" class="form-control article-input"
+              placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
+            </div>
+            <div class="form-group input-group article-input">
+              <input name="tags" class="form-control article-input" placeholder="Tags (comma-separated)" type="text" value="@form("tags").value"/>
+            </div>
           </div>
-          <div class="form-group input-group article-input">
-            <i class="glyphicon glyphicon-info-sign"></i>
-            <label for="content" class="editor-hint">
-              Editor uses Markdown markup language. You can read reference
-              <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
-            </label>
-            <textarea id="content" name="content" class="form-control article-input"
-            placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
-          </div>
-          <div class="form-group input-group article-input">
-            <input name="tags" class="form-control article-input" placeholder="Tags (comma-separated)" type="text" value="@form("tags").value"/>
+          <div class="tab-pane fade" id="preview"></div>
+          <div class="tab-pane fade" id="cat">
+            <br>
+            <img src="http://www.publicola.mu.nu/archives/images/cookie.b.jpg">
+            <br>
+            <hr>
           </div>
         </div>
-        <div class="preview-panel"></div>
         <div class="btn-toolbar pull-right clearfix">
-          @* Our "boss" doesn't want to have preview enabled for 2.0 release *@
-@*          <a class="btn btn-success preview-button" href="@routes.ArticleController.previewArticle()">Show preview</a>*@
           <input class="btn btn-primary" type="submit" value="Create article" />
           <a class="btn btn-danger" href="@routes.ArticleController.allArticles()">Discard</a>
         </div>

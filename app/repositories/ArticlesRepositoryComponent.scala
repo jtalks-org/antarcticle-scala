@@ -16,9 +16,11 @@ trait ArticlesRepositoryComponent {
    * Database session should be provided by a caller via implicit parameter.
    */
   trait ArticlesRepository {
-    def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
+    def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)
+               (implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String], Int)]
 
-    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String])]
+    def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)
+                      (implicit s: JdbcBackend#Session): List[(ArticleRecord, UserRecord, Seq[String], Int)]
 
     def get(id: Int)(implicit s: JdbcBackend#Session): Option[(ArticleRecord, UserRecord, Seq[String])]
 
@@ -36,7 +38,8 @@ trait ArticlesRepositoryComponent {
 }
 
 trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
-  this: Profile with UsersSchemaComponent with ArticlesSchemaComponent with TagsSchemaComponent =>
+  this: Profile with UsersSchemaComponent with ArticlesSchemaComponent
+    with TagsSchemaComponent with CommentsSchemaComponent =>
 
   val articlesRepository = new SlickArticlesRepository
 
@@ -89,19 +92,22 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articleTag <- articlesTags if articleTag.articleId === id
       tag <- tags if articleTag.tagId === tag.id
     } yield tag.name)
+    val articleCommentsCompiled = Compiled((id: Column[Int]) => for {
+      comment <- comments if comment.articleId === id
+    } yield comment.id)
 
     def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       (tagsIds match {
         case Some(x) => articlesByTags(x)
         case None => articles
-      }).portion(offset, portionSize).list.map(fetchTags)
+      }).portion(offset, portionSize).list.map(fetchTagsAndCommentsCount)
     }
 
     def getListForUser(userId: Int, offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       (tagsIds match {
         case Some(x) => articlesByTags(x).byAuthor(userId)
         case None => articles.byAuthor(userId)
-      }).portion(offset, portionSize).list.map(fetchTags)
+      }).portion(offset, portionSize).list.map(fetchTagsAndCommentsCount)
     }
 
     def get(id: Int)(implicit s: JdbcBackend#Session) = {
@@ -131,6 +137,11 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
 
     private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {
       case (article, author) => (article, author, articleTagsCompiled(article.id.get).list)
+    }
+
+    private def fetchTagsAndCommentsCount(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {
+        case (article, author) => 
+          (article, author, articleTagsCompiled(article.id.get).list, articleCommentsCompiled(article.id.get).list.length)
     }
 
     /**

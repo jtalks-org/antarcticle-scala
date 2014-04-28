@@ -47,8 +47,8 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     tags.map(_.name) ++= Seq("tag1", "tag2", "tag3")
 
     users ++= Seq(
-      UserRecord(None, "user1"),
-      UserRecord(None, "user2")
+      UserRecord(None, "user1", "password1"),
+      UserRecord(None, "user2", "password2")
     )
 
     articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(

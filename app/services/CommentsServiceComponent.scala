@@ -19,7 +19,6 @@ trait CommentsServiceComponent {
   val commentsService: CommentsService
 
   trait CommentsService {
-    def getAllNotReadComments(recipientUserId: Int)
     def getByArticle(id: Int): Seq[Comment]
     def insert(articleId: Int, content: String)(implicit principal: Principal): AuthorizationResult[CommentRecord]
     def update(id: Int, content: String)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
@@ -33,11 +32,6 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
   val commentsService = new CommentsServiceImpl
 
   class CommentsServiceImpl extends CommentsService {
-
-
-    override def getAllNotReadComments(recipientUserId: Int) = withSession { implicit  session =>
-
-    }
 
     def getByArticle(articleId: Int) = withSession { implicit session =>
       commentsRepository.getByArticle(articleId).map((toComment _).tupled)

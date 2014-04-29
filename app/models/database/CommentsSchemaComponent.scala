@@ -6,7 +6,7 @@ import scala.slick.model.ForeignKeyAction
 case class CommentToUpdate(content: String, updatedAt: Timestamp)
 
 case class CommentRecord(id: Option[Int], userId: Int, articleId: Int,
-       content: String, createdAt: Timestamp, updatedAt: Option[Timestamp] = None, readByArticleAuthor: Option[Boolean] = None)
+       content: String, createdAt: Timestamp, updatedAt: Option[Timestamp] = None)
 
 trait CommentsSchemaComponent {
   this: Profile with UsersSchemaComponent with ArticlesSchemaComponent =>
@@ -24,7 +24,6 @@ trait CommentsSchemaComponent {
     def content = column[String]("content", O.NotNull, O.DBType("text"))
     def createdAt = column[Timestamp]("created_at", O.NotNull)
     def updatedAt = column[Timestamp]("updated_at", O.Nullable)
-    def readByArticleAuthor = column[Boolean]("read_by_article_author", O.NotNull)
 
     // FKs
     def author = foreignKey("comment_author_fk", userId, users)(_.id)
@@ -32,7 +31,7 @@ trait CommentsSchemaComponent {
     def article = foreignKey("comment_article_fk", articleId, articles)(_.id, onDelete = ForeignKeyAction.Cascade)
 
     // projections
-    def * = (id.?, userId, articleId, content, createdAt, updatedAt.?, readByArticleAuthor.?) <> (CommentRecord.tupled, CommentRecord.unapply)
+    def * = (id.?, userId, articleId, content, createdAt, updatedAt.?) <> (CommentRecord.tupled, CommentRecord.unapply)
   }
 
   val comments = TableQuery[Comments]

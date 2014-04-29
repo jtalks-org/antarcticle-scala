@@ -13,8 +13,6 @@ trait CommentsRepositoryComponent {
    */
   trait CommentsRepository {
 
-    def getAllNotReadComments(recipientUserId: Int)(implicit session: JdbcBackend#Session):Seq[CommentRecord]
-
     def getByArticle(id: Int)(implicit session: JdbcBackend#Session): Seq[(CommentRecord, UserRecord)]
 
     def insert(comment: CommentRecord)(implicit session: JdbcBackend#Session): Int
@@ -65,9 +63,6 @@ trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
       // sorting after join as a workaround for https://github.com/slick/slick/issues/746
       .sortBy(_._1.createdAt.asc)
     )
-
-
-    def getAllNotReadComments(recipientUserId: Int)(implicit session: JdbcBackend#Session): Seq[CommentRecord] = {Seq()}
 
     def insert(comment: CommentRecord)(implicit session: JdbcBackend#Session) = insertCompiled.insert(comment)
 

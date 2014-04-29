@@ -69,4 +69,13 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
   }
 
+  val removeReadByArticleAuthorFlagForArticleComments = new Migration {
+    val version = 7
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table comments drop column read_by_article_author").execute()
+    }
+
+  }
+
 }

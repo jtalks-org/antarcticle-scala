@@ -17,13 +17,13 @@ trait NotificationsSchemaComponent {
   /**
    * Notifications
    */
-  class Notifications(tag: scala.slick.lifted.Tag) extends Table[Notification](tag, "comments") {
+  class Notifications(tag: scala.slick.lifted.Tag) extends Table[Notification](tag, "notifications") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)
     def articleId = column[Int]("article_id", O.NotNull)
-    def commentId = column[Int]("article_id", O.NotNull)
-    def title = column[String]("content", O.NotNull)
+    def commentId = column[Int]("comment_id", O.NotNull)
+    def title = column[String]("title", O.NotNull)
     def content = column[String]("content", O.NotNull)
     def createdAt = column[Timestamp]("created_at", O.Nullable)
 

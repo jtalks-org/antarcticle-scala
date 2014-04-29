@@ -1,3 +1,4 @@
+import org.parboiled.support.Chars
 import org.specs2.mutable.Specification
 import views.helpers.Markdown
 
@@ -121,6 +122,68 @@ class Example(name: String) {
       val result = Markdown.toHtml(markdownSource)
 
       result must contain("<p><strong>strong <em>nestedemph</em></strong></p>")
+    }
+
+    "correctly handle underscores in text" in {
+      val markdownSource = "__strong _nestedemph__"
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must contain("<p><strong>strong _nestedemph</strong></p>")
+    }
+
+    "produce correct html for email" in {
+      val markdownSource = "mail@to.me"
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must contain("mailto:")
+    }
+
+    "produce correct html for nested lists" in {
+      val markdownSource =
+        """
+          |*	One
+          |	*	Two
+          |
+          |1. First
+          |2. Second:
+          |	* One
+          |3. Third
+          |
+          |1. First
+          |
+          |2. Second:
+          |	* One
+          |
+          |3. Third
+        """.stripMargin
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must contain("<ul>\n  <li><p>One</p>\n  <ul>\n    <li>Two</li>\n  </ul></li>\n</ul>")
+      result must contain("<li>One</li>\n  </ul></li>\n  <li><p>Third</p></li>\n</ol>")
+    }
+
+    "produce correct html for ordered list with paragraphs" in {
+      val markdownSource =
+        """
+          |Multiple paragraphs:
+          |
+          |1.	Item 1, graf one.
+          |
+          |	Item 2. graf two. The quick brown fox jumped over the lazy dog's
+          |	back.
+          |
+          |2.	Item 2.
+          |
+          |3.	Item 3.
+        """.stripMargin
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must contain("<li><p>Item 1, graf one.</p>")
+      result must contain("<li><p>Item 3.</p></li>\n</ol>")
     }
   }
 }

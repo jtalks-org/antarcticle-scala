@@ -17,7 +17,7 @@ trait NotificationsSchemaComponent {
   /**
    * Notifications
    */
-  class Notifications(tag: Tag) extends Table[Notification](tag, "notifications") {
+  class Notifications(tag: scala.slick.lifted.Tag) extends Table[Notification](tag, "notifications") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)

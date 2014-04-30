@@ -1,7 +1,7 @@
 package repositories
 
 import scala.slick.jdbc.JdbcBackend
-import models.database.{NotificationsSchemaComponent, Profile, TagsSchemaComponent, Notification}
+import models.database.{NotificationsSchemaComponent, Profile, Notification}
 
 /**
  * @author Anuar_Nurmakanov
@@ -23,12 +23,16 @@ trait NotificationsRepositoryComponent {
 trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryComponent {
   this: NotificationsSchemaComponent with Profile =>
 
+  import profile.simple._
+
   val notificationsRepository = new NotificationsRepositoryImpl
+
+  val compiledByReceiverId = Compiled((id: Column[Int]) => notifications.filter(id === _.userId))
 
   class NotificationsRepositoryImpl extends NotificationsRepository {
 
     def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification] = {
-      Seq()
+      compiledByReceiverId(articlesAuthorId).list()
     }
 
     def deleteNotification(id: Int)(implicit session: JdbcBackend#Session) = {

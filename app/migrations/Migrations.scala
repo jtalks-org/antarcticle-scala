@@ -75,7 +75,26 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("alter table comments drop column read_by_article_author").execute()
     }
+  }
 
+  val addCommentsNotifications = new Migration {
+    val version = 8
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("CREATE TABLE IF NOT EXISTS notifications ( " +
+        " id int(11) NOT NULL AUTO_INCREMENT," +
+        " user_id int(11) NOT NULL," +
+        " article_id int(11) NOT NULL," +
+        " comment_id int(11) NOT NULL," +
+        " title varchar(90) NOT NULL," +
+        " content text NOT NULL," +
+        " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+        " PRIMARY KEY(id)," +
+        " CONSTRAINT notification_user_fk FOREIGN KEY (user_id) REFERENCES users (id)," +
+        " CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id)," +
+        " CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id)" +
+        ");").execute()
+    }
   }
 
 }

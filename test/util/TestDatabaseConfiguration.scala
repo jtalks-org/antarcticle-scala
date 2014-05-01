@@ -6,7 +6,10 @@ import scala.slick.driver.{H2Driver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.jdbc.JdbcBackend.Database
 import migrations.{MigrationTool, MigrationsContainer}
+import scala.Some
 import models.database.Notification
+import models.database.CommentRecord
+import models.database.UserRecord
 import scala.Some
 
 /**
@@ -50,7 +53,8 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     users ++= Seq(
       UserRecord(None, "user1", "password1"),
       UserRecord(None, "user2", "password2"),
-      UserRecord(None, "user3", "password3")
+      UserRecord(None, "user3", "password3"),
+      UserRecord(None, "doesn't have notifications", "password3")
     )
 
     articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(

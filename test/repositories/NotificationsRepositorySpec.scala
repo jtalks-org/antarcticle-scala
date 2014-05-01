@@ -43,4 +43,14 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
       notification.title must_== expectedTitle
     }
   }
+
+  "get notifications by recipient id" should {
+    "return nothing when recipient doesn't have notifications" in withTestDb { implicit session =>
+      val userId = 4
+
+      val notifications = notificationsRepository.getNotificationsForArticlesOf(userId)
+
+      notifications must beEmpty
+    }
+  }
 }

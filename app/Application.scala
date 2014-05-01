@@ -39,6 +39,7 @@ trait Services
   extends ArticlesServiceComponentImpl
   with TagsServiceComponentImpl
   with CommentsServiceComponentImpl
+  with NotificationsServiceComponentImpl
   with UsersServiceComponentImpl{
   this: Repositories with SessionProvider =>
 
@@ -50,6 +51,7 @@ trait Repositories
   extends SlickArticlesRepositoryComponent
   with TagsRepositoryComponentImpl
   with CommentsRepositoryComponentImpl
+  with NotificationsRepositoryComponentImpl
   with UsersRepositoryComponentImpl {
   this: Schema with Profile =>
 }

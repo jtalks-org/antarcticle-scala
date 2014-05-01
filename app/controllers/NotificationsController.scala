@@ -5,41 +5,41 @@ import security.Authentication
 import models.database.Notification
 import java.sql.Timestamp
 import scala.collection.mutable.ArrayBuffer
+import services.NotificationsServiceComponent
+import models.ArticleModels.ArticleDetailsModel
+import security.Result.{Authorized, NotAuthorized}
 
 /**
  *   Temporary notification controller implementation to be used until
  *   proper backend for notifications is implemented
  */
 trait NotificationsController {
-  this: Controller with Authentication =>
-
-  var data = ArrayBuffer[Notification](
-    Notification(Some(1), 1, 1, 1, "Yo mama is so stupid", "she thought a quarterback was a refund", new Timestamp(1)),
-    Notification(Some(2), 1, 2, 1, "Yet another notification", "There are so many of them", new Timestamp(100000000000l)),
-    Notification(Some(3), 1, 2, 1, "These notifications are fake", "User story is not ready yet", new Timestamp(500000000000l))
-  )
+  this: Controller with NotificationsServiceComponent with Authentication =>
 
   def getNotifications = Action {
     implicit request =>
-      Ok(views.html.templates.notifications(data))
+      val notifications = notificationsService.getNotificationForCurrentUser
+      Ok(views.html.templates.notifications(notifications))
   }
 
   def getNotification(id: Int) = Action {
     implicit request =>
-      val notification = data.filter((notification) => notification.id == Some(id)).head
-      data = data.filter((notification) => notification.id != Some(id))
-      Found(routes.ArticleController.viewArticle(notification.articleId).absoluteURL() + "#" + notification.commentId)
+      notificationsService.getNotification(id) match {
+        case Some(notification : Notification) => Found(routes.ArticleController.viewArticle(notification.articleId).absoluteURL() + "#" + notification.commentId)
+        case None => NotFound(views.html.errors.notFound())
+      }
   }
 
   def dismissNotification(id: Int) = Action {
     implicit request =>
-      data = data.filter((notification) => notification.id != Some(id))
-      Ok(views.html.templates.notifications(List()))
+      notificationsService.deleteNotification(id).fold(
+        fail = _ => NotFound(views.html.errors.notFound()),
+        succ = _ => Ok(routes.NotificationsController.getNotifications.absoluteURL())//TODO temporary
+      )
   }
 
   def dismissAllNotifications = Action {
     implicit request =>
-      data.clear()
       Ok(views.html.templates.notifications(List()))
   }
 }

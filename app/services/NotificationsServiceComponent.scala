@@ -1,8 +1,9 @@
 package services
 
-import models.database.Notification
-import scala.slick.jdbc.JdbcBackend
-import repositories.{NotificationsRepositoryComponent}
+import repositories.NotificationsRepositoryComponent
+import models.database._
+import scalaz._
+import Scalaz._
 
 
 /**
@@ -12,7 +13,11 @@ trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
 
   trait NotificationsService {
-    def getNotificationForArticlesOf(articlesAuthorId: Int)(implicit s: JdbcBackend#Session): Seq[Notification]
+    def getNotificationForCurrentUser: Seq[Notification]
+
+    def getNotification(id: Int): Option[Notification]
+
+    def deleteNotification(id: Int): ValidationNel[String, Unit]
   }
 }
 
@@ -22,8 +27,23 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
   val notificationsService = new NotificationsServiceImpl
 
   class NotificationsServiceImpl extends NotificationsService{
-    def getNotificationForArticlesOf(articlesAuthorId: Int)(implicit s: JdbcBackend#Session): Seq[Notification] = {
-      Seq()
+
+    override def getNotificationForCurrentUser: Seq[Notification] = withSession { implicit session =>
+      notificationsRepository.getNotificationsForArticlesOf(1)
+    }
+
+    override def getNotification(id: Int): Option[Notification] = withSession { implicit session =>
+      notificationsRepository.getNotification(id)
+    }
+
+    override def deleteNotification(id: Int) = withTransaction{ implicit session =>
+      notificationsRepository.getNotification(id) match {
+        case None => "Notification not found".failureNel
+        case Some(n) => {
+          notificationsRepository.deleteNotification(id)
+        }.successNel
+      }
+
     }
   }
 }

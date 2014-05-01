@@ -13,6 +13,8 @@ trait NotificationsRepositoryComponent {
 
     def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification]
 
+    def getNotification(id: Int)(implicit session: JdbcBackend#Session): Option[Notification]
+
     def deleteNotification(id: Int) (implicit session: JdbcBackend#Session)
   }
 }
@@ -33,8 +35,8 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
       compiledByReceiverId(articlesAuthorId).list()
     }
 
-    def getNotification(id: Int)(implicit session: JdbcBackend#Session): Notification = {
-      compiledById(id).first
+    def getNotification(id: Int)(implicit session: JdbcBackend#Session): Option[Notification] = {
+      compiledById(id).firstOption
     }
 
     def deleteNotification(id: Int)(implicit session: JdbcBackend#Session) = {

@@ -28,6 +28,7 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
   val notificationsRepository = new NotificationsRepositoryImpl
 
   val compiledByReceiverId = Compiled((id: Column[Int]) => notifications.filter(id === _.userId))
+  val compiledById = Compiled((id: Column[Int]) => notifications.filter(id === _.id))
 
   class NotificationsRepositoryImpl extends NotificationsRepository {
 
@@ -36,6 +37,7 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
     }
 
     def deleteNotification(id: Int)(implicit session: JdbcBackend#Session) = {
+      compiledById(id).compiledDelete
     }
   }
 }

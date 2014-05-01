@@ -53,4 +53,17 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
       notifications must beEmpty
     }
   }
+
+  "delete notification" should {
+    "delete it from database" in withTestDb { implicit session =>
+      val deletedNotificationId = 3
+      val recipientId = 1
+
+      notificationsRepository.deleteNotification(deletedNotificationId)
+
+      notificationsCount(recipientId) must_==  0
+    }
+  }
+
+  def notificationsCount(recipientId: Int)(implicit session: Session) = notifications.filter(_.userId == recipientId).length.run
 }

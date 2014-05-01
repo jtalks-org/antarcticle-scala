@@ -4,6 +4,8 @@ import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 import util.TestDatabaseConfigurationWithFixtures
 import models.database.Schema
+import security.AuthenticatedUser
+import security.Authorities.User
 
 /**
  * @author Anuar_Nurmakanov
@@ -74,10 +76,12 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
       val expectedContent = "Don't deny it, you met it."
 
       val notification = notificationsRepository.getNotification(notificationId)
-      notification.articleId must_== expectedArticleId
-      notification.commentId must_== expectedCommentId
-      notification.content must_== expectedContent
-      notification.title must_== expectedTitle
+      notification should beSome
+
+      notification.get.articleId must_== expectedArticleId
+      notification.get.commentId must_== expectedCommentId
+      notification.get.content must_== expectedContent
+      notification.get.title must_== expectedTitle
     }
   }
 

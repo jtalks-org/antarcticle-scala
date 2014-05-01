@@ -4,6 +4,7 @@ import repositories.NotificationsRepositoryComponent
 import models.database._
 import scalaz._
 import Scalaz._
+import security.{AuthenticatedUser, Principal}
 
 
 /**
@@ -13,7 +14,7 @@ trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
 
   trait NotificationsService {
-    def getNotificationForCurrentUser: Seq[Notification]
+    def getNotificationForCurrentUser(implicit principal: Principal): Seq[Notification]
 
     def getNotification(id: Int): Option[Notification]
 
@@ -28,8 +29,9 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
   class NotificationsServiceImpl extends NotificationsService{
 
-    override def getNotificationForCurrentUser: Seq[Notification] = withSession { implicit session =>
-      notificationsRepository.getNotificationsForArticlesOf(1)
+    override def getNotificationForCurrentUser(implicit principal: Principal): Seq[Notification] = withSession { implicit session =>
+      val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+      notificationsRepository.getNotificationsForArticlesOf(currentUserId)
     }
 
     override def getNotification(id: Int): Option[Notification] = withSession { implicit session =>

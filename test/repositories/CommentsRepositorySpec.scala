@@ -1,9 +1,7 @@
 package repositories
 
 import org.specs2.mutable.Specification
-import utils.Implicits._
 import org.specs2.time.NoTimeConversions
-import com.github.nscala_time.time.Imports._
 import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 
@@ -11,8 +9,6 @@ class CommentsRepositorySpec extends Specification with NoTimeConversions {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
               with CommentsRepositoryComponentImpl
 
-  import repository._
-  import profile.simple._
 
   "get comments by article" should {
     "return comments with author" in pending

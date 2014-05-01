@@ -1,12 +1,12 @@
 package util
 
-import models.database.Profile
-import models.database.Schema
+import models.database.{Notification, Profile, Schema}
 import services.SlickSessionProvider
 import scala.slick.driver.{H2Driver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.jdbc.JdbcBackend.Database
 import migrations.{MigrationTool, MigrationsContainer}
+import models.database.Notification
 
 /**
  * Configures H2 database for tests. Database scope is single session.
@@ -71,6 +71,12 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
       CommentRecord(None, 2, 3, "dsfasdfsdaf", time, None),
       CommentRecord(None, 1, 4, "<b>content2</b>", time - 10.days, None),
       CommentRecord(None, 1, 1, "<b>content42342</b>", time + 5.minutes, None)
+    )
+
+    notifications ++= Seq(
+      Notification(Some(1), 2, 2, 2, "Be careful, it's JTalks, baby", "Don't deny it, you met it.", time),
+      Notification(Some(2), 2, 2, 2, "Again and again", "Don't deny it, you met it.", time),
+      Notification(Some(3), 1, 2, 2, "You can delete this notification.", "But be careful, it's JTalks, baby.", time)
     )
   }
 }

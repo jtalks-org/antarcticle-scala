@@ -8,10 +8,7 @@ import models.database.{NotificationsSchemaComponent, Profile, Notification}
  */
 trait NotificationsRepositoryComponent {
   val notificationsRepository: NotificationsRepository
-  /**
-   * Provides basic comment-related operations over a database.
-   * Database session should be provided by a caller via implicit parameter.
-   */
+
   trait NotificationsRepository {
 
     def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification]
@@ -34,6 +31,10 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
 
     def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification] = {
       compiledByReceiverId(articlesAuthorId).list()
+    }
+
+    def getNotification(id: Int)(implicit session: JdbcBackend#Session): Notification = {
+      compiledById(id).first
     }
 
     def deleteNotification(id: Int)(implicit session: JdbcBackend#Session) = {

@@ -55,13 +55,29 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
   }
 
   "delete notification" should {
-    "delete it from database" in withTestDb { implicit session =>
+    "delete it in database" in withTestDb { implicit session =>
       val deletedNotificationId = 3
       val recipientId = 1
 
       notificationsRepository.deleteNotification(deletedNotificationId)
 
       notificationsCount(recipientId) must_==  0
+    }
+  }
+
+  "get notification" should {
+    "return it by id" in withTestDb { implicit session =>
+      val notificationId = 1
+      val expectedArticleId = 2
+      val expectedCommentId = 2
+      val expectedTitle = "Be careful, it's JTalks, baby"
+      val expectedContent = "Don't deny it, you met it."
+
+      val notification = notificationsRepository.getNotification(notificationId)
+      notification.articleId must_== expectedArticleId
+      notification.commentId must_== expectedCommentId
+      notification.content must_== expectedContent
+      notification.title must_== expectedTitle
     }
   }
 

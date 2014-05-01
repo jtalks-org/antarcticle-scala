@@ -1,12 +1,13 @@
 package util
 
-import models.database.{Notification, Profile, Schema}
+import models.database._
 import services.SlickSessionProvider
 import scala.slick.driver.{H2Driver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.jdbc.JdbcBackend.Database
 import migrations.{MigrationTool, MigrationsContainer}
 import models.database.Notification
+import scala.Some
 
 /**
  * Configures H2 database for tests. Database scope is single session.
@@ -48,7 +49,8 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
 
     users ++= Seq(
       UserRecord(None, "user1", "password1"),
-      UserRecord(None, "user2", "password2")
+      UserRecord(None, "user2", "password2"),
+      UserRecord(None, "user3", "password3")
     )
 
     articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(
@@ -76,7 +78,8 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     notifications ++= Seq(
       Notification(Some(1), 2, 2, 2, "Be careful, it's JTalks, baby", "Don't deny it, you met it.", time),
       Notification(Some(2), 2, 2, 2, "Again and again", "Don't deny it, you met it.", time),
-      Notification(Some(3), 1, 2, 2, "You can delete this notification.", "But be careful, it's JTalks, baby.", time)
+      Notification(Some(3), 1, 2, 2, "You can delete this notification.", "But be careful, it's JTalks, baby.", time),
+      Notification(Some(4), 3, 2, 2, "Have you checked a content of your notification?", "Bullshit, do it now.", time)
     )
   }
 }

@@ -185,5 +185,19 @@ class Example(name: String) {
       result must contain("<li><p>Item 1, graf one.</p>")
       result must contain("<li><p>Item 3.</p></li>\n</ol>")
     }
+
+    "produce correct html for list with different indents" in {
+      val markdownSource = """
+          |* this
+          |
+          | * sub
+          |
+          | that
+        """.stripMargin
+
+      val result = Markdown.toHtml(markdownSource)
+
+      result must contain("<ul>\n  <li>this</li>\n</ul>\n<ul>\n  <li>sub</li>\n</ul><p>that</p>")
+    }
   }
 }

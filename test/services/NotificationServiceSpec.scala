@@ -52,4 +52,16 @@ class NotificationServiceSpec extends  Specification
       foundNotifications mustEqual expectedNotifications
     }
   }
+
+  "get notification" should {
+    "return it by id" in {
+      val notificationId = 1
+      val expectedNotification = Some(firstNotification)
+      notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
+
+      val foundNotification = notificationsService.getNotification(notificationId)
+
+      foundNotification mustEqual expectedNotification
+    }
+  }
 }

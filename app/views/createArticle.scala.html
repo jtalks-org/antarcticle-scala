@@ -8,7 +8,6 @@
       <ul class="nav nav-tabs">
         <li class="active"><a href="#write" data-toggle="tab">Write</a></li>
         <li><a id="preview-tab" data-href="@routes.ArticleController.previewArticle()" href="#preview" data-toggle="tab">Preview</a></li>
-        <li><a href="#cat" data-toggle="tab">Cat</a></li>
       </ul>
 
       <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
@@ -32,12 +31,6 @@
             </div>
           </div>
           <div class="tab-pane fade" id="preview"></div>
-          <div class="tab-pane fade" id="cat">
-            <br>
-            <img src="http://www.publicola.mu.nu/archives/images/cookie.b.jpg">
-            <br>
-            <hr>
-          </div>
         </div>
         <div class="btn-toolbar pull-right clearfix">
           <input class="btn btn-primary" type="submit" value="Create article" />

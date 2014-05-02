@@ -8,10 +8,8 @@ import org.specs2.scalaz.ValidationMatchers
 import repositories.NotificationsRepositoryComponent
 import util.FakeSessionProvider
 
-import models.database._
-import scala.slick.driver.H2Driver
 import java.sql.Timestamp
-import security.{Authorities, AuthenticatedUser, AuthenticatedPrincipal}
+import security.{Authorities, AuthenticatedUser}
 import util.FakeSessionProvider._
 import models.database.Notification
 
@@ -62,6 +60,29 @@ class NotificationServiceSpec extends  Specification
       val foundNotification = notificationsService.getNotification(notificationId)
 
       foundNotification mustEqual expectedNotification
+    }
+  }
+
+  "dismiss notification" should {
+    "delete it when it exists" in {
+      val notificationId = 1
+      val expectedNotification = Some(firstNotification)
+      notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
+
+      val isDeleted = notificationsService.deleteNotification(notificationId)
+
+      isDeleted must beSuccessful
+      there was one(notificationsRepository).deleteNotification(notificationId)(FakeSessionValue)
+    }
+
+    "fail when notification doesn't exist" in {
+      val notificationId = 1
+      notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
+
+      val isDeleted = notificationsService.deleteNotification(notificationId)
+
+      isDeleted must beFailing
+      there was no(notificationsRepository).deleteNotification(notificationId)(FakeSessionValue)
     }
   }
 }

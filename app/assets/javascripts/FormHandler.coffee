@@ -20,7 +20,12 @@ class FormHandler
 
   defaultOnFail: (data) =>
     $('.clear-on-resubmit').remove() # clear old validation messages, if any
-    this.form.prepend(data.responseText)
+    if (data.status == 413)
+      # it seems there's no easy way to handle http 413 globally on server
+      this.form.prepend("<div class='alert alert-danger form-error clear-on-resubmit'>" +
+      "<a class='close' data-dismiss='alert' href='#'>x</a>Operation cannot be completed: too much data sent</div>")
+    else
+      this.form.prepend(data.responseText)
     $("body").css("cursor", "default")
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
@@ -28,10 +33,8 @@ class FormHandler
     this.form.submit(=>
       $("body").css("cursor", "progress")
       $.post(this.form.attr('action'), this.form.serialize())
-      .done((data) =>
-          @onSuccess(data))
-      .fail((data) =>
-          @onFail(data))
+      .done((data) => @onSuccess(data))
+      .fail((data) => @onFail(data))
       return false
     )
 

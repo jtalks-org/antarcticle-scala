@@ -6,6 +6,7 @@ class PreviewSupport
 
   constructor: (@previewLinkSelector, @previewPanelSelector, @formSelector) ->
     $(@previewLinkSelector).click (e) =>
+      $('.clear-on-resubmit').remove() # clear old validation messages, if any
       previewPanel = $(@previewPanelSelector)
       form = $(@formSelector)
       $.post($(@previewLinkSelector).attr('data-href'), form.serialize())

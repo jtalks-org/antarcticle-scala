@@ -7,10 +7,6 @@ import scala.slick.jdbc.JdbcBackend
 import scala.slick.jdbc.JdbcBackend.Database
 import migrations.{MigrationTool, MigrationsContainer}
 import scala.Some
-import models.database.Notification
-import models.database.CommentRecord
-import models.database.UserRecord
-import scala.Some
 
 /**
  * Configures H2 database for tests. Database scope is single session.

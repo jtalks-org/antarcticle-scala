@@ -9,18 +9,13 @@ import util.FakeSessionProvider.FakeSessionValue
 import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
 import org.mockito.Matchers
-import util.{TimeFridge, MockSession}
-import models.Page
+import util.TimeFridge
 import org.specs2.specification.BeforeExample
 import scalaz._
 import Scalaz._
-import validators.Validator
 import repositories.CommentsRepositoryComponent
-import util.ScalazValidationTestUtils._
 import org.specs2.scalaz.ValidationMatchers
 import models.CommentModels.Comment
-import conf.Constants._
-import models.UserModels.UserModel
 import security._
 import security.Result._
 

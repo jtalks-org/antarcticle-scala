@@ -21,7 +21,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
     "return all exist notifications" in withTestDb { implicit session =>
       val userId = 2
 
-      val notifications = notificationsRepository.getNotificationsForArticlesOf(userId)
+      val notifications = notificationsRepository.getNotificationsForUser(userId)
 
       notifications must have size 2
     }
@@ -35,7 +35,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
       val expectedTitle = "Have you checked a content of your notification?"
       val expectedContent = "Bullshit, do it now."
 
-      val notifications = notificationsRepository.getNotificationsForArticlesOf(userId)
+      val notifications = notificationsRepository.getNotificationsForUser(userId)
 
       notifications must have size 1
       val notification = notifications(0)
@@ -50,7 +50,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
     "return nothing when recipient doesn't have notifications" in withTestDb { implicit session =>
       val userId = 4
 
-      val notifications = notificationsRepository.getNotificationsForArticlesOf(userId)
+      val notifications = notificationsRepository.getNotificationsForUser(userId)
 
       notifications must beEmpty
     }
@@ -61,7 +61,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
       val deletedNotificationId = 3
       val recipientId = 1
 
-      notificationsRepository.deleteNotification(deletedNotificationId)
+      notificationsRepository.deleteNotification(deletedNotificationId, recipientId)
 
       notificationsCount(recipientId) must_==  0
     }

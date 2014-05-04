@@ -33,19 +33,20 @@ class NotificationServiceSpec extends  Specification
 
   val firstNotification = Notification(None, 1, 2, 1, "", "", time)
   val secondNotification = Notification(None, 1, 2, 1, "", "", time)
+  val currentUserId = 1
+  val currentUser = new AuthenticatedUser(currentUserId,"user", Authorities.User)
 
-  override protected def before: Any = {
+  def before: Any = {
     org.mockito.Mockito.reset(notificationsRepository)
   }
 
   "get notifications" should {
     "return all notifications for current user" in {
-      val currentUserId = 1
-      val currentUser = new AuthenticatedUser(currentUserId,"user", Authorities.User)
-      val expectedNotifications = Seq(firstNotification, secondNotification)
-      notificationsRepository.getNotificationsForArticlesOf(currentUserId) (FakeSessionValue) returns expectedNotifications
 
-      val foundNotifications = notificationsService.getNotificationForCurrentUser(currentUser)
+      val expectedNotifications = Seq(firstNotification, secondNotification)
+      notificationsRepository.getNotificationsForUser(currentUserId) (FakeSessionValue) returns expectedNotifications
+
+      val foundNotifications = notificationsService.getNotificationsForCurrentUser(currentUser)
 
       foundNotifications mustEqual expectedNotifications
     }
@@ -57,7 +58,7 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      val foundNotification = notificationsService.getNotification(notificationId)
+      val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(currentUser)
 
       foundNotification mustEqual expectedNotification
     }
@@ -69,20 +70,18 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      val isDeleted = notificationsService.deleteNotification(notificationId)
+      notificationsService.deleteNotification(notificationId)(currentUser)
 
-      isDeleted must beSuccessful
-      there was one(notificationsRepository).deleteNotification(notificationId)(FakeSessionValue)
+      there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
     }
 
-    "fail when notification doesn't exist" in {
+    "be silent when notification doesn't exist" in {
       val notificationId = 1
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
 
-      val isDeleted = notificationsService.deleteNotification(notificationId)
+      notificationsService.deleteNotification(notificationId)(currentUser)
 
-      isDeleted must beFailing
-      there was no(notificationsRepository).deleteNotification(notificationId)(FakeSessionValue)
+      there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
     }
   }
 }

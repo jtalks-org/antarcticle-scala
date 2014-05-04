@@ -11,11 +11,15 @@ trait NotificationsRepositoryComponent {
 
   trait NotificationsRepository {
 
-    def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification]
+    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session)
+
+    def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session): Seq[Notification]
 
     def getNotification(id: Int)(implicit session: JdbcBackend#Session): Option[Notification]
 
-    def deleteNotification(id: Int) (implicit session: JdbcBackend#Session)
+    def deleteNotification(notificationId: Int, userId: Int) (implicit session: JdbcBackend#Session)
+
+    def deleteNotificationsForUser(userId: Int) (implicit session: JdbcBackend#Session)
   }
 }
 
@@ -26,21 +30,26 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
 
   val notificationsRepository = new NotificationsRepositoryImpl
 
-  val compiledByReceiverId = Compiled((id: Column[Int]) => notifications.filter(id === _.userId))
+  val compiledForInsert = notifications.insertInvoker
+  val compiledByUser = Compiled((id: Column[Int]) => notifications.filter(id === _.userId))
   val compiledById = Compiled((id: Column[Int]) => notifications.filter(id === _.id))
+  val compiledByIdAndUser =
+    Compiled((id: Column[Int], userId: Column[Int]) => notifications.filter(id === _.id).filter(userId === _.userId))
 
   class NotificationsRepositoryImpl extends NotificationsRepository {
 
-    def getNotificationsForArticlesOf(articlesAuthorId: Int)(implicit session: JdbcBackend#Session): Seq[Notification] = {
-      compiledByReceiverId(articlesAuthorId).list()
-    }
+    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) =
+      compiledForInsert.insert(notification)
 
-    def getNotification(id: Int)(implicit session: JdbcBackend#Session): Option[Notification] = {
-      compiledById(id).firstOption
-    }
+    def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) = compiledByUser(userId).list()
 
-    def deleteNotification(id: Int)(implicit session: JdbcBackend#Session) = {
-      compiledById(id).compiledDelete
-    }
+    def getNotification(id: Int)(implicit session: JdbcBackend#Session) = compiledById(id).firstOption
+
+    def deleteNotification(notificationId: Int, userId: Int)(implicit session: JdbcBackend#Session) =
+      compiledByIdAndUser(notificationId, userId).delete
+
+    def deleteNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) =
+      compiledByUser(userId).delete
+
   }
 }

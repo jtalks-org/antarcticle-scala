@@ -25,14 +25,17 @@ class CommentsServiceSpec extends Specification
 
   object service extends CommentsServiceComponentImpl
     with CommentsRepositoryComponent
+    with NotificationsServiceComponent
     with FakeSessionProvider {
     override val commentsRepository = mock[CommentsRepository]
+    override val notificationsService = mock[NotificationsService]
   }
 
   import service._
 
   def before = {
     org.mockito.Mockito.reset(commentsRepository)
+    org.mockito.Mockito.reset(notificationsService)
   }
 
   val userRecord = UserRecord(1.some, "user1", "password1")

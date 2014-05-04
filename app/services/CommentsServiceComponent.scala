@@ -27,7 +27,7 @@ trait CommentsServiceComponent {
 }
 
 trait CommentsServiceComponentImpl extends CommentsServiceComponent {
-  this: SessionProvider with CommentsRepositoryComponent =>
+  this: SessionProvider with NotificationsServiceComponent with CommentsRepositoryComponent =>
 
   val commentsService = new CommentsServiceImpl
 
@@ -44,7 +44,9 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
           val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
           val toInsert = CommentRecord(None, currentUserId, articleId, content, DateTime.now)
           val id = commentsRepository.insert(toInsert)
-          toInsert.copy(id = Some(id))
+          val result = toInsert.copy(id = Some(id))
+          notificationsService.createNotification(result)
+          result
         }
       }
 

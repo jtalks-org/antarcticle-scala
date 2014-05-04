@@ -5,6 +5,7 @@ import models.database._
 import scalaz._
 import Scalaz._
 import security.{AuthenticatedUser, Principal}
+import scala.slick.jdbc.JdbcBackend
 
 
 /**
@@ -14,12 +15,17 @@ trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
 
   trait NotificationsService {
-    def getNotificationForCurrentUser(implicit principal: Principal): Seq[Notification]
+    def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session)
 
-    def getNotification(id: Int): Option[Notification]
+    def getNotificationsForCurrentUser(implicit principal: Principal): Seq[Notification]
 
-    def deleteNotification(id: Int): ValidationNel[String, Unit]
+    def getAndDeleteNotification(id: Int)(implicit principal: Principal): Option[Notification]
+
+    def deleteNotification(notificationId: Int)(implicit principal: Principal)
+
+    def deleteNotificationsForCurrentUser()(implicit principal: Principal)
   }
+
 }
 
 trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
@@ -27,25 +33,42 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
   val notificationsService = new NotificationsServiceImpl
 
-  class NotificationsServiceImpl extends NotificationsService{
+  class NotificationsServiceImpl extends NotificationsService {
 
-    override def getNotificationForCurrentUser(implicit principal: Principal): Seq[Notification] = withSession { implicit session =>
-      val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-      notificationsRepository.getNotificationsForArticlesOf(currentUserId)
+
+    def createNotification(cr: CommentRecord)(implicit principal: Principal, session : JdbcBackend#Session) {
+        // todo: pattern matching by auth
+        notificationsRepository.insertNotification(
+          new Notification(None, cr.userId, cr.articleId, cr.id.get, "title", cr.content, cr.createdAt))
     }
 
-    override def getNotification(id: Int): Option[Notification] = withSession { implicit session =>
-      notificationsRepository.getNotification(id)
+    def getNotificationsForCurrentUser(implicit principal: Principal) = withSession {
+      implicit session =>
+        // todo: pattern matching by auth
+        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+        notificationsRepository.getNotificationsForUser(currentUserId)
     }
 
-    override def deleteNotification(id: Int) = withTransaction{ implicit session =>
-      notificationsRepository.getNotification(id) match {
-        case None => "Notification not found".failureNel
-        case Some(n) => {
-          notificationsRepository.deleteNotification(id)
-        }.successNel
-      }
+    def getAndDeleteNotification(id: Int)(implicit principal: Principal) = withSession {
+      implicit session => 
+        val notification = notificationsRepository.getNotification(id)
+        this.deleteNotification(id)
+        notification
+    }
 
+    def deleteNotification(id: Int)(implicit principal: Principal) = withTransaction {
+      implicit session =>
+        // todo: pattern matching by auth
+        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+        notificationsRepository.deleteNotification(id, currentUserId)
+    }
+
+    def deleteNotificationsForCurrentUser()(implicit principal: Principal) = withTransaction {
+      implicit session =>
+        // todo: pattern matching by auth
+        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+        notificationsRepository.deleteNotificationsForUser(currentUserId)
     }
   }
+
 }

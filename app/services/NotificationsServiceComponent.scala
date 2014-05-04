@@ -3,13 +3,12 @@ package services
 import repositories.NotificationsRepositoryComponent
 import models.database._
 import scalaz._
-import Scalaz._
 import security.{AuthenticatedUser, Principal}
 import scala.slick.jdbc.JdbcBackend
 
 
 /**
- * @author Anuar_Nurmakanov
+ *
  */
 trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
@@ -38,8 +37,9 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
     def createNotification(cr: CommentRecord)(implicit principal: Principal, session : JdbcBackend#Session) {
         // todo: pattern matching by auth
+        // todo: don't create notifications for own comments
         notificationsRepository.insertNotification(
-          new Notification(None, cr.userId, cr.articleId, cr.id.get, "title", cr.content, cr.createdAt))
+          new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content, cr.createdAt))
     }
 
     def getNotificationsForCurrentUser(implicit principal: Principal) = withSession {
@@ -50,7 +50,8 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
     }
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal) = withSession {
-      implicit session => 
+      implicit session =>
+        // todo: pattern matching by auth
         val notification = notificationsRepository.getNotification(id)
         this.deleteNotification(id)
         notification

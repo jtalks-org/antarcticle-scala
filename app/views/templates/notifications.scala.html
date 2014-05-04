@@ -1,4 +1,4 @@
-@(notifications: Seq[database.Notification])(implicit user: Principal)
+@(notifications: Seq[database.Notification] = List())(implicit user: Principal)
 @if(notifications.isEmpty) {
   <div class="dropdown-header" data-count="">
     <span>You have no pending notifications</span>
@@ -16,7 +16,7 @@
       </a>
     </span>
   </div>
-  @for(notification <- notifications) {
+  @for(notification <- notifications.take(5)) {
     <li class="inbox-item">
       <a href="@routes.NotificationsController.getNotification(notification.id.get)">
         <div class="notification-toolbar">

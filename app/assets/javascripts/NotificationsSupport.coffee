@@ -16,9 +16,10 @@ dismissNotification = (e) ->
     url: $(this).attr('data-href'),
     type: 'DELETE'
   }).done( =>
-    $(this).parent().parent().parent().remove()
-    notificationsLeft = $(".notifications-badge").text() - 1
-    $(".notifications-badge").text(if notificationsLeft == 0 then "" else notificationsLeft)
+    $.get($("#notifications-link").attr('href')).done((data) =>
+      $("#notifications-dropdown").html(data)
+      $(".notifications-badge").text($(".dropdown-header").attr("data-count"))
+    )
   )
   e.preventDefault()
   return false

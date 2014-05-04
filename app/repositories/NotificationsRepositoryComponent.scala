@@ -1,14 +1,15 @@
 package repositories
 
 import scala.slick.jdbc.JdbcBackend
-import models.database.{NotificationsSchemaComponent, Profile, Notification}
+import models.database.{ArticlesSchemaComponent, NotificationsSchemaComponent, Profile, Notification}
 
-/**
- * @author Anuar_Nurmakanov
- */
 trait NotificationsRepositoryComponent {
   val notificationsRepository: NotificationsRepository
 
+  /**
+   * Provides basic user notification specific operations over a database.
+   * Database session should be provided by a caller via implicit parameter.
+   */
   trait NotificationsRepository {
 
     def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session)
@@ -23,8 +24,14 @@ trait NotificationsRepositoryComponent {
   }
 }
 
+/**
+ * Slick notification dao implementation based on precompiled queries.
+ * For information about precompiled queries refer to
+ * <p> http://slick.typesafe.com/doc/2.0.0/queries.html#compiled-queries
+ * <p> http://stackoverflow.com/questions/21422394/why-cannot-use-compiled-insert-statement-in-slick
+ */
 trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryComponent {
-  this: NotificationsSchemaComponent with Profile =>
+  this: NotificationsSchemaComponent with ArticlesSchemaComponent with Profile =>
 
   import profile.simple._
 
@@ -38,8 +45,11 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
 
   class NotificationsRepositoryImpl extends NotificationsRepository {
 
-    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) =
-      compiledForInsert.insert(notification)
+    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) = {
+      // todo: merge into one query
+      notification.title = articles.filter(_.id === notification.articleId).map(_.title).first()
+      notifications.insert(notification)
+    }
 
     def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) = compiledByUser(userId).list()
 

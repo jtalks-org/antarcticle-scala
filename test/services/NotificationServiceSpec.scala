@@ -14,9 +14,6 @@ import util.FakeSessionProvider._
 import models.database.Notification
 
 
-/**
- * @author Anuar_Nurmakanov
- */
 class NotificationServiceSpec extends  Specification
   with NoTimeConversions with Mockito with BeforeExample
   with ValidationMatchers {

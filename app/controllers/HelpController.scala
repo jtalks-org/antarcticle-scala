@@ -5,7 +5,7 @@ import security.Authentication
 import play.api.mvc.Action
 
 /**
- *
+ * Renders application help pages
  */
 trait HelpController {
   this: Controller with Authentication =>

@@ -7,7 +7,7 @@ import scala.slick.model.ForeignKeyAction
  *
  */
 case class Notification(id: Option[Int], userId: Int, articleId: Int, commentId: Int,
-                         title: String, content: String, createdAt: Timestamp)
+                         var title: String, content: String, createdAt: Timestamp)
 
 trait NotificationsSchemaComponent {
   this: Profile with UsersSchemaComponent with ArticlesSchemaComponent with CommentsSchemaComponent =>

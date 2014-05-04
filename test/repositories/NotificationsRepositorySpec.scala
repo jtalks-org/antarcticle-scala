@@ -4,12 +4,8 @@ import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 import util.TestDatabaseConfigurationWithFixtures
 import models.database.Schema
-import security.AuthenticatedUser
-import security.Authorities.User
 
-/**
- * @author Anuar_Nurmakanov
- */
+
 class NotificationsRepositorySpec extends Specification with NoTimeConversions {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
   with NotificationsRepositoryComponentImpl
@@ -85,5 +81,6 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
     }
   }
 
-  def notificationsCount(recipientId: Int)(implicit session: Session) = notifications.filter(_.userId == recipientId).length.run
+  def notificationsCount(recipientId: Int)(implicit session: Session) =
+    notifications.filter(_.userId === recipientId).length.run
 }

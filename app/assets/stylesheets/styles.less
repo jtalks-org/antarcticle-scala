@@ -141,8 +141,9 @@ h6 {
   word-wrap: break-word;
 }
 
-
-/***************/
+/***********************************************
+* NOTIFICATIONS
+***********************************************/
 .inbox-dialog {
     width: 375px;
     max-height: 505px;
@@ -190,10 +191,14 @@ h6 {
 .inbox-dialog .inbox-item .item-content .item-location {
     margin: 4px 0;
     color: #07c;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .inbox-dialog .inbox-item .item-content .item-summary{
-    color: #3d3d3d
+    color: #3d3d3d;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .inbox-dialog .inbox-item.inbox-se-link {
@@ -655,7 +660,6 @@ ul.nav-tabs {
 }
 
 .description {
- /* margin-top: -200px;*/
   height: 200px;
   overflow: hidden;
 }

@@ -26,12 +26,14 @@ class FormHandler
       "<a class='close' data-dismiss='alert' href='#'>x</a>Operation cannot be completed: too much data sent</div>")
     else
       this.form.prepend(data.responseText)
+    $('.default-form input[type="submit"]').prop('disabled', false);
     $("body").css("cursor", "default")
 
   constructor: (@selector, @onSuccess = this.defaultOnSuccess, @onFail = this.defaultOnFail) ->
     this.form = $(@selector)
     this.form.submit(=>
       $("body").css("cursor", "progress")
+      $('.default-form input[type="submit"]').prop('disabled', true);
       $.post(this.form.attr('action'), this.form.serialize())
       .done((data) => @onSuccess(data))
       .fail((data) => @onFail(data))

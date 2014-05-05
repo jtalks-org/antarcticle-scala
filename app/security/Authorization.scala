@@ -25,6 +25,7 @@ object Entities {
   sealed trait Entity
   case object Article extends Entity
   case object Comment extends Entity
+  case object Notification extends Entity
 }
 
 // user "roles"

@@ -9,7 +9,7 @@ import repositories.NotificationsRepositoryComponent
 import util.FakeSessionProvider
 
 import java.sql.Timestamp
-import security.{Authorities, AuthenticatedUser}
+import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
 import util.FakeSessionProvider._
 import models.database.Notification
 
@@ -31,14 +31,15 @@ class NotificationServiceSpec extends  Specification
   val firstNotification = Notification(None, 1, 2, 1, "", "", time)
   val secondNotification = Notification(None, 1, 2, 1, "", "", time)
   val currentUserId = 1
-  val currentUser = new AuthenticatedUser(currentUserId,"user", Authorities.User)
+  val currentUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
+  val anonymousUser = AnonymousPrincipal
 
   def before: Any = {
     org.mockito.Mockito.reset(notificationsRepository)
   }
 
   "get notifications" should {
-    "return all notifications for current user" in {
+    "return all notifications for authenticated user" in {
 
       val expectedNotifications = Seq(firstNotification, secondNotification)
       notificationsRepository.getNotificationsForUser(currentUserId) (FakeSessionValue) returns expectedNotifications
@@ -46,6 +47,12 @@ class NotificationServiceSpec extends  Specification
       val foundNotifications = notificationsService.getNotificationsForCurrentUser(currentUser)
 
       foundNotifications mustEqual expectedNotifications
+    }
+
+    "return nothing for not authenticated user" in {
+      val foundNotifications = notificationsService.getNotificationsForCurrentUser(anonymousUser)
+
+      foundNotifications must beEmpty
     }
   }
 

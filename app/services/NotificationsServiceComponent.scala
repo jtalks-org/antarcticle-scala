@@ -2,9 +2,15 @@ package services
 
 import repositories.NotificationsRepositoryComponent
 import models.database._
-import scalaz._
-import security.{AuthenticatedUser, Principal}
 import scala.slick.jdbc.JdbcBackend
+import security.Principal
+import security.AuthenticatedUser
+import scalaz._
+import models.database.CommentRecord
+import security.AuthenticatedUser
+import models.database.Notification
+import models.Page
+import models.ArticleModels.ArticleListModel
 
 
 /**
@@ -44,9 +50,14 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
     def getNotificationsForCurrentUser(implicit principal: Principal) = withSession {
       implicit session =>
-        // todo: pattern matching by auth
-        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-        notificationsRepository.getNotificationsForUser(currentUserId)
+        principal.isAuthenticated match {
+          case true => {
+            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+            notificationsRepository.getNotificationsForUser(currentUserId)
+          }
+          case false =>
+            Seq()
+        }
     }
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal) = withSession {

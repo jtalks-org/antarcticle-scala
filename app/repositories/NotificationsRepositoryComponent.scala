@@ -47,7 +47,9 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
 
     def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) = {
       // todo: merge into one query
-      notification.title = articles.filter(_.id === notification.articleId).map(_.title).first()
+      val articleData =  articles.filter(_.id === notification.articleId).map(a => (a.title, a.authorId)).first()
+      notification.title = articleData._1
+      notification.userId = articleData._2
       notifications.insert(notification)
     }
 

@@ -3,10 +3,7 @@ package models.database
 import java.sql.Timestamp
 import scala.slick.model.ForeignKeyAction
 
-/**
- *
- */
-case class Notification(id: Option[Int], userId: Int, articleId: Int, commentId: Int,
+case class Notification(id: Option[Int], var userId: Int, articleId: Int, commentId: Int,
                          var title: String, content: String, createdAt: Timestamp)
 
 trait NotificationsSchemaComponent {
@@ -15,7 +12,9 @@ trait NotificationsSchemaComponent {
   import profile.simple._
 
   /**
-   * Notifications
+   * Notifications are simple messages with title and short text to attract user attention.
+   * Notification can be created when new comments are added to your article, if someone
+   * spottes orthographic error und so weiter
    */
   class Notifications(tag: scala.slick.lifted.Tag) extends Table[Notification](tag, "notifications") {
     // columns

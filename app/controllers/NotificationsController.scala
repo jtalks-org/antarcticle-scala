@@ -46,8 +46,10 @@ trait NotificationsController {
 
   def dismissAllNotifications = Action {
     implicit request =>
-      notificationsService.deleteNotificationsForCurrentUser()
-      Ok("")
+      notificationsService.deleteNotificationsForCurrentUser() match {
+        case Authorized(_) => Ok("")
+        case NotAuthorized() => Unauthorized("Not authorized to remove this notification")
+      }
   }
 
   private def errors(errors: NonEmptyList[String]) = {

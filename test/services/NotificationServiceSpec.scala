@@ -12,7 +12,8 @@ import java.sql.Timestamp
 import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
 import util.FakeSessionProvider._
 import models.database.Notification
-import security.Result.{Authorized, AuthorizationResult}
+import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
+import scala.slick.jdbc.JdbcBackend
 
 
 class NotificationServiceSpec extends  Specification
@@ -32,7 +33,7 @@ class NotificationServiceSpec extends  Specification
   val firstNotification = Notification(None, 1, 2, 1, "", "", time)
   val secondNotification = Notification(None, 1, 2, 1, "", "", time)
   val currentUserId = 1
-  val currentUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
+  val authenticatedUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
   val anonymousUser = AnonymousPrincipal
 
   def before: Any = {
@@ -45,7 +46,7 @@ class NotificationServiceSpec extends  Specification
       val expectedNotifications = Seq(firstNotification, secondNotification)
       notificationsRepository.getNotificationsForUser(currentUserId) (FakeSessionValue) returns expectedNotifications
 
-      val foundNotifications = notificationsService.getNotificationsForCurrentUser(currentUser)
+      val foundNotifications = notificationsService.getNotificationsForCurrentUser(authenticatedUser)
 
       foundNotifications mustEqual expectedNotifications
     }
@@ -63,7 +64,7 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(currentUser)
+      val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(authenticatedUser)
 
       foundNotification mustEqual expectedNotification
     }
@@ -75,7 +76,7 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      val authResult = notificationsService.deleteNotification(notificationId)(currentUser)
+      val authResult = notificationsService.deleteNotification(notificationId)(authenticatedUser)
 
       authResult must beSuccessful
       there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
@@ -85,9 +86,25 @@ class NotificationServiceSpec extends  Specification
       val notificationId = 1
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
 
-      val authResult = notificationsService.deleteNotification(notificationId)(currentUser)
+      val authResult = notificationsService.deleteNotification(notificationId)(authenticatedUser)
 
       authResult must beFailing
+    }
+  }
+
+  "dismiss all notifications" should {
+    "deleted all notifications for authorized user" in {
+      val result = notificationsService.deleteNotificationsForCurrentUser()(authenticatedUser)
+
+      result mustEqual Authorized(())
+      there was one(notificationsRepository).deleteNotificationsForUser(currentUserId)(FakeSessionValue)
+    }
+
+    "do nothing for not authorized user" in {
+      val result = notificationsService.deleteNotificationsForCurrentUser()(anonymousUser)
+
+      result mustEqual NotAuthorized()
+      there was no(notificationsRepository).deleteNotificationsForUser(anyInt)(any[JdbcBackend#Session])
     }
   }
 }

@@ -6,7 +6,7 @@ import security.{Entities, Principal, AuthenticatedUser}
 import models.database.CommentRecord
 import models.database.Notification
 import security.Permissions.{Delete, Update}
-import security.Result.AuthorizationResult
+import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
 import scalaz._
 import Scalaz._
 
@@ -26,7 +26,7 @@ trait NotificationsServiceComponent {
 
     def deleteNotification(notificationId: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
 
-    def deleteNotificationsForCurrentUser()(implicit principal: Principal)
+    def deleteNotificationsForCurrentUser()(implicit principal: Principal): AuthorizationResult[Unit]
   }
 
 }
@@ -82,9 +82,15 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
     def deleteNotificationsForCurrentUser()(implicit principal: Principal) = withTransaction {
       implicit session =>
-        // todo: pattern matching by auth
-        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-        notificationsRepository.deleteNotificationsForUser(currentUserId)
+        principal.isAuthenticated match {
+          case true => {
+            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+            notificationsRepository.deleteNotificationsForUser(currentUserId)
+            Authorized(())
+          }
+          case false => NotAuthorized()
+        }
+
     }
 }
 }

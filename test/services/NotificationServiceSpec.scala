@@ -14,6 +14,7 @@ import util.FakeSessionProvider._
 import models.database.Notification
 import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
 import scala.slick.jdbc.JdbcBackend
+import scalaz.Failure
 
 
 class NotificationServiceSpec extends  Specification
@@ -59,14 +60,39 @@ class NotificationServiceSpec extends  Specification
   }
 
   "get notification" should {
-    "return it by id" in {
+    "return it by id if it exists for authenticated user" in {
       val notificationId = 1
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
       val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(authenticatedUser)
 
-      foundNotification mustEqual expectedNotification
+      foundNotification must beSuccessful.like {
+        case Some(_) => ok
+        case None => ko
+      }
+    }
+
+    "return nothing when it doesn't exist for authenticated user" in {
+      val notificationId = 100
+      notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
+
+      val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(authenticatedUser)
+
+      foundNotification must beSuccessful.like {
+        case None => ok
+        case Some(_) => ko
+      }
+    }
+
+    "fail when user isn't authenticated" in {
+      val notificationId = 1
+      val expectedNotification = Some(firstNotification)
+      notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
+
+      val foundNotification = notificationsService.getAndDeleteNotification(notificationId)(anonymousUser)
+
+      foundNotification must beFailing
     }
   }
 

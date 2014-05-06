@@ -22,7 +22,7 @@ trait NotificationsServiceComponent {
 
     def getNotificationsForCurrentUser(implicit principal: Principal): Seq[Notification]
 
-    def getAndDeleteNotification(id: Int)(implicit principal: Principal): Option[Notification]
+    def getAndDeleteNotification(id: Int)(implicit principal: Principal): ValidationNel[String, Option[Notification]]
 
     def deleteNotification(notificationId: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
 
@@ -60,10 +60,14 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal) = withSession {
       implicit session =>
-        // todo: pattern matching by auth
-        val notification = notificationsRepository.getNotification(id)
-        this.deleteNotification(id)
-        notification
+        principal.isAuthenticated match {
+          case true => {
+            val notification = notificationsRepository.getNotification(id)
+            this.deleteNotification(id)
+            notification
+          }.successNel
+          case false => "User isn't authenticated".failureNel
+        }
     }
 
     def deleteNotification(id: Int)(implicit principal: Principal) = withTransaction {

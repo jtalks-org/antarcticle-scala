@@ -23,13 +23,16 @@ trait NotificationsController {
 
   def getNotification(id: Int) = Action {
     implicit request =>
-      notificationsService.getAndDeleteNotification(id) match {
-        case Some(notification : Notification) =>
-          Found(routes.ArticleController.viewArticle(
-            notification.articleId).absoluteURL() + "#" + notification.commentId
-          )
-        case None => NotFound(views.html.errors.notFound())
-      }
+      notificationsService.getAndDeleteNotification(id).fold(
+        fail = errors,
+        succ =  {
+          case Some(notification : Notification) =>
+            Found(routes.ArticleController.viewArticle(
+              notification.articleId).absoluteURL() + "#" + notification.commentId
+            )
+          case None => NotFound(views.html.errors.notFound())
+        }
+      )
   }
 
   def dismissNotification(id: Int) = Action {

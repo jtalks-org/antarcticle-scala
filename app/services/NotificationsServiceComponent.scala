@@ -45,7 +45,7 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
         // todo: pattern matching by auth
         // todo: don't create notifications for own comments
         notificationsRepository.insertNotification(
-          new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content, cr.createdAt))
+          new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content.take(150), cr.createdAt))
     }
 
     def getNotificationsForCurrentUser(implicit principal: Principal) = withSession {

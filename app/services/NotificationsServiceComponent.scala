@@ -1,16 +1,14 @@
 package services
 
 import repositories.NotificationsRepositoryComponent
-import models.database._
 import scala.slick.jdbc.JdbcBackend
-import security.Principal
-import security.AuthenticatedUser
-import scalaz._
+import security.{Entities, Principal, AuthenticatedUser}
 import models.database.CommentRecord
-import security.AuthenticatedUser
 import models.database.Notification
-import models.Page
-import models.ArticleModels.ArticleListModel
+import security.Permissions.{Delete, Update}
+import security.Result.AuthorizationResult
+import scalaz._
+import Scalaz._
 
 
 /**
@@ -26,7 +24,7 @@ trait NotificationsServiceComponent {
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal): Option[Notification]
 
-    def deleteNotification(notificationId: Int)(implicit principal: Principal)
+    def deleteNotification(notificationId: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
 
     def deleteNotificationsForCurrentUser()(implicit principal: Principal)
   }
@@ -70,9 +68,16 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
     def deleteNotification(id: Int)(implicit principal: Principal) = withTransaction {
       implicit session =>
-        // todo: pattern matching by auth
-        val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-        notificationsRepository.deleteNotification(id, currentUserId)
+        val notification = notificationsRepository.getNotification(id)
+        notification match {
+          case Some(n) =>
+            principal.doAuthorizedOrFail(Delete, n){ () =>
+              val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
+              notificationsRepository.deleteNotification(id, currentUserId)
+              ()
+            }.successNel
+          case None => "Deleted notification doesn't exist".failureNel
+        }
     }
 
     def deleteNotificationsForCurrentUser()(implicit principal: Principal) = withTransaction {
@@ -81,6 +86,5 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
         val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
         notificationsRepository.deleteNotificationsForUser(currentUserId)
     }
-  }
-
+}
 }

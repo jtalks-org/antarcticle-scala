@@ -12,6 +12,7 @@ import java.sql.Timestamp
 import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
 import util.FakeSessionProvider._
 import models.database.Notification
+import security.Result.{Authorized, AuthorizationResult}
 
 
 class NotificationServiceSpec extends  Specification
@@ -74,8 +75,9 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      notificationsService.deleteNotification(notificationId)(currentUser)
+      val authResult = notificationsService.deleteNotification(notificationId)(currentUser)
 
+      authResult must beSuccessful
       there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
     }
 
@@ -83,9 +85,9 @@ class NotificationServiceSpec extends  Specification
       val notificationId = 1
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
 
-      notificationsService.deleteNotification(notificationId)(currentUser)
+      val authResult = notificationsService.deleteNotification(notificationId)(currentUser)
 
-      there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
+      authResult must beFailing
     }
   }
 }

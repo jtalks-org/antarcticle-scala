@@ -111,6 +111,7 @@ class AuthenticatedPrincipal(sid: Int, authority: Authority) extends Principal {
       case (User, _, article: ArticleRecord) => article.authorId == sid
       case (User, _, comment: Comment) => comment.author.id == sid
       case (User, _, comment: CommentRecord) => comment.userId == sid
+      case (User, _, notification: Notification) => notification.userId == sid
 
       case t => notConfigured(t)
     }

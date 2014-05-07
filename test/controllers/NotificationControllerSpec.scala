@@ -11,6 +11,12 @@ import util.FakeAuthentication
 import org.specs2.specification.AfterExample
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import scalaz._
+import Scalaz._
+import security.AuthenticatedUser
+import scala.Some
+import models.database.Notification
+import security.Result.Authorized
 
 class NotificationControllerSpec extends Specification with Mockito with AfterExample {
   object controller extends NotificationsController
@@ -44,6 +50,25 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
       contentType(page) must beSome("text/html")
       contentAsString(page).contains(notification.title) must beTrue
       contentAsString(page).contains(notification.content) must beTrue
+    }
+  }
+
+  "get notification" should {
+    "show errors when user isn't authenticated" in {
+      notificationsService.deleteNotification(anyInt)(any[Principal]) returns "Deleted notification doesn't exist".failureNel
+
+      val page = controller.dismissNotification(1)(FakeRequest())
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+
+    "show not found error when notification doesn't exist" in {
+      notificationsService.deleteNotification(anyInt)(any[Principal]) returns Authorized().successNel
+
+      val page = controller.dismissNotification(1)(FakeRequest())
+
+      status(page) must equalTo(200)
     }
   }
 }

@@ -53,27 +53,36 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
   }
 
   "dismiss notification" should {
-    "show errors when notification doesn't exist" in {
+    "show error when notification doesn't exist" in {
       notificationsService.deleteNotification(anyInt)(any[Principal]) returns "Deleted notification doesn't exist".failureNel
       val notificationId = 1
 
       val page = controller.dismissNotification(notificationId)(FakeRequest())
 
       status(page) must equalTo(400)
-      contentType(page) must beSome("text/html")
+    }
+
+    "show error when user isn't authenticated" in {
+      notificationsService.deleteNotification(anyInt)(any[Principal]) returns NotAuthorized().successNel
+      val notificationId = 1
+
+      val page = controller.dismissNotification(notificationId)(FakeRequest())
+
+      status(page) must equalTo(401)
     }
 
     "be success when user's authenticated" in {
       notificationsService.deleteNotification(anyInt)(any[Principal]) returns Authorized().successNel
+      val notificationId = 1
 
-      val page = controller.dismissNotification(1)(FakeRequest())
+      val page = controller.dismissNotification(notificationId)(FakeRequest())
 
       status(page) must equalTo(200)
     }
   }
 
   "dismiss notifications" should {
-    "show errors when user isn't authenticated" in {
+    "show error when user isn't authenticated" in {
       notificationsService.deleteNotificationsForCurrentUser()(any[Principal]) returns NotAuthorized()
 
       val page = controller.dismissAllNotifications()(FakeRequest())

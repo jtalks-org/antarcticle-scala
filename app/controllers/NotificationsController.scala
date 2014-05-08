@@ -37,7 +37,7 @@ trait NotificationsController {
 
   def dismissNotification(id: Int) = Action {
     implicit request =>
-      val result = notificationsService.deleteNotification(id);
+      val result = notificationsService.deleteNotification(id)
       result.fold(
         fail = errors,
         succ =  {

@@ -1,9 +1,8 @@
 package controllers
 
 import services.NotificationsServiceComponent
-import security.{Principal, Authorities, AuthenticatedUser}
+import security.{Principal, Authorities}
 import java.sql.Timestamp
-import models.database.Notification
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
@@ -16,7 +15,7 @@ import Scalaz._
 import security.AuthenticatedUser
 import scala.Some
 import models.database.Notification
-import security.Result.Authorized
+import security.Result.{NotAuthorized, Authorized}
 
 class NotificationControllerSpec extends Specification with Mockito with AfterExample {
   object controller extends NotificationsController
@@ -53,20 +52,39 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
     }
   }
 
-  "get notification" should {
-    "show errors when user isn't authenticated" in {
+  "dismiss notification" should {
+    "show errors when notification doesn't exist" in {
       notificationsService.deleteNotification(anyInt)(any[Principal]) returns "Deleted notification doesn't exist".failureNel
+      val notificationId = 1
 
-      val page = controller.dismissNotification(1)(FakeRequest())
+      val page = controller.dismissNotification(notificationId)(FakeRequest())
 
       status(page) must equalTo(400)
       contentType(page) must beSome("text/html")
     }
 
-    "show not found error when notification doesn't exist" in {
+    "be success when user's authenticated" in {
       notificationsService.deleteNotification(anyInt)(any[Principal]) returns Authorized().successNel
 
       val page = controller.dismissNotification(1)(FakeRequest())
+
+      status(page) must equalTo(200)
+    }
+  }
+
+  "dismiss notifications" should {
+    "show errors when user isn't authenticated" in {
+      notificationsService.deleteNotificationsForCurrentUser()(any[Principal]) returns NotAuthorized()
+
+      val page = controller.dismissAllNotifications()(FakeRequest())
+
+      status(page) must equalTo(401)
+    }
+
+    "be success when user's authenticated" in {
+      notificationsService.deleteNotificationsForCurrentUser()(any[Principal]) returns Authorized()
+
+      val page = controller.dismissAllNotifications()(FakeRequest())
 
       status(page) must equalTo(200)
     }

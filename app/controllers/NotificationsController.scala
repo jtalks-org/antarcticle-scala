@@ -47,7 +47,7 @@ trait NotificationsController {
       val result = notificationsService.deleteNotificationsForCurrentUser()
       result.fold(
         fail = nel => Forbidden(""),
-        succ = nel => Ok("")
+        succ = nel => Ok(views.html.templates.notifications())
       )
   }
 }

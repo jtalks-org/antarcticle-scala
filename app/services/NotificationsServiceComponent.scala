@@ -2,10 +2,10 @@ package services
 
 import repositories.NotificationsRepositoryComponent
 import scala.slick.jdbc.JdbcBackend
-import security.{Entities, Principal, AuthenticatedUser}
+import security.{Principal, AuthenticatedUser}
 import models.database.CommentRecord
 import models.database.Notification
-import security.Permissions.{Delete, Update}
+import security.Permissions.Delete
 import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
 import scalaz._
 import Scalaz._
@@ -24,9 +24,9 @@ trait NotificationsServiceComponent {
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal): ValidationNel[String, Option[Notification]]
 
-    def deleteNotification(notificationId: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
+    def deleteNotification(notificationId: Int)(implicit principal: Principal): ValidationNel[String, String]
 
-    def deleteNotificationsForCurrentUser()(implicit principal: Principal): AuthorizationResult[Unit]
+    def deleteNotificationsForCurrentUser()(implicit principal: Principal): ValidationNel[String, String]
   }
 
 }
@@ -39,62 +39,56 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
   class NotificationsServiceImpl extends NotificationsService {
 
 
-    def createNotification(cr: CommentRecord)(implicit principal: Principal, session : JdbcBackend#Session) {
-        // todo: pattern matching by auth
-        // todo: don't create notifications for own comments
-        notificationsRepository.insertNotification(
-          new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content.take(150), cr.createdAt))
+    def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session) {
+      principal match {
+        case user: AuthenticatedUser =>
+          val currentUserId = user.userId
+          if (cr.userId != currentUserId)
+            notificationsRepository.insertNotification(
+              new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content.take(150), cr.createdAt))
+      }
     }
 
     def getNotificationsForCurrentUser(implicit principal: Principal) = withSession {
       implicit session =>
-        principal.isAuthenticated match {
-          case true => {
-            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-            notificationsRepository.getNotificationsForUser(currentUserId)
-          }
-          case false =>
-            Seq()
+        principal match {
+          case user: AuthenticatedUser => notificationsRepository.getNotificationsForUser(user.userId)
+          case _ => Seq()
         }
     }
 
     def getAndDeleteNotification(id: Int)(implicit principal: Principal) = withSession {
       implicit session =>
-        principal.isAuthenticated match {
-          case true => {
+        principal match {
+          case user: AuthenticatedUser  => {
             val notification = notificationsRepository.getNotification(id)
             this.deleteNotification(id)
             notification
           }.successNel
-          case false => "User isn't authenticated".failureNel
+          case _ => "Authentication required".failureNel
         }
     }
 
     def deleteNotification(id: Int)(implicit principal: Principal) = withTransaction {
       implicit session =>
-        val notification = notificationsRepository.getNotification(id)
-        notification match {
-          case Some(n) =>
-            principal.doAuthorizedOrFail(Delete, n){ () =>
-              val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-              notificationsRepository.deleteNotification(id, currentUserId)
-              ()
-            }.successNel
-          case None => "Deleted notification doesn't exist".failureNel
+        principal match {
+          case user: AuthenticatedUser  =>
+            notificationsRepository.deleteNotification(id, user.userId)
+            "".successNel
+          case _ => "Authentication required".failureNel
         }
     }
 
     def deleteNotificationsForCurrentUser()(implicit principal: Principal) = withTransaction {
       implicit session =>
-        principal.isAuthenticated match {
-          case true => {
-            val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-            notificationsRepository.deleteNotificationsForUser(currentUserId)
-            Authorized(())
-          }
-          case false => NotAuthorized()
+        principal match {
+          case user: AuthenticatedUser =>
+            notificationsRepository.deleteNotificationsForUser(user.userId)
+            "".successNel
+          case _ => "Authentication required".failureNel
         }
 
     }
-}
+  }
+
 }

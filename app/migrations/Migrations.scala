@@ -3,53 +3,18 @@ package migrations
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend, GetResult}
 
+/**
+ * This class contains all database schema migrations, which are applied to the database
+ * on software upgrade only. On new installations database is created in up-to-date state
+ * and migrations are NOT performed.
+ *
+ * Under no conditions should version numbers be changed, as these numbers are also present
+ * in every database, indicating it's version. It is, however, more or less safe to drop old
+ * migrations if upgrades from really old versions are not required.
+ */
 class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
   import profile.simple._
-
-  val addRememberMeTokenToUser = new Migration {
-    val version = 1
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table users add remember_token varchar(64)").execute
-    }
-  }
-
-  val changeContentColumnTypes = new Migration {
-    val version = 2
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table articles modify content longtext").execute
-      Q.updateNA("alter table articles modify description longtext").execute
-      Q.updateNA("alter table comments modify content longtext").execute
-    }
-  }
-
-  /**
-   *  Non-null timestamps in MySQL by default are assigned with 'on update CURRENT_TIMESTAMP',
-   *  we obviously don't need it for 'created_at' fields
-   */
-  val removeDefaultOnUpdateConstraintFromTimestampField = new Migration {
-    val version = 3
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table articles change created_at created_at timestamp not null default current_timestamp").execute
-      Q.updateNA("alter table comments change created_at created_at timestamp not null default current_timestamp").execute
-    }
-  }
-
-  /**
-   * Current description building strategy (cutoff after 300 chars) cannot guarantee proper markup preservation
-   * for the description. Until better content shortening strategy is developed we're temporary setting
-   * description equal to full content.
-   */
-  val setDescriptionToFullContent = new Migration {
-    val version = 4
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("UPDATE articles SET description = content").execute
-    }
-  }
 
   val addPasswordColumnToUsersTable = new Migration {
     val version = 5
@@ -57,23 +22,6 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("alter table users add password varchar(255)").execute
       Q.updateNA("update users set password=''").execute
-    }
-  }
-
-  val addReadByArticleAuthorFlagForArticleComments = new Migration {
-    val version = 6
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table comments add column read_by_article_author boolean not null default false").execute()
-    }
-
-  }
-
-  val removeReadByArticleAuthorFlagForArticleComments = new Migration {
-    val version = 7
-
-    def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table comments drop column read_by_article_author").execute()
     }
   }
 
@@ -94,6 +42,19 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
         " CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id)," +
         " CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id)" +
         ");").execute()
+    }
+  }
+
+  val cascadesForNotifications = new Migration {
+    val version = 9
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_user_fk").execute()
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_article_fk").execute()
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute()
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_user_fk FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE").execute()
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE").execute()
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute()
     }
   }
 

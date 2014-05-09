@@ -49,7 +49,7 @@ trait MigrationTool {
         Logger.info(s"Migration completed (version: $version)")
       case xs =>
         val currentVersion = getCurrentVersion
-        val notPerformedMigrations = migrations.drop(currentVersion)
+        val notPerformedMigrations = migrations.filter(_.version > currentVersion)
         if (!notPerformedMigrations.isEmpty) {
           val newVersion = notPerformedMigrations.last.version
           Logger.info(s"Migrating database from version $currentVersion to $newVersion")

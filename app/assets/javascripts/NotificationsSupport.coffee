@@ -18,6 +18,7 @@ dismissNotification = (e) ->
   }).done( =>
     $.get($("#notifications-link").attr('href')).done((data) =>
       $("#notifications-dropdown").html(data)
+      $(".dismiss-notification").click(dismissNotification)
       $(".notifications-badge").text($(".dropdown-header").attr("data-count"))
     )
   )

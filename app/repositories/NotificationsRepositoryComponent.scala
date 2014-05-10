@@ -18,10 +18,11 @@ trait NotificationsRepositoryComponent {
 
     def getNotification(id: Int)(implicit session: JdbcBackend#Session): Option[Notification]
 
-    def deleteNotification(notificationId: Int, userId: Int) (implicit session: JdbcBackend#Session)
+    def deleteNotification(notificationId: Int, userId: Int)(implicit session: JdbcBackend#Session)
 
-    def deleteNotificationsForUser(userId: Int) (implicit session: JdbcBackend#Session)
+    def deleteNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session)
   }
+
 }
 
 /**
@@ -45,13 +46,8 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
 
   class NotificationsRepositoryImpl extends NotificationsRepository {
 
-    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) = {
-      // todo: merge into one query
-      val articleData =  articles.filter(_.id === notification.articleId).map(a => (a.title, a.authorId)).first()
-      notification.title = articleData._1
-      notification.userId = articleData._2
-      notifications.insert(notification)
-    }
+    def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) =
+      compiledForInsert.insert(notification)
 
     def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) = compiledByUser(userId).list()
 
@@ -64,4 +60,5 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
       compiledByUser(userId).delete
 
   }
+
 }

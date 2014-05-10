@@ -1,12 +1,10 @@
 package services
 
-import repositories.NotificationsRepositoryComponent
+import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import scala.slick.jdbc.JdbcBackend
 import security.{Principal, AuthenticatedUser}
 import models.database.CommentRecord
 import models.database.Notification
-import security.Permissions.Delete
-import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
 import scalaz._
 import Scalaz._
 
@@ -32,7 +30,7 @@ trait NotificationsServiceComponent {
 }
 
 trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
-  this: SessionProvider with NotificationsRepositoryComponent =>
+  this: SessionProvider with NotificationsRepositoryComponent with ArticlesRepositoryComponent =>
 
   val notificationsService = new NotificationsServiceImpl
 
@@ -42,10 +40,11 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
     def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session) {
       principal match {
         case user: AuthenticatedUser =>
-          val currentUserId = user.userId
-          if (cr.userId != currentUserId)
+          val article = articlesRepository.get(cr.articleId).get._1
+          if (cr.userId != article.authorId)
             notificationsRepository.insertNotification(
-              new Notification(None, cr.userId, cr.articleId, cr.id.get, "", cr.content.take(150), cr.createdAt))
+              new Notification(None, article.authorId, cr.articleId, cr.id.get, article.title,
+                cr.content.take(150), cr.createdAt))
       }
     }
 

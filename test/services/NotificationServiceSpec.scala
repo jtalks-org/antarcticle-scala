@@ -5,7 +5,7 @@ import org.specs2.time.NoTimeConversions
 import org.specs2.mock.Mockito
 import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers
-import repositories.NotificationsRepositoryComponent
+import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import util.FakeSessionProvider
 
 import java.sql.Timestamp
@@ -21,8 +21,10 @@ class NotificationServiceSpec extends  Specification
 
   object service extends NotificationsServiceComponentImpl
     with NotificationsRepositoryComponent
+    with ArticlesRepositoryComponent
     with FakeSessionProvider {
     override val notificationsRepository = mock[NotificationsRepository]
+    override val articlesRepository = mock[ArticlesRepository]
   }
 
   import service._

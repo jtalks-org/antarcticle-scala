@@ -13,6 +13,8 @@ trait TagsServiceComponent {
     def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session): ValidationNel[String, Seq[String]]
 
     def updateTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session): ValidationNel[String, Seq[String]]
+
+    def listDistinctTags(): Seq[String]
   }
 }
 
@@ -41,6 +43,10 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
     override def updateTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session) = {
       tagsRepository.removeArticleTags(articleId)
       createTagsForArticle(articleId, tags)
+    }
+
+    override def listDistinctTags(): Seq[String] =  withSession {
+      implicit session => tagsRepository.getAllTags().map(_.name)
     }
 
     def validateTags(tags: Seq[String]) = {

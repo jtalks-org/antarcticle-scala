@@ -4,8 +4,6 @@ import play.api.mvc.{Action, Controller}
 import security.Authentication
 import models.database.Notification
 import services.NotificationsServiceComponent
-import scalaz.NonEmptyList
-import security.Result.{NotAuthorized, Authorized}
 
 
 /**
@@ -24,7 +22,7 @@ trait NotificationsController {
   def getNotification(id: Int) = Action {
     implicit request =>
       notificationsService.getAndDeleteNotification(id).fold(
-        fail = errors,
+        fail = nel => Forbidden(""),
         succ =  {
           case Some(notification : Notification) =>
             Found(routes.ArticleController.viewArticle(
@@ -37,25 +35,19 @@ trait NotificationsController {
 
   def dismissNotification(id: Int) = Action {
     implicit request =>
-      val result = notificationsService.deleteNotification(id);
+      val result = notificationsService.deleteNotification(id)
       result.fold(
-        fail = errors,
-        succ =  {
-          case Authorized(_) => Ok("")
-          case NotAuthorized() => Unauthorized("Not authorized to remove this notification")
-        }
+        fail = nel => Forbidden(""),
+        succ = nel => Ok("")
       )
   }
 
   def dismissAllNotifications = Action {
     implicit request =>
-      notificationsService.deleteNotificationsForCurrentUser() match {
-        case Authorized(_) => Ok("")
-        case NotAuthorized() => Unauthorized("Not authorized to remove this notification")
-      }
-  }
-
-  private def errors(errors: NonEmptyList[String]) = {
-    BadRequest(views.html.templates.formErrors(errors.list))
+      val result = notificationsService.deleteNotificationsForCurrentUser()
+      result.fold(
+        fail = nel => Forbidden(""),
+        succ = nel => Ok(views.html.templates.notifications())
+      )
   }
 }

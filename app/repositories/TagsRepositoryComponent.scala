@@ -1,7 +1,7 @@
 package repositories
 
 import models.database.{Profile, Tag, TagsSchemaComponent}
-import scala.slick.jdbc.{GetResult, StaticQuery => Q}
+import scala.slick.jdbc.GetResult
 import scala.slick.jdbc.JdbcBackend
 
 trait TagsRepositoryComponent {
@@ -13,6 +13,8 @@ trait TagsRepositoryComponent {
    * Database session should be provided by a caller via implicit parameter.
    */
   trait TagsRepository {
+    def getAllTags()(implicit session: JdbcBackend#Session): Seq[Tag]
+
     def getByName(name: Option[String])(implicit session: JdbcBackend#Session): Option[Tag]
 
     def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session): Seq[Tag]
@@ -45,6 +47,8 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
     val compiledByArticleId = Compiled((id: Column[Int]) => articlesTags.filter(_.articleId === id))
     val compiledForInsert = tags.map(t => t.name).returning(tags.map(_.id)).insertInvoker
     val compiledArticleTagsForInsert = articlesTags.insertInvoker
+
+    override def getAllTags()(implicit session: JdbcBackend#Session) = tags.list().map(r => Tag(r._1.get, r._2))
 
     override def getByName(name: Option[String])(implicit session: JdbcBackend#Session) =
       compiledByName(name).firstOption.map(r => Tag(r._1.get, r._2))

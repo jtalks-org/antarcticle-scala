@@ -47,7 +47,10 @@ trait ArticleController {
   }
 
   def getNewArticlePage = Action { implicit request =>
-    Ok(views.html.createArticle(articleForm))
+    currentPrincipal match {
+      case user : AuthenticatedUser => Ok(views.html.createArticle(articleForm))
+      case _ => defaultOnUnauthorized(request)
+    }
   }
 
   def previewArticle = Action { implicit request =>
@@ -85,9 +88,13 @@ trait ArticleController {
   }
 
   def editArticle(id: Int = 0) = Action { implicit request =>
-    articlesService.get(id) match {
-      case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
-      case _ => NotFound(views.html.errors.notFound())
+    currentPrincipal match {
+      case user : AuthenticatedUser =>
+        articlesService.get(id) match {
+          case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
+          case _ => NotFound(views.html.errors.notFound())
+        }
+      case _ => defaultOnUnauthorized(request)
     }
   }
 

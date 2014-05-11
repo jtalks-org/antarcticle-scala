@@ -6,8 +6,22 @@ jQuery(=>
       input = $(this)
       input.val(input.val().trim()))
     hljs.initHighlightingOnLoad()
-    $('.tags-input').tags_input()
     $("body").css("cursor", "default")
+
+    tagApi = $('#tag_input').tagsManager({
+      tagClass: "tm-tag tm-tag-info"
+      hiddenTagListName: "tags",
+      tagsContainer: '.tag-container'
+    });
+    $("#tag_input").typeahead({
+      name: 'countries',
+      limit: 10,
+      prefetch: $("#tag_input").attr('data-url')
+    }).on('typeahead:selected', (e, d) =>
+      tagApi.tagsManager("pushTag", d.value);
+    )
+    tagApi.tagsManager("pushTag", tag) for tag in $('#tag_input').attr('value').split(',')
+    $('.tt-hint').addClass('form-control');
   )
 )
 

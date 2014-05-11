@@ -15,7 +15,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
     import profile.simple._
 
-    override def fixtures(implicit session: JdbcBackend#Session): Unit = {
+    override def fixtures(implicit session: JdbcBackend#Session) = {
       val time = DateTime.now
 
       tags.map(_.name) ++= Seq("tag1", "tag2", "tag3")
@@ -33,6 +33,15 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
   import repository._
   import profile.simple._
+
+  "get all tags" should {
+    "return all available tags" in withTestDb {
+      implicit session =>
+        val tags = tagsRepository.getAllTags()
+        println(tags)
+        tags.map(_.name)forall Seq("tag1", "tag2", "tag3").contains must beTrue
+    }
+  }
 
   "get tags by names" should {
     "return existing tags" in withTestDb {
@@ -122,7 +131,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
     "omit duplicates when inserting tags" in withTestDb {
       implicit session =>
-        tagsRepository.insertTags(Seq("tag4","tag4","tag4"))
+        tagsRepository.insertTags(Seq("tag4", "tag4", "tag4"))
 
         val records = tags.length.run
         records must_== 4
@@ -132,7 +141,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
   "insert article-tags" should {
     "insert given article-tags" in withTestDb {
       implicit session =>
-        tagsRepository.insertArticleTags(Seq((2,2)))
+        tagsRepository.insertArticleTags(Seq((2, 2)))
 
         val records = articlesTags.length.run
         records must_== 5
@@ -140,7 +149,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
     "omit duplicates when inserting article-tags" in withTestDb {
       implicit session =>
-        tagsRepository.insertArticleTags(Seq((2,2),(2,2)))
+        tagsRepository.insertArticleTags(Seq((2, 2), (2, 2)))
 
         val records = articlesTags.length.run
         records must_== 5

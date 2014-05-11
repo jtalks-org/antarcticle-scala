@@ -5,16 +5,14 @@ import org.specs2.time.NoTimeConversions
 import org.specs2.mock.Mockito
 import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers
-import repositories.NotificationsRepositoryComponent
+import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import util.FakeSessionProvider
 
 import java.sql.Timestamp
 import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
 import util.FakeSessionProvider._
 import models.database.Notification
-import security.Result.{NotAuthorized, Authorized, AuthorizationResult}
 import scala.slick.jdbc.JdbcBackend
-import scalaz.Failure
 
 
 class NotificationServiceSpec extends  Specification
@@ -23,8 +21,10 @@ class NotificationServiceSpec extends  Specification
 
   object service extends NotificationsServiceComponentImpl
     with NotificationsRepositoryComponent
+    with ArticlesRepositoryComponent
     with FakeSessionProvider {
     override val notificationsRepository = mock[NotificationsRepository]
+    override val articlesRepository = mock[ArticlesRepository]
   }
 
   import service._
@@ -102,9 +102,9 @@ class NotificationServiceSpec extends  Specification
       val expectedNotification = Some(firstNotification)
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns expectedNotification
 
-      val authResult = notificationsService.deleteNotification(notificationId)(authenticatedUser)
+      val result = notificationsService.deleteNotification(notificationId)(authenticatedUser)
 
-      authResult must beSuccessful
+      result must beSuccessful
       there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
     }
 
@@ -112,9 +112,10 @@ class NotificationServiceSpec extends  Specification
       val notificationId = 1
       notificationsRepository.getNotification(notificationId) (FakeSessionValue) returns None
 
-      val authResult = notificationsService.deleteNotification(notificationId)(authenticatedUser)
+      val result = notificationsService.deleteNotification(notificationId)(authenticatedUser)
 
-      authResult must beFailing
+      result must beSuccessful
+      there was one(notificationsRepository).deleteNotification(notificationId, currentUserId)(FakeSessionValue)
     }
   }
 
@@ -122,14 +123,14 @@ class NotificationServiceSpec extends  Specification
     "deleted all notifications for authorized user" in {
       val result = notificationsService.deleteNotificationsForCurrentUser()(authenticatedUser)
 
-      result mustEqual Authorized(())
+      result must beSuccessful
       there was one(notificationsRepository).deleteNotificationsForUser(currentUserId)(FakeSessionValue)
     }
 
-    "do nothing for not authorized user" in {
+    "do nothing for anonymous user" in {
       val result = notificationsService.deleteNotificationsForCurrentUser()(anonymousUser)
 
-      result mustEqual NotAuthorized()
+      result must beFailing
       there was no(notificationsRepository).deleteNotificationsForUser(anyInt)(any[JdbcBackend#Session])
     }
   }

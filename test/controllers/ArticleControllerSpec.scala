@@ -110,10 +110,18 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "get new article page" should {
     "return new article form page" in {
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
+
       val page = controller.getNewArticlePage(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
+    }
+
+    "return login page for anonymous user" in {
+      val page = controller.getNewArticlePage(FakeRequest())
+
+      status(page) must equalTo(303)
     }
   }
 
@@ -163,6 +171,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   "get edit article page" should {
     "fetch an existing article" in {
       articlesService.get(articleId) returns Some(articleDetailsModel)
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
       val page = controller.editArticle(articleId)(FakeRequest())
 
@@ -175,11 +184,20 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
     "show error page for illegal article id" in {
       articlesService.get(articleId) returns None
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
       val page = controller.editArticle(1)(FakeRequest())
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
+    }
+
+    "show login page for anonymous user" in {
+      articlesService.get(articleId) returns None
+
+      val page = controller.editArticle(1)(FakeRequest())
+
+      status(page) must equalTo(303)
     }
   }
 

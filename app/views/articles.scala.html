@@ -6,10 +6,9 @@
       <div class="clearfix">
         <div class="pull-left tag-search-container">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.listArticles(None)">
-            <div class="bootstrap-tagsinput">
-              <input value="@lastUsedTags" class="form-control tags-input" name="tags"/>
-            </div>
+            <input value="@lastUsedTags" id="tag_input" class="form-control tags-input"/>
             <button class="btn btn-sm btn-info tag-search-button">Find</button>
+            <div class="tag-container"></div>
           </form>
         </div>
         @if(user.can(Create, Article)) {

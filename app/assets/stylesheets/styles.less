@@ -300,33 +300,20 @@ blockquote p {
  * ARTICLES
  ***********************************************/
 @media (min-width: 1050px) {
-  div.bootstrap-tagsinput {
-    width: 400px;
-  }
-
-  ul.tags-input {
-    width: 390px;
+  div.tag-search-container {
+    max-width: 630px;
   }
 }
 
 @media (max-width: 1050px) {
-  div.bootstrap-tagsinput {
-    width: 300px;
-  }
-
-  ul.tags-input {
-    width: 290px;
+  div.tag-search-container {
+    width: 550px;
   }
 }
 
 @media (max-width: 650px) {
-  div.bootstrap-tagsinput {
-    width: 200px;
-  }
-
-  ul.tags-input {
-    max-width: 190px;
-    min-width: 190px;
+  div.tag-search-container {
+    width: 400px;
   }
 }
 
@@ -334,13 +321,25 @@ blockquote p {
   display: inline-block;
 }
 
+.tags-input {
+  display: inline;
+  width: auto;
+}
+
 .tag-search-container {
   line-height: 41px;
   margin-left: 70px;
+  padding: 3px;
+  span {
+    display: inline;
+  }
+  .tm-tag  {
+    margin-bottom: 3px;
+  }
 }
 
 .tag-search-button {
-  margin-top: 5px;
+  margin-top: 2px;
   vertical-align: top;
 }
 
@@ -405,6 +404,9 @@ blockquote p {
 
 .article-input {
   width: 100%;
+  .twitter-typeahead {
+    width: 100%
+  }
 }
 
 .articles-not-found {
@@ -505,70 +507,6 @@ ul.nav-tabs {
 
 .share42init {
   display: inline;
-}
-
-/***********************************************
-* Tag filter
-***********************************************/
-
-.tags-input {
-  display: inline-block;
-  margin: 0;
-  padding: 2px 2px 2px 5px;
-  min-width: 200px;
-  min-height: 22px;
-
-  background: #FFF;
-  -webkit-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-  list-style: none;
-  line-height: 22px;
-
-  &:hover {
-    cursor: text;
-  }
-
-  li.tag {
-    float: left;
-    margin: 2px 5px 2px 0px;
-    padding: 2px 0px 2px 13px;
-
-    border: 1px solid rgb(202, 216, 243);
-    -webkit-border-radius: 8px 4px 4px 8px;
-    -moz-border-radius: 8px 4px 4px 8px;
-    border-radius: 8px 4px 4px 8px;
-
-    background: image-url("tags/disc.png") no-repeat scroll 4px center rgb(222, 231, 248);
-    color: rgb(102, 102, 102);
-    word-break: break-word;
-    font-size: 11px;
-    line-height: normal;
-  }
-
-  .remove-tag {
-    display: inline-block;
-    margin: 0px 2px 0px 5px;
-    width: 15px;
-    height: 100%;
-
-    border-left: 1px dotted rgb(126, 157, 214);
-    background: url("../images/cross.png") no-repeat scroll center center transparent;
-    text-indent: -2000px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .tags-inner-input {
-    margin: 0;
-    padding: 2px 0 0 0;
-
-    outline: none;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-
-  }
 }
 
 /***********************************************

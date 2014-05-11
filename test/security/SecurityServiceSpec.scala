@@ -16,6 +16,7 @@ import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
 import org.specs2.time.NoTimeConversions
+import scala.slick.jdbc.JdbcBackend
 
 class SecurityServiceSpec extends Specification
     with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
@@ -40,14 +41,16 @@ class SecurityServiceSpec extends Specification
     "success" should {
       val username = "userdfsd"
       val password = "rerfev"
+      val salt = Some("fakeSalt")
+      val encodedPassword: String = service.securityService.encodePassword(password, salt)
       val userInfo = UserInfo(username, password, "fn".some, "ln".some)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
-      val userFromDb = UserRecord(Some(1), username, password)
+      val userFromDb = UserRecord(Some(1), username, encodedPassword, false, salt)
       val generatedToken = "2314"
 
       "return remember me token and authenticated user" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userFromDb.some
+        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb)
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(username, password) must beSuccessful((generatedToken, authUser)).await
@@ -55,38 +58,40 @@ class SecurityServiceSpec extends Specification
 
       "authenticated admin should have Admin authority" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userFromDb.copy(admin=true).some
+        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(admin=true))
         tokenProvider.generateToken returns generatedToken
 
         Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
-          case (_, user) if user.authority == Authorities.Admin => ok
+          case (_, user:AuthenticatedUser) if user.authority == Authorities.Admin => ok
         }
       }
 
       "create new user when not exists" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
+        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
         tokenProvider.generateToken returns generatedToken
 
         Await.result(securityService.signInUser(username, password), 10 seconds)
 
-        there was one(usersRepository).insert(UserRecord(None, username, password, false, "fn".some, "ln".some))(FakeSessionValue)
+        def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
+        val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
+        there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(any[JdbcBackend#Session])
       }
 
       "created user should have User authority" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
+        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
         tokenProvider.generateToken returns generatedToken
 
         Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
-          case (_, user) if user.authority == Authorities.User => ok
+          case (_, user:AuthenticatedUser) if user.authority == Authorities.User => ok
         }
       }
 
       "issue remember me token to authenticated user" in {
         val userId = 1
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.getByUsername(username)(FakeSessionValue) returns None
+        usersRepository.findByUserName(username)(FakeSessionValue) returns Nil
         usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns userId
         usersRepository.updateRememberToken(userId, generatedToken)(FakeSessionValue) returns true
         tokenProvider.generateToken returns generatedToken
@@ -100,6 +105,7 @@ class SecurityServiceSpec extends Specification
     "fail" should {
       "return validation error" in {
         authenticationManager.authenticate(any[String], any[String]) returns future(None)
+        usersRepository.findByUserName(anyString)(any[JdbcBackend#Session]) returns Nil
 
         securityService.signInUser("", "") must beFailing.await
       }

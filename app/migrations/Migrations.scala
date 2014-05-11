@@ -97,4 +97,13 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     }
   }
 
+  val addSaltColumnForUsers = new Migration {
+    val version = 9
+
+    def run(implicit  session: JdbcBackend#Session): Unit = {
+      Q.updateNA("alter table users add salt varchar(64)").execute()
+      Q.updateNA("alter table users convert to character set utf8 collate utf8_bin").execute()
+    }
+  }
+
 }

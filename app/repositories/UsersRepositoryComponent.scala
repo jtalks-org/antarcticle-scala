@@ -4,6 +4,7 @@ import models.database._
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.lifted
 
+
 trait UsersRepositoryComponent {
   val usersRepository: UsersRepository
 
@@ -21,6 +22,8 @@ trait UsersRepositoryComponent {
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
     def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+
+    def remove(username:String)(implicit session: JdbcBackend#Session): Unit
   }
 }
 
@@ -59,6 +62,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
+    val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
       byTokenCompiled(token).firstOption
@@ -72,7 +76,11 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
 
-    override def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
       byUsernameIgnoreCaseCompiled(username).list
+
+    def remove(username: String)(implicit session: JdbcBackend#Session) = {
+      byUsernameCompiled(username).delete
+    }
   }
 }

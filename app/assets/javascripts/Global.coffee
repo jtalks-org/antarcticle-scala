@@ -16,7 +16,7 @@ jQuery(=>
     $("#tag_input").typeahead({
       name: 'countries',
       limit: 10,
-      prefetch: 'http://localhost:9000/tags'
+      prefetch: $("#tag_input").attr('data-url')
     }).on('typeahead:selected', (e, d) =>
       tagApi.tagsManager("pushTag", d.value);
     )

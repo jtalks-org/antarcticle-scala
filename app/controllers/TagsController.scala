@@ -5,7 +5,7 @@ import play.api.libs.json.Json
 import services.TagsServiceComponent
 
 /**
- *
+ * Provides client with tag-related information
  */
 trait TagsController  {
   this: Controller with TagsServiceComponent =>

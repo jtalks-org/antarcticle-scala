@@ -28,6 +28,17 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
     org.mockito.Mockito.reset(tagValidator)
   }
 
+  "list tags" should {
+    "enumerate available tags" in {
+      val tags = List(Tag(1, "tag"), Tag(2, "tag2"))
+      tagsRepository.getAllTags()(Matchers.eq(FakeSessionValue)) returns tags
+
+      val result = tagsService.listDistinctTags()
+
+      result.forall(tags.map(_.name) contains) must beTrue
+    }
+  }
+
   "tags creation for article" should {
     val tags = List("tag", " tag1 ", "tag2 ")
 
@@ -90,4 +101,11 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
       there was noMoreCallsTo(tagsRepository)
     }
   }
+
+  //todo: add missing tests
+  /*"tag update" should {
+    "create only new tags" in {
+
+    }
+  }*/
 }

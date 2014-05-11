@@ -19,7 +19,7 @@ $.fn.extend
 
     # input for new tag
     tagInput = $("<input data-role=\"tagsinput\" data-provide=\"typeahead\" data-items=\"10\" autocomplete=\"off\" class=\"tags-inner-input\" />")
-    $.get('/tags').done((data) => tagInput.typeahead().data('typeahead').source = data)
+    $.get('tags').done((data) => tagInput.typeahead().data('typeahead').source = data)
 
     createTag = (tag) ->
       escapedTag = $('<div></div>').text(tag).html()

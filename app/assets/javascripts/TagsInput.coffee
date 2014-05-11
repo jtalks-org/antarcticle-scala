@@ -44,7 +44,7 @@ $.fn.extend
     updateValue = ->
       input.attr('value', tags.join(','))
 
-    # check tag existance in array
+    # check tag existence in array
     tagExists = (tag) ->
       tags.indexOf(tag) != -1
 

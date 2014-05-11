@@ -21,14 +21,15 @@
   border-radius: 0px;
   min-height: 35px !important;
 }
+
 .navbar-brand {
-  padding-top:7px !important;
-  padding-bottom:7px !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
 }
 
 .navbar-nav > li > a {
-  padding-top:10px !important;
-  padding-bottom:6px !important;
+  padding-top: 10px !important;
+  padding-bottom: 6px !important;
 }
 
 .dropdown-header {
@@ -47,7 +48,6 @@
     margin-bottom: 7px;
   }
 }
-
 
 html,
 body {
@@ -145,15 +145,15 @@ h6 {
 * NOTIFICATIONS
 ***********************************************/
 .inbox-dialog {
-    width: 375px;
-    max-height: 505px;
-    padding: 0;
+  width: 375px;
+  max-height: 505px;
+  padding: 0;
 }
 
-.inbox-dialog .inbox-item{
+.inbox-dialog .inbox-item {
   border-top: 1px solid #e5e5e5;
 
-  .notification-toolbar{
+  .notification-toolbar {
     display: inline-block;
     vertical-align: top;
     margin-right: 5px;
@@ -167,42 +167,42 @@ h6 {
 }
 
 .inbox-dialog .message-text {
-    width: 313px
+  width: 313px
 }
 
 .inbox-dialog .timestamp {
-    color: #999;
-    border-top: 1px solid;
+  color: #999;
+  border-top: 1px solid;
 }
 
 .inbox-dialog .inbox-item .item-content {
-    display: inline-block;
-    width: 313px;
+  display: inline-block;
+  width: 313px;
 }
 
 .inbox-dialog .inbox-item .item-content .item-header {
-    color: #888;
+  color: #888;
 }
 
 .inbox-dialog .inbox-item .item-content .item-creation {
-    float: right
+  float: right
 }
 
 .inbox-dialog .inbox-item .item-content .item-location {
-    margin: 4px 0;
-    color: #07c;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  margin: 4px 0;
+  color: #07c;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.inbox-dialog .inbox-item .item-content .item-summary{
-    color: #3d3d3d;
-    text-overflow: ellipsis;
-    overflow: hidden;
+.inbox-dialog .inbox-item .item-content .item-summary {
+  color: #3d3d3d;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .inbox-dialog .inbox-item.inbox-se-link {
-    text-align: center
+  text-align: center
 }
 
 .notifications-badge {
@@ -299,6 +299,36 @@ blockquote p {
 /***********************************************
  * ARTICLES
  ***********************************************/
+@media (min-width: 1050px) {
+  div.bootstrap-tagsinput {
+    width: 400px;
+  }
+
+  ul.tags-input {
+    width: 390px;
+  }
+}
+
+@media (max-width: 1050px) {
+  div.bootstrap-tagsinput {
+    width: 300px;
+  }
+
+  ul.tags-input {
+    width: 290px;
+  }
+}
+
+@media (max-width: 650px) {
+  div.bootstrap-tagsinput {
+    width: 200px;
+  }
+
+  ul.tags-input {
+    width: 190px;
+  }
+}
+
 .tag-search div {
   display: inline-block;
 }
@@ -306,13 +336,6 @@ blockquote p {
 .tag-search-container {
   line-height: 41px;
   margin-left: 70px;
-}
-
-@media (max-width: 400px) {
-  .tag-search input {
-    margin-left: 0;
-    width: 150px;
-  }
 }
 
 .create-article-button {
@@ -475,9 +498,8 @@ ul.nav-tabs {
 }
 
 .share42init {
-  display:inline;
+  display: inline;
 }
-
 
 /***********************************************
 * Tag filter
@@ -669,6 +691,6 @@ ul.nav-tabs {
   margin-top: -200px;
   width: 100%;
   height: 200px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
   pointer-events: none;
 }

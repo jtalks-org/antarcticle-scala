@@ -7,7 +7,7 @@
         <div class="pull-left tag-search-container">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.listArticles(None)">
             <div class="bootstrap-tagsinput">
-              <input data-role="tagsinput" value="@lastUsedTags" class="form-control tags-input" name="tags" placeholder="Tags filter" />
+              <input value="@lastUsedTags" class="form-control tags-input" name="tags"/>
             </div>
             <button class="btn btn-sm btn-info tag-search-button">Find</button>
           </form>

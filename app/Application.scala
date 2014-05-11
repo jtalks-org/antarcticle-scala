@@ -31,7 +31,8 @@ trait Controllers
   with UserController
   with HelpController
   with NotificationsController
-  with CommentController {
+  with CommentController
+  with TagsController {
   this: Services with SecurityComponent =>
 }
 
@@ -40,7 +41,7 @@ trait Services
   with TagsServiceComponentImpl
   with CommentsServiceComponentImpl
   with NotificationsServiceComponentImpl
-  with UsersServiceComponentImpl{
+  with UsersServiceComponentImpl {
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator

@@ -32,6 +32,8 @@ GET           /notifications                     @controllers.NotificationsContr
 GET           /notification/:id                  @controllers.NotificationsController.getNotification(id: Int)
 DELETE        /notification/:id                  @controllers.NotificationsController.dismissNotification(id: Int)
 DELETE        /notifications                     @controllers.NotificationsController.dismissAllNotifications()
+# Tags
+GET           /tags                              @controllers.TagsController.listTags()
 # Static resources: styles, scripts, images, fonts, etc
 GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)
 GET           /javascripts/:file                 controllers.Assets.at(path="/public/javascripts", file)

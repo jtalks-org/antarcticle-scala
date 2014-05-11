@@ -1,3 +1,4 @@
+#todo: replace string html elements with dom builders
 $.fn.extend
   tags_input: (options) ->
     settings =
@@ -17,11 +18,12 @@ $.fn.extend
       tags = input.val().split(',')
 
     # input for new tag
-    tagInput = $("<input type=\"text\" class=\"tags-inner-input\" />")
+    tagInput = $("<input data-role=\"tagsinput\" data-provide=\"typeahead\" data-items=\"10\" autocomplete=\"off\" class=\"tags-inner-input\" />")
+    $.get('/tags').done((data) => tagInput.typeahead().data('typeahead').source = data)
 
     createTag = (tag) ->
       escapedTag = $('<div></div>').text(tag).html()
-      "<li><span>#{escapedTag}</span><a href=\"#\" class=\"remove-tag\">x</a></li>"
+      "<li class=\"tag\"><span>#{escapedTag}</span><a href=\"#\" class=\"remove-tag\">x</a></li>"
 
     # construct tags list and input for new tag
     html = "<ul class=\"#{settings.class}\">"
@@ -70,10 +72,6 @@ $.fn.extend
     # focus on tag input when clicked anywhere inside <ul>
     tagsList.on 'click', (e) ->
       tagInput.focus()
-
-    # create tag on focus lost
-    tagsList.on 'focusout', (e) ->
-      addTag()
 
     tagInput.on 'keypress', (e) ->
       # create tag when pressed delimiter character

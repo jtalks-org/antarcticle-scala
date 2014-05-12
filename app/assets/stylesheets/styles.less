@@ -321,14 +321,15 @@ blockquote p {
   display: inline-block;
 }
 
-.tags-input {
+.tag-search-input {
   display: inline;
+  min-width: 210px;
   width: auto;
 }
 
 .tag-search-container {
   line-height: 41px;
-  margin-left: 70px;
+  margin-left: 68px;
   padding: 3px;
   span {
     display: inline;
@@ -388,18 +389,6 @@ blockquote p {
 
 .articles-list {
   margin: 5px 0px 10px 0px;
-
-  .comments-size {
-    border: 1px solid rgb(200, 200, 200);
-    -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.1);
-    padding: 3px;
-    min-width: 25px;
-    display: inline-block;
-    text-align: center;
-    margin-left: 5px;
-  }
 }
 
 .article-input {
@@ -468,28 +457,13 @@ article.entry footer .footer-elements {
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-article.entry footer .footer-elements .tags {
-  margin: 0;
-  list-style: none;
-}
-
-article.entry footer .footer-elements .tags li {
-  white-space: nowrap;
-  float: left;
-}
-
-article.entry footer .footer-elements .tags li:not(:last-child) {
-  margin-right: 5px;
-}
-
-article.entry footer .footer-elements .tags li i {
-  float: left;
-  line-height: 20px;
-}
-
-article.entry footer .footer-elements .tags li a {
-  display: inline-block;
-  white-space: normal;
+footer {
+  span.tm-tag {
+    margin: 0 0 0 5px;
+  }
+  .footer-element {
+    margin-top: 5px;
+  }
 }
 
 article.entry .manage-buttons {

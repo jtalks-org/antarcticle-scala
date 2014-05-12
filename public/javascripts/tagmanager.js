@@ -438,13 +438,6 @@
                         });
                     }
 
-                    // on tag pop fill back the tag's content to the input field
-                    if (opts.fillInputOnTagRemove) {
-                        $self.on('tm:popped', function(e, tag) {
-                            $(this).val(tag);
-                        });
-                    }
-
                     $self.change(function(e) {
                         if (!/webkit/.test(navigator.userAgent.toLowerCase())) {
                             $self.focus();

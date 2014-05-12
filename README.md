@@ -48,7 +48,8 @@ The following databases are supported:
 
 SQLite, Microsoft Access and Derby will also probably work, but we haven't tested them.
 
-When creating database in MySQL you need to use utf_bin collation like this: `create database antarcticle character set utf8 collate utf8_bin`
+When creating database in MySQL you need to use utf_bin collation like this:
+`create database antarcticle character set utf8 collate utf8_bin`
 
 To configure database connection use the following properties:
 

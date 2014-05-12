@@ -24,7 +24,7 @@
         <div class="clearfix">
           <div class="pull-left tag-search-container">
             <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
-              <input id="tag_input" value="@lastUsedTags" class="form-control tags-input"
+              <input id="tag_input" value="@lastUsedTags" class="form-control tag-search-input"
               data-url="@routes.TagsController.listTags()"/>
               <button class="btn btn-sm btn-info tag-search-button">Find</button>
               <div class="tag-container"></div>

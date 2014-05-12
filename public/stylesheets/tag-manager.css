@@ -123,7 +123,8 @@ input[type="text"].tm-input {
 }
 .tt-suggestion > p {
     display: block;
-    padding: 3px 20px;
+    padding: 3px;
+    margin:0;
     clear: both;
     font-weight: normal;
     line-height: 1.428571429;

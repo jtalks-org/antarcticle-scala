@@ -6,8 +6,8 @@
       <div class="clearfix">
         <div class="pull-left tag-search-container">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.listArticles(None)">
-            <input value="@lastUsedTags" id="tag_input" class="form-control tags-input"
-            data-url="@routes.TagsController.listTags()"/>
+            <input value="@lastUsedTags" id="tag_input" class="form-control tag-search-input"
+            data-url="@routes.TagsController.listTags()" placeholder="Tag filter (comma separated)"/>
             <button class="btn btn-sm btn-info tag-search-button">Find</button>
             <div class="tag-container"></div>
           </form>

@@ -1,5 +1,5 @@
 @(page: models.Page[_], paginationHandler: Int => Call)
-<div>
+<div class="pagination-container">
   <ul class="pagination">
   @if(page.totalPages > 1) {
     @if(page.currentPage > 1) {
@@ -10,7 +10,7 @@
         <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-chevron-left"></i> Prev </a>
       </li>
     }
-    @for(pageNum <- 1 to page.totalPages) {
+    @for(pageNum <- Math.max(1, page.currentPage-2) to Math.min(page.totalPages, page.currentPage+2)) {
       @if(pageNum == page.currentPage){
         <li class="active">
         } else {

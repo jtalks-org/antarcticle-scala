@@ -1,5 +1,5 @@
 @(page: models.Page[_], paginationHandler: Int => Call)
-<div class="pagination-container">
+<div>
   <ul class="pagination">
   @if(page.totalPages > 1) {
     @if(page.currentPage > 1) {

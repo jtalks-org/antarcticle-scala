@@ -17,6 +17,7 @@ import scalaz._
 import Scalaz._
 import org.specs2.time.NoTimeConversions
 import scala.slick.jdbc.JdbcBackend
+import org.specs2.matcher.Matcher
 
 class SecurityServiceSpec extends Specification
     with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
@@ -46,6 +47,7 @@ class SecurityServiceSpec extends Specification
       val userInfo = UserInfo(username, password, "fn".some, "ln".some)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
       val userFromDb = UserRecord(Some(1), username, encodedPassword, false, salt)
+      val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, false, salt)
       val generatedToken = "2314"
 
       "return remember me token and authenticated user" in {
@@ -76,6 +78,24 @@ class SecurityServiceSpec extends Specification
         def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
         val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
         there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(any[JdbcBackend#Session])
+      }
+
+      "do case sensetive authorisation if several similar usernames are exists" in {
+        val m: Matcher[String]  = (_: String).equalsIgnoreCase(username)
+        usersRepository.findByUserName(m)(any[JdbcBackend#Session]) returns List(userFromDb, userFromDb2)
+        tokenProvider.generateToken returns generatedToken
+
+        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+          case (_, user:AuthenticatedUser) if user.username == username => ok
+        }
+
+        Await.result(securityService.signInUser(username.toUpperCase, password), 10 seconds) must beSuccessful.like {
+          case (_, user:AuthenticatedUser) if user.username == username.toUpperCase => ok
+        }
+
+        there was one(usersRepository).findByUserName(===(username))(any[JdbcBackend#Session])
+        there was one(usersRepository).findByUserName(===(username.toUpperCase))(any[JdbcBackend#Session])
+        there was no (authenticationManager).authenticate(anyString, anyString)
       }
 
       "created user should have User authority" in {

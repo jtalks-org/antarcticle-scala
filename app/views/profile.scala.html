@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: String = "")(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: Option[String] = None)(implicit user: Principal)
 @templates.main(s"Articles by ${userDetails.username}") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
@@ -31,7 +31,7 @@
             </form>
           </div>
         </div>
-        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, Some(lastUsedTags)))
+        @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, lastUsedTags))
         <div class="centralized-inputs clearfix">
           @if(page.totalPages == 0) {
             <h3>User has no articles.</h3>

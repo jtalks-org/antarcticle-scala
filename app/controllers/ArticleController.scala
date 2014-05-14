@@ -35,7 +35,7 @@ trait ArticleController {
   def listArticlesPaged(tags: Option[String], page: Int = 1)  = Action {implicit request =>
     articlesService.getPage(page, tags).fold(
       fail => NotFound(views.html.errors.notFound()),
-      succ = articlesPage => Ok(views.html.articles(articlesPage, tags.getOrElse("")))
+      succ = articlesPage => Ok(views.html.articles(articlesPage, tags))
     )
   }
 

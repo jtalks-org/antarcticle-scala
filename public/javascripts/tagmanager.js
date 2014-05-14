@@ -405,12 +405,6 @@
                         });
                     }
 
-                    $self.focusout(function(e) {
-                        var press = jQuery.Event("keypress");
-                        press.which = 44;
-                        $self.trigger(press)
-                    });
-
                     $self.on('keypress', function(e) {
                         // push ASCII-based delimiters
                         if (privateMethods.keyInArray(e, opts.delimiterChars)) {

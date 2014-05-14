@@ -283,6 +283,7 @@
 
             applyDelimiter : function (e) {
                 var $self = $(this);
+                $('.tt-dropdown-menu').hide();
                 publicMethods.pushTag.call($self,$(this).val());
                 e.preventDefault();
             },
@@ -403,6 +404,12 @@
                             }
                         });
                     }
+
+                    $self.focusout(function(e) {
+                        var press = jQuery.Event("keypress");
+                        press.which = 44;
+                        $self.trigger(press)
+                    });
 
                     $self.on('keypress', function(e) {
                         // push ASCII-based delimiters

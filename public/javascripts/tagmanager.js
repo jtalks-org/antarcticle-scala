@@ -283,6 +283,7 @@
 
             applyDelimiter : function (e) {
                 var $self = $(this);
+                $('.tt-dropdown-menu').hide();
                 publicMethods.pushTag.call($self,$(this).val());
                 e.preventDefault();
             },

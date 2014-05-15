@@ -1,4 +1,4 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], lastUsedTags: String = "")(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], lastUsedTags: Option[String] = None)(implicit user: Principal)
 
 @templates.main("Articles") {
   <div class="row">
@@ -21,7 +21,7 @@
           </div>
         }
       </div>
-      @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(Some(lastUsedTags), _))
+      @templates.bareArticleList(page, routes.ArticleController.listArticlesPaged(lastUsedTags, _))
     </div>
   </div>
 }

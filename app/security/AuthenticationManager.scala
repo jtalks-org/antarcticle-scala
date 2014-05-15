@@ -41,7 +41,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
   }
 
   private def generateMd5Hash(str: String) = {
-    MessageDigest.getInstance("MD5").digest(str.getBytes).map("%02X" format _).mkString
+    MessageDigest.getInstance("MD5").digest(str.getBytes).map("%02X" format _).mkString.toLowerCase
   }
 
   private def sendRequest(poulpeUrl: String, username: String, password: String) = {

@@ -6,7 +6,7 @@ import repositories.UsersRepositoryComponent
 import util.FakeSessionProvider.FakeSessionValue
 import org.mockito.Matchers
 import models.database.UserRecord
-import org.specs2.specification.BeforeExample
+import org.specs2.specification.{Example, BeforeExample}
 import org.specs2.mock.Mockito
 import org.specs2.scalaz.ValidationMatchers
 import scala.concurrent.future
@@ -18,6 +18,7 @@ import Scalaz._
 import org.specs2.time.NoTimeConversions
 import scala.slick.jdbc.JdbcBackend
 import org.specs2.matcher.Matcher
+import org.specs2.execute.AsResult
 
 class SecurityServiceSpec extends Specification
     with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
@@ -37,9 +38,11 @@ class SecurityServiceSpec extends Specification
     org.mockito.Mockito.reset(authenticationManager)
   }
 
+  def anySession = any[JdbcBackend#Session]
+
   //TODO: don't use await somehow?
   "sign in" should {
-    "success" should {
+    "be success" in {
       val username = "userdfsd"
       val password = "rerfev"
       val salt = Some("fakeSalt")
@@ -49,6 +52,8 @@ class SecurityServiceSpec extends Specification
       val userFromDb = UserRecord(Some(1), username, encodedPassword, false, salt)
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, false, salt)
       val generatedToken = "2314"
+
+      def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
 
       "return remember me token and authenticated user" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
@@ -68,6 +73,7 @@ class SecurityServiceSpec extends Specification
         }
       }
 
+
       "create new user when not exists" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
         usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
@@ -75,14 +81,41 @@ class SecurityServiceSpec extends Specification
 
         Await.result(securityService.signInUser(username, password), 10 seconds)
 
-        def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
         val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
-        there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(any[JdbcBackend#Session])
+        there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
+        there was no(usersRepository).updatePassword(anyInt, anyString, any[Option[String]])(anySession)
+      }
+
+
+      "update user when password does not match" in {
+
+        def withMockedAuthenticationManagerAndTokenProvider[T](test: => T) = {
+          authenticationManager.authenticate(username, password) returns future(userInfo.some)
+          tokenProvider.generateToken returns generatedToken
+          test
+          there was no(usersRepository).insert(any[UserRecord])(anySession)
+          there was one(usersRepository).updatePassword(===(1), anyString, any[Option[String]])(anySession)
+        }
+
+        "and one user exists with case-insensetive username" in {
+          withMockedAuthenticationManagerAndTokenProvider{
+            usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""))
+            Await.result(securityService.signInUser(username, password), 10 seconds)
+          }
+        }
+
+        "and several users exist with case-insensetive username" in {
+          withMockedAuthenticationManagerAndTokenProvider {
+            usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""), userFromDb2)
+            Await.result(securityService.signInUser(username, password), 10 seconds)
+          }
+        }
+
       }
 
       "do case sensetive authorisation if several similar usernames are exists" in {
         val m: Matcher[String]  = (_: String).equalsIgnoreCase(username)
-        usersRepository.findByUserName(m)(any[JdbcBackend#Session]) returns List(userFromDb, userFromDb2)
+        usersRepository.findByUserName(m)(anySession) returns List(userFromDb, userFromDb2)
         tokenProvider.generateToken returns generatedToken
 
         Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
@@ -93,8 +126,8 @@ class SecurityServiceSpec extends Specification
           case (_, user:AuthenticatedUser) if user.username == username.toUpperCase => ok
         }
 
-        there was one(usersRepository).findByUserName(===(username))(any[JdbcBackend#Session])
-        there was one(usersRepository).findByUserName(===(username.toUpperCase))(any[JdbcBackend#Session])
+        there was one(usersRepository).findByUserName(===(username))(anySession)
+        there was one(usersRepository).findByUserName(===(username.toUpperCase))(anySession)
         there was no (authenticationManager).authenticate(anyString, anyString)
       }
 
@@ -120,12 +153,25 @@ class SecurityServiceSpec extends Specification
 
         there was one(usersRepository).updateRememberToken(userId, generatedToken)(FakeSessionValue)
       }
+
+      "trim username" in {
+        usersRepository.findByUserName(username)(FakeSessionValue) returns List(userFromDb)
+        tokenProvider.generateToken returns generatedToken
+
+        Await.result(securityService.signInUser(' ' + username + ' ', password), 10 seconds) must beSuccessful.like {
+          case (_, user:AuthenticatedUser) if user.username == username => ok
+        }
+
+        there was one(usersRepository).findByUserName(===(username))(anySession)
+        there was no (authenticationManager).authenticate(anyString, anyString)
+      }
+
     }
 
-    "fail" should {
+    "fail" in {
       "return validation error" in {
-        authenticationManager.authenticate(any[String], any[String]) returns future(None)
-        usersRepository.findByUserName(anyString)(any[JdbcBackend#Session]) returns Nil
+        authenticationManager.authenticate(anyString, anyString) returns future(None)
+        usersRepository.findByUserName(anyString)(anySession) returns Nil
 
         securityService.signInUser("", "") must beFailing.await
       }

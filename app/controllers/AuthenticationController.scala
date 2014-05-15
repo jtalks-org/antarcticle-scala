@@ -8,8 +8,6 @@ import scala.Some
 import views.html
 import conf.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.data.format.Formatter
-import play.api.data.format.Formats.stringFormat
 
 /**
  *  Handles sign in and sign out user actions.
@@ -19,19 +17,9 @@ import play.api.data.format.Formats.stringFormat
 trait AuthenticationController {
   this: Controller with SecurityServiceComponent with Authentication  =>
 
-  def trimmer: Formatter[String] = new Formatter[String] {
-    def bind(key: String, data: Map[String, String]) = {
-      stringFormat.bind(key, data).fold(
-        left => Left(left),
-        right => Right(right.trim())
-      )
-    }
-    def unbind(key: String, value: String) = stringFormat.unbind(key, value.trim())
-  }
-
   val loginForm = Form(
     tuple(
-      "login" -> of[String](trimmer),
+      "login" -> text,
       "password" -> text
     )
   )

@@ -21,9 +21,10 @@ trait UsersRepositoryComponent {
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
+    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session): Unit
+
     def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
 
-    def remove(username:String)(implicit session: JdbcBackend#Session): Unit
   }
 }
 
@@ -63,6 +64,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
     val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
+    val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
       byTokenCompiled(token).firstOption
@@ -79,8 +81,8 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
       byUsernameIgnoreCaseCompiled(username).list
 
-    def remove(username: String)(implicit session: JdbcBackend#Session) = {
-      byUsernameCompiled(username).delete
+    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {
+      for (s <- salt) yield forUpdateCompiled(id).update(password, s)
     }
   }
 }

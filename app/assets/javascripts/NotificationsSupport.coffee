@@ -1,13 +1,14 @@
 jQuery(=>
   $(document).ready(=>
-    $.get($("#notifications-link").attr('href')).done((data) =>
-      # load notifications on page load
-      $("#notifications-dropdown").html(data)
-      $(".notifications-badge").text($(".dropdown-header").attr("data-count"))
-      # register user action listeners
-      $("#drop-notifications-button").click(dismissAllNotifications)
-      $(".dismiss-notification").click(dismissNotification)
-    )
+    if ($("#notifications-link").size() > 0)  # if we don't have any notification controls don't bother initializing
+      $.get($("#notifications-link").attr('href')).done((data) =>
+        # load notifications on page load
+        $("#notifications-dropdown").html(data)
+        $(".notifications-badge").text($(".dropdown-header").attr("data-count"))
+        # register user action listeners
+        $("#drop-notifications-button").click(dismissAllNotifications)
+        $(".dismiss-notification").click(dismissNotification)
+      )
   )
 )
 
@@ -15,7 +16,7 @@ dismissNotification = (e) ->
   $.ajax({
     url: $(this).attr('data-href'),
     type: 'DELETE'
-  }).done( =>
+  }).done(=>
     $.get($("#notifications-link").attr('href')).done((data) =>
       $("#notifications-dropdown").html(data)
       $(".dismiss-notification").click(dismissNotification)

@@ -46,7 +46,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
     }
 
     override def listDistinctTags(): Seq[String] =  withSession {
-      implicit session => tagsRepository.getAllTags().map(_.name)
+      implicit session => tagsRepository.getAllTags().map(_.name).sortWith(_.toLowerCase < _.toLowerCase)
     }
 
     def validateTags(tags: Seq[String]) = {

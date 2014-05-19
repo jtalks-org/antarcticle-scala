@@ -25,6 +25,8 @@ POST          /articles/:id/comments/:commentId  @controllers.CommentController.
 # Users
 GET           /users/:name                       @controllers.UserController.viewProfile(name: String, tags: Option[String])
 GET           /users/:name/page/:page            @controllers.UserController.viewProfilePaged(name: String, page: Int, tags: Option[String])
+GET           /administration                    @controllers.UserController.listUsers(search: Option[String])
+GET           /administration/page/:page         @controllers.UserController.listUsersPaged(search: Option[String], page: Int)
 # Help pages
 GET           /help/markdown                     @controllers.HelpController.markdownHelp()
 # Notifications

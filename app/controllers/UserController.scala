@@ -26,4 +26,17 @@ trait UserController {
         NotFound(views.html.errors.notFound())
     }
   }
+
+  def listUsers(tags: Option[String]) = listUsersPaged(tags)
+
+  def listUsersPaged(search: Option[String], page: Int = 1)  = Action {implicit request =>
+    usersService.getPage(page, search).fold(
+      fail => NotFound(views.html.errors.notFound()),
+      succ = usersPage => Ok(views.html.userManagement(usersPage, search))
+    )
+  }
+
+  def postChangedUserRole(){
+
+  }
 }

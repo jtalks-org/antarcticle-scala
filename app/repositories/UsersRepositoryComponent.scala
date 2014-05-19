@@ -14,13 +14,20 @@ trait UsersRepositoryComponent {
   trait UsersRepository {
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
-    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
-
+    //todo: wat? why do we need two of them?
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+
+    def findUserPaged(username: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
+
+    def countFindUser(username: String)(implicit session: JdbcBackend#Session): Int
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
+
+    def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
   }
 }
 
@@ -35,12 +42,18 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
    * Query extensions to avoid criteria duplication
    */
   implicit class UsersExtension[C](val q: Query[Users, C]) {
+    type SColumn = Column[String]
+
     def byId(id: Column[Int]): Query[Users, C] = {
       q.filter(_.id === id)
     }
-    type SColumn = Column[String]
+
     def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
       q.filter(user => f(user.username) === f(username))
+    }
+
+    def stringFieldsMatch(search: SColumn): Query[Users, C] = {
+      q.filter(user => user.username.like(search) || user.firstName.like(search) || user.lastName.like(search))
     }
   }
 
@@ -57,7 +70,9 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       username: Column[String] => users.byUsername(username, {_.toLowerCase})
     }
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
+    val userSearchCount = Compiled((search: Column[String]) => users.stringFieldsMatch(search).length)
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
+    val updateUserRoleCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.admin))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
@@ -66,13 +81,22 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def getByUsername(username: String)(implicit session: JdbcBackend#Session) =
       byUsernameCompiled(username).firstOption
 
+    def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
+      // todo: cannot be compiled due to https://github.com/slick/slick/pull/764
+      users.stringFieldsMatch(search).drop(offset).take(portionSize).list
+
+    def countFindUser(search: String)(implicit session: JdbcBackend#Session) = userSearchCount(search).run
+
+    def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session) =
+       updateUserRoleCompiled(id).update(isAdmin) > 0
+
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session) =
       updateTokenCompiled(id).update(tokenValue) > 0
 
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
 
-    override def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session) =
       byUsernameIgnoreCaseCompiled(username).list
   }
 }

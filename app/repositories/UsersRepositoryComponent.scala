@@ -3,6 +3,7 @@ package repositories
 import models.database._
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.lifted
+import models.UserModels.UserModel
 
 trait UsersRepositoryComponent {
   val usersRepository: UsersRepository
@@ -16,11 +17,19 @@ trait UsersRepositoryComponent {
 
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session)
+
+    def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
+
+    def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
+
+    def countFindUser(search: String)(implicit session: JdbcBackend#Session) : Int
   }
 }
 
@@ -40,7 +49,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def byId(id: Column[Int]): Query[Users, C] = {
       q.filter(_.id === id)
     }
-    type SColumn = Column[String]
+
     def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
       q.filter(user => f(user.username) === f(username))
     }
@@ -91,7 +100,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session) =
       byUsernameIgnoreCaseCompiled(username).list
 
     def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {

@@ -14,20 +14,13 @@ trait UsersRepositoryComponent {
   trait UsersRepository {
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
-    //todo: wat? why do we need two of them?
+    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
+
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
-
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
-
-    def findUserPaged(username: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
-
-    def countFindUser(username: String)(implicit session: JdbcBackend#Session): Int
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
-    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
-
-    def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
   }
 }
 
@@ -47,7 +40,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def byId(id: Column[Int]): Query[Users, C] = {
       q.filter(_.id === id)
     }
-
+    type SColumn = Column[String]
     def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
       q.filter(user => f(user.username) === f(username))
     }
@@ -74,6 +67,8 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
     val updateUserRoleCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.admin))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
+    val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
+    val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
       byTokenCompiled(token).firstOption
@@ -96,7 +91,11 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session) =
+    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord] =
       byUsernameIgnoreCaseCompiled(username).list
+
+    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {
+      for (s <- salt) yield forUpdateCompiled(id).update(password, s)
+    }
   }
 }

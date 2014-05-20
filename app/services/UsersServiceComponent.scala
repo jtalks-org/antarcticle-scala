@@ -34,7 +34,7 @@ trait UsersServiceComponentImpl extends UsersServiceComponent {
     }
 
     override def getPage(page: Int, search: Option[String]) = withTransaction { implicit session =>
-      val pageSize = Constants.PAGE_SIZE
+      val pageSize = Constants.PAGE_SIZE_USERS
       val offset = pageSize * (page - 1)
       val total = usersRepository.countFindUser(search.getOrElse(""))
       total match {

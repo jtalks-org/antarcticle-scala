@@ -17,5 +17,5 @@ case class Page[T](currentPage: Int, totalItems: Int, list: Seq[T]) {
 }
 
 object Page{
-  def getPageCount(totalItems : Int) = if (totalItems == 0)  1 else ceil(totalItems / Constants.PAGE_SIZE.toDouble).toInt
+  def getPageCount(totalItems : Int) = if (totalItems == 0)  1 else ceil(totalItems / Constants.PAGE_SIZE_ARTICLES.toDouble).toInt
 }

@@ -24,8 +24,8 @@ jQuery(=>
       )
       tagApi.tagsManager("pushTag", tag) for tag in $('#tag_input').attr('value').split(',')
       $('.tt-hint').addClass('form-control');
-      $('.tag-search-input').closest('form').on 'submit', (e) ->
-        inputData = $('.tag-search-input').val()
+      $('.search-input').closest('form').on 'submit', (e) ->
+        inputData = $('.search-input').val()
         if (inputData.trim() != "")
           tagApi.tagsManager("pushTag", inputData)
         if ($('.tag-container span').length == 0)

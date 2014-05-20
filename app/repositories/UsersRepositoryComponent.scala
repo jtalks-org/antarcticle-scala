@@ -82,10 +82,10 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       byUsernameCompiled(username).firstOption
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
-      // todo: cannot be compiled due to https://github.com/slick/slick/pull/764
-      users.stringFieldsMatch(search).drop(offset).take(portionSize).list
+      // todo: cannot be compiled: https://github.com/slick/slick/pull/764
+      users.stringFieldsMatch(s"%$search%").drop(offset).take(portionSize).list
 
-    def countFindUser(search: String)(implicit session: JdbcBackend#Session) = userSearchCount(search).run
+    def countFindUser(search: String)(implicit session: JdbcBackend#Session) = userSearchCount(s"%$search%").run
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session) =
        updateUserRoleCompiled(id).update(isAdmin) > 0

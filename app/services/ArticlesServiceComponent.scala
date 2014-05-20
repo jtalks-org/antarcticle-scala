@@ -121,7 +121,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     private def fetchPageFromDb(page: Int, userId: Option[Int] = None, tagsString : Option[String] = None)(implicit s: JdbcBackend#Session) = {
-      val pageSize = Constants.PAGE_SIZE
+      val pageSize = Constants.PAGE_SIZE_ARTICLES
       val offset = pageSize * (page - 1)
       val tagsIds = tagsString match {
         case Some(tagsValues) =>

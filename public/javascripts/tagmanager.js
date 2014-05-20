@@ -413,16 +413,20 @@
                     });
 
                     $self.on('keydown', function(e) {
-                        // disable ENTER
+                        var fieldIsEmpty = 0 === $(this).val().trim().length;
+                        // disable submit on ENTER
                         if (e.which === 13) {
                             if (opts.preventSubmitOnEnter) {
                                 privateMethods.killEvent(e);
                             }
                         }
-
                         // push key-based delimiters (includes <enter> by default)
                         if (privateMethods.keyInArray(e, opts.delimiterKeys)) {
                             privateMethods.applyDelimiter.call($self, e);
+                        }
+                        // submit the form on enter with empty field
+                        if (e.which === 13 && fieldIsEmpty) {
+                           $(this).closest("form").submit();
                         }
                     });
 

@@ -1,60 +1,77 @@
 @(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit user: Principal)
-  @templates.main("Users & Roles") {
-    <div class="row">
-      <div class="col-md-10 col-md-offset-1">
-        <div class="clearfix">
-          <form class="form-inline" method="get" action="@routes.UserController.listUsers(None)">
-            <div class="form-group">
-              <input value="@search" name="search" class="form-control search-input"
-              placeholder="By login, first or last name"/>
-            </div>
-            <button type="submit" class="btn btn-sm btn-info">Filter</button>
-          </form>
+@templates.main("Users & Roles") {
+  <div class="row">
+    <div class="clearfix">
+      <form class="form-inline" method="get" action="@routes.UserController.listUsers(None)">
+        <div class="form-group">
+          <input value="@search" name="search" class="form-control search-input"
+          placeholder="By login, first or last name"/>
         </div>
-      </div>
+        <button type="submit" class="btn btn-sm btn-info">Filter</button>
+      </form>
     </div>
-    <br/>
-    <div class="row">
-      <div class="row col-md-10 col-md-offset-1">
-        @if(!page.list.isEmpty) {
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <table class="table table-condensed">
-                <thead>
-                  <tr>
-                    <th>Username</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                @for(user <- page.list) {
-                  <tr>
-                    <td>@user.username</td>
-                    <td>@user.firstName</td>
-                    <td>@user.lastName</td>
-                    <td>
-                      <select data-href="@routes.UserController.postChangedUserRole(user.id.get)" class="user-role">
-                        <option value="admin" @{"selected".when(user.admin)}>Admin</option>
-                        <option value="user" @{"selected".when(!user.admin)}>User</option>
-                      </select>
-                    </td>
-                  </tr>
-                }
-                </tbody>
-              </table>
-            </div>
+  </div>
+  <br/>
+  <div class="row">
+    @if(!page.list.isEmpty) {
+      <div class="clearfix">
+      @if(page.list.size > 25) {
+        <div class="panel panel-default col-md-6 table-column-left">
+          <div class="panel-body">
+          @userTable(page.list.take(25))
           </div>
-        } else {
-          <br>
-          <div class="articles-not-found" style="">
-            <h3>No user match this search criteria :(</h3>
+        </div>
+        <div class="panel panel-default col-md-6 table-column">
+          <div class="panel-body">
+          @userTable(page.list.drop(25))
           </div>
-        }
-        @templates.pagination(page, routes.UserController.listUsersPaged(search, _))
+        </div>
+      } else {
+        <div class="panel panel-default col-md-8 col-md-offset-2">
+          <div class="panel-body">
+          @userTable(page.list)
+          </div>
+        </div>
+      }
       </div>
-    </div>
-  } {
-      <script src="@routes.Assets.at("/public/javascripts", "RoleManagementSupport.js")" type="text/javascript"></script>
+    } else {
+      <br>
+      <div class="articles-not-found" style="">
+        <h3>No user match this search criteria :(</h3>
+      </div>
+    }
+    @templates.pagination(page, routes.UserController.listUsersPaged(search, _))
+  </div>
+} {
+  <script src="@routes.Assets.at("/public/javascripts", "RoleManagementSupport.js")" type="text/javascript"></script>
+}
+
+  @userTable(users: Seq[models.database.UserRecord]) = {
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Login</th>
+          <th>Name</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+      @for(user <- users) {
+        <tr>
+          <td>@user.username</td>
+          <td>@user.firstName @user.lastName</td>
+          <td>
+            <select data-href="@routes.UserController.postChangedUserRole(user.id.get)" class="user-role">
+              <option value="admin" @{
+              "selected".when(user.admin)
+            }>Admin</option>
+              <option value="user" @{
+              "selected".when(!user.admin)
+            }>User</option>
+            </select>
+          </td>
+        </tr>
+      }
+      </tbody>
+    </table>
   }

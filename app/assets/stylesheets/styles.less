@@ -140,12 +140,18 @@ h6 {
 .form-error {
   word-wrap: break-word;
 }
-
-.bb-alert {
-  position:fixed;
-  font-size:1.2em;
+.bb-alert-container {
   top: 0;
-  z-index:2000;
+  position: fixed;
+  width:100%;
+  z-index: 2000;
+  .bb-alert {
+    font-size: 1.2em;
+    display: none;
+    width: 300px;
+    text-align: center;
+    float: none !important;
+  }
 }
 
 /***********************************************

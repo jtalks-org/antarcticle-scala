@@ -14,7 +14,7 @@ import security.Entities
 import security.Permissions._
 import security.Result._
 import models.database.ArticleToUpdate
-import models.Page
+import models.{ArticlePage, Page}
 import scala.Some
 import models.ArticleModels.ArticleDetailsModel
 import models.UserModels.UserModel
@@ -137,13 +137,13 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         none = articlesRepository.count(tagsIds)
       )
       total match {
-        case it if 1 until Page.getPageCount(it) + 1 contains page =>
+        case it if 1 until ArticlePage.getPageCount(it) + 1 contains page =>
           val list = userId.cata(
             some = articlesRepository.getListForUser(_, offset, pageSize, tagsIds),
             none = articlesRepository.getList(offset, pageSize, tagsIds)
           )
           val modelsList = list.map((recordToListModel _).tupled)
-          Page(page, total, modelsList).successNel
+          new ArticlePage(page, total, modelsList).successNel
         case _ => "No such page exists".failureNel
       }
     }

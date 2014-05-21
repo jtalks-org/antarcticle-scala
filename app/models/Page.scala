@@ -9,13 +9,25 @@ import conf.Constants
  * @param list page contents
  * @tparam T type of the page elements
  */
-case class Page[T](currentPage: Int, totalItems: Int, list: Seq[T]) {
+abstract class Page[T](val currentPage: Int, val totalItems: Int, val list: Seq[T]) {
 
-  val totalPages = Page.getPageCount(totalItems)
+  val totalPages: Int
 
   require(currentPage > 0, "Pages are numbered starting from 1")
 }
 
-object Page{
-  def getPageCount(totalItems : Int) = if (totalItems == 0)  1 else ceil(totalItems / Constants.PAGE_SIZE_ARTICLES.toDouble).toInt
+class ArticlePage[T](currentPage: Int, totalItems: Int, list: Seq[T]) extends Page[T](currentPage, totalItems, list) {
+  override val totalPages = ArticlePage.getPageCount(totalItems)
 }
+
+class UserPage[T](currentPage: Int, totalItems: Int, list: Seq[T]) extends Page[T](currentPage, totalItems, list) {
+  override val totalPages = UserPage.getPageCount(totalItems)
+}
+
+class BasePage(pageSize: Int) {
+  def getPageCount(totalItems: Int) = if (totalItems == 0) 1 else ceil(totalItems / pageSize.toDouble).toInt
+}
+
+object ArticlePage extends BasePage(Constants.PAGE_SIZE_ARTICLES)
+
+object UserPage extends BasePage(Constants.PAGE_SIZE_USERS)

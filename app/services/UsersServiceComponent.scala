@@ -5,7 +5,7 @@ import Scalaz._
 import repositories.UsersRepositoryComponent
 import scalaz._
 import models.database.UserRecord
-import models.Page
+import models.{UserPage, Page}
 import models.UserModels.UpdateUserRoleModel
 import conf.Constants
 
@@ -38,9 +38,9 @@ trait UsersServiceComponentImpl extends UsersServiceComponent {
       val offset = pageSize * (page - 1)
       val total = usersRepository.countFindUser(search.getOrElse(""))
       total match {
-        case it if 1 until Page.getPageCount(it) + 1 contains page =>
+        case it if 1 until UserPage.getPageCount(it) + 1 contains page =>
           val modelsList = usersRepository.findUserPaged(search.getOrElse(""), offset, pageSize)
-          Page(page, total, modelsList).successNel
+          new UserPage(page, total, modelsList).successNel
         case _ => "No such page exists".failureNel
       }
     }

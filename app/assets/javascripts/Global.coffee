@@ -1,5 +1,4 @@
-unless String::trim then String::trim = ->
-  @replace /^\s+|\s+$/g, ""
+unless String::trim then String::trim = -> @replace /^\s+|\s+$/g, ""
 jQuery(=>
   $(document).ready(=>
     $('.trimmed-input').bind('blur', () ->

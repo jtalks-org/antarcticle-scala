@@ -8,7 +8,7 @@ import util.FakeAuthentication
 import play.api.test._
 import play.api.test.Helpers._
 import models.database.UserRecord
-import models.Page
+import models.{ArticlePage, Page}
 import security.{Entities, Permissions, AuthenticatedUser}
 import scalaz._
 import Scalaz._
@@ -38,7 +38,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
     val username = "user"
     val password = "password"
     val user = new UserRecord(Some(1), username, password, true)
-    val articles = Page(1, 0,List[ArticleListModel]()).successNel
+    val articles = new ArticlePage(1, 0,List[ArticleListModel]()).successNel
     implicit def principal = {
       val usr = mock[AuthenticatedUser]
       usr.userId returns 1

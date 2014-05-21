@@ -11,7 +11,7 @@ import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
 import security.AnonymousPrincipal
-import models.Page
+import models.{ArticlePage, Page}
 import security.Result.NotAuthorized
 import scala.Some
 import security.Result.Authorized
@@ -49,7 +49,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "list of all articles" should {
     "return first page of all exist articles" in {
-      articlesService.getPage(1, None) returns new Page(1, 1, Seq(articleListModel)).successNel
+      articlesService.getPage(1, None) returns new ArticlePage(1, 1, Seq(articleListModel)).successNel
 
       val page = controller.allArticles()(FakeRequest())
 
@@ -63,7 +63,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
   "paged list of tagged articles" should {
     "return a page with articles" in {
-      articlesService.getPage(2, Some("")) returns new Page(2, 1, Seq(articleListModel)).successNel
+      articlesService.getPage(2, Some("")) returns new ArticlePage(2, 1, Seq(articleListModel)).successNel
 
       val page = controller.listArticlesPaged(Some(""), 2)(FakeRequest())
 

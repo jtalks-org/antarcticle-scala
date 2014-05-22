@@ -22,25 +22,24 @@
         </header>
         <br/>
         <div class="clearfix">
+        @if(!page.list.isEmpty) {
           <div class="pull-left tag-search-container">
             <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
               <input id="tag_input" value="@lastUsedTags" class="form-control search-input"
-              data-url="@routes.TagsController.listTags()"/>
+              placeholder="Tag filter (comma separated)" data-url="@routes.TagsController.listTags()"/>
               <button class="btn btn-sm btn-info tag-search-button">Find</button>
               <div class="tag-container"></div>
             </form>
           </div>
+        }
         </div>
         @templates.bareArticleList(page, routes.UserController.viewProfilePaged(userDetails.username, _, lastUsedTags))
         <div class="centralized-inputs clearfix">
-          @if(page.totalPages == 0) {
-            <h3>User has no articles.</h3>
-          }
-          @if(user.can(Create, Article)) {
-            <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
-              <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
-            </a>
-          }
+        @if(user.can(Create, Article)) {
+          <a class="btn btn-lg btn-primary" href="@routes.ArticleController.getNewArticlePage">
+            <i class="glyphicon glyphicon-pencil icon-white"></i> Write article
+          </a>
+        }
         </div>
       </div>
     </div>

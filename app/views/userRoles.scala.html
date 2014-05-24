@@ -1,4 +1,4 @@
-@(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit user: Principal)
+@(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit principal: security.Principal)
 @templates.main("Users & Roles") {
   <div class="row">
     <div class="col-md-offset-1 clearfix">
@@ -12,26 +12,28 @@
     </div>
   </div>
   <br/>
-  <div class="row">
+  <div class="row row-with-columns">
     @if(!page.list.isEmpty) {
       <div class="clearfix">
-      @if(page.list.size > 25) {
-        <div class="panel panel-default col-md-5 col-md-offset-1 table-column-left">
-          <div class="panel-body">
-          @userTable(page.list.take(25))
+      @defining(conf.Constants.PAGE_SIZE_USERS / 2) { columnSize =>
+        @if(page.list.size > columnSize) {
+          <div class="panel panel-default col-md-5 col-md-offset-1 table-column-left equal-height-column">
+            <div class="panel-body">
+            @userTable(page.list.take(columnSize))
+            </div>
           </div>
-        </div>
-        <div class="panel panel-default col-md-5 table-column">
-          <div class="panel-body">
-          @userTable(page.list.drop(25))
+          <div class="panel panel-default col-md-5 table-column equal-height-column">
+            <div class="panel-body">
+            @userTable(page.list.drop(columnSize))
+            </div>
           </div>
-        </div>
-      } else {
-        <div class="panel panel-default col-md-8 col-md-offset-1">
-          <div class="panel-body">
-          @userTable(page.list)
+        } else {
+          <div class="panel panel-default col-md-8 col-md-offset-1">
+            <div class="panel-body">
+            @userTable(page.list)
+            </div>
           </div>
-        </div>
+        }
       }
       </div>
     } else {
@@ -40,6 +42,8 @@
         <h3>No user match this search criteria :(</h3>
       </div>
     }
+  </div>
+  <div class="row">
     <div class="col-md-offset-1">
       @templates.pagination(page, routes.UserController.listUsersPaged(search, _))
     </div>
@@ -63,13 +67,10 @@
           <td>@user.username</td>
           <td>@user.firstName @user.lastName</td>
           <td>
-            <select data-href="@routes.UserController.postChangedUserRole(user.id.get)" class="user-role">
-              <option value="admin" @{
-              "selected".when(user.admin)
-            }>Admin</option>
-              <option value="user" @{
-              "selected".when(!user.admin)
-            }>User</option>
+            <select data-href="@routes.UserController.postChangedUserRole(user.id.get)" class="user-role"
+              @{"disabled".when(user.id.get == principal.asInstanceOf[security.AuthenticatedUser].userId)}>
+            <option value="admin" @{"selected".when(user.admin)}>Admin</option>
+            <option value="user" @{"selected".when(!user.admin)}>User</option>
             </select>
           </td>
         </tr>

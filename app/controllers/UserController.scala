@@ -4,13 +4,11 @@ import play.api.mvc.{Controller, Action}
 import services.{UsersServiceComponent, ArticlesServiceComponent}
 import security.Authentication
 import models.database.UserRecord
-import play.api.data.Form
-import play.api.data.Forms._
-import scala.text
-import models.database.UserRecord
 import scala.Some
 import models.UserModels.UpdateUserRoleModel
-import play.api.libs.json.Json
+import security.Permissions.Manage
+import security.Entities.Users
+import security.Result.{NotAuthorized, Authorized}
 
 /**
  * Maintains all information from user profile: article list for a particular user,
@@ -37,17 +35,24 @@ trait UserController {
   def listUsers(tags: Option[String]) = listUsersPaged(tags)
 
   def listUsersPaged(search: Option[String], page: Int = 1) = Action { implicit request =>
-    usersService.getPage(page, search).fold(
-      fail => NotFound(views.html.errors.notFound()),
-      succ = usersPage => Ok(views.html.userManagement(usersPage, search))
-    )
+    currentPrincipal match {
+      case user if user.can(Manage, Users) =>
+        usersService.getPage(page, search).fold(
+          fail => NotFound(views.html.errors.notFound()),
+          succ = usersPage => Ok(views.html.userRoles(usersPage, search))
+        )
+      case _ =>
+        Unauthorized(views.html.errors.forbidden())
+    }
   }
 
   def postChangedUserRole(id: Int) = Action(parse.json) {
     implicit request =>
       (request.body \ "role").asOpt[String].fold(BadRequest(""))(role => {
-        usersService.updateUserRole(new UpdateUserRoleModel(id, "admin".equals(role)))
-        Ok("")
+        usersService.updateUserRole(new UpdateUserRoleModel(id, "admin".equals(role))) match {
+          case Authorized(result) => Ok("")
+          case NotAuthorized() => Unauthorized("")
+        }
       }
       )
   }

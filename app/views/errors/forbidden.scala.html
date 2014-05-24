@@ -1,0 +1,29 @@
+@()(implicit user: Principal = security.AnonymousPrincipal)
+@templates.main("Forbidden"){
+  <div class="hero-unit">
+    <div class="container">
+      <div class="row">
+        <div class="text-center">
+          <h1 class="error-title">Error 403</h1>
+          <p class="lead">
+            Your account has insufficient permissions to view this page
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <h2>Why am I seeing this?</h2>
+        <br/>
+        <p>Most likely this is one of the secret pages, where moderators perform their sacred magic.</p>
+        <br/>
+        <p><a class="btn btn-info" href="@routes.ArticleController.allArticles()">Just take me out of here!</a></p>
+      </div>
+    </div>
+    <hr>
+  </div>
+} {
+
+}

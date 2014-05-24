@@ -4,10 +4,14 @@
   @if(page.totalPages > 1) {
     @if(page.currentPage > 1) {
       <li class="prev previous_page">
-        <a href="@paginationHandler(1)"><i class="glyphicon glyphicon-chevron-left"></i><i class="glyphicon glyphicon-chevron-left"></i> First </a>
+        <a href="@paginationHandler(1)">
+          <i class="glyphicon glyphicon-chevron-left"></i><i class="glyphicon glyphicon-chevron-left"></i> First
+        </a>
       </li>
       <li class="prev previous_page">
-        <a href="@paginationHandler(page.currentPage - 1)"><i class="glyphicon glyphicon-chevron-left"></i> Prev </a>
+        <a href="@paginationHandler(page.currentPage - 1)">
+          <i class="glyphicon glyphicon-chevron-left"></i> Prev
+        </a>
       </li>
     }
     @for(pageNum <- Math.max(1, page.currentPage-2) to Math.min(page.totalPages, page.currentPage+2)) {
@@ -21,10 +25,14 @@
     }
     @if(page.currentPage < page.totalPages) {
       <li class="next next_page">
-        <a href="@paginationHandler(page.currentPage + 1)">Next <i class="glyphicon glyphicon-chevron-right"></i></a>
+        <a href="@paginationHandler(page.currentPage + 1)">
+          Next <i class="glyphicon glyphicon-chevron-right"></i>
+        </a>
       </li>
       <li class="next next_page">
-        <a href="@paginationHandler(page.totalPages)">Last <i class="glyphicon glyphicon-chevron-right"></i><i class="glyphicon glyphicon-chevron-right"></i></a>
+        <a href="@paginationHandler(page.totalPages)">
+          Last <i class="glyphicon glyphicon-chevron-right"></i><i class="glyphicon glyphicon-chevron-right"></i>
+        </a>
       </li>
     }
   }

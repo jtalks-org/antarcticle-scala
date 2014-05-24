@@ -26,13 +26,14 @@ object Entities {
   case object Article extends Entity
   case object Comment extends Entity
   case object Notification extends Entity
+  case object Users extends Entity
 }
 
 // user "roles"
 object Authorities {
   sealed trait Authority
-  case object Admin extends Authority
-  case object User extends Authority
+  object Admin extends Authority
+  object User extends Authority
 }
 
 object Result {

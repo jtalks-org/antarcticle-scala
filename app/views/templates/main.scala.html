@@ -32,23 +32,6 @@
                 </li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    Welcome, @authenticatedUser.username <b class="caret"></b>
-                  </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)">
-                      <i class="glyphicon glyphicon-file"></i> My articles
-                    </a>
-                  </li>
-                  <li>
-                    <a href="@routes.AuthenticationController.logout">
-                      <i class="glyphicon glyphicon-log-out"></i> Sign out
-                    </a>
-                  </li>
-                </ul>
-              </li>
                 @authenticatedUser.authority match {
                   case Admin => {
                     <li class="dropdown">
@@ -69,8 +52,31 @@
                       </ul>
                     </li>
                   }
-                 case _ => {}
+                  case _ => {}
                 }
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    @authenticatedUser.username <b class="caret"></b>
+                  </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)">
+                      <i class="glyphicon glyphicon-file"></i> My articles
+                    </a>
+                  </li>
+                  <li>
+                    <a href="@routes.HelpController.markdownHelp()">
+                      <i class="glyphicon glyphicon-question-sign"></i> Online help
+                    </a>
+                  </li>
+                  <li>
+                    <a href="@routes.AuthenticationController.logout">
+                      <i class="glyphicon glyphicon-log-out"></i> Sign out
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
               </ul>
             }
             case _ => {

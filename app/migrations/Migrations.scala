@@ -79,7 +79,14 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
         " PRIMARY KEY(id)" +
         ");").execute()
     }
+  }
 
+  val addInstanceNameProperty = new Migration {
+    val version: Int = 12
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("INSERT INTO properties VALUES(1, 'INSTANCE_NAME', 'ANTARCTICLE', 'ANTARCTICLE', CURRENT_TIMESTAMP);").execute()
+    }
   }
 
 }

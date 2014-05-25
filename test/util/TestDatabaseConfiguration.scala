@@ -81,5 +81,10 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
       Notification(Some(3), 1, 2, 2, "You can delete this notification.", "But be careful, it's JTalks, baby.", time),
       Notification(Some(4), 3, 2, 2, "Have you checked a content of your notification?", "Bullshit, do it now.", time)
     )
+
+    properties ++= Seq(
+      Property(Some(1), "changed_property", "changed property for a test", "default value of changed property for a test", time),
+      Property(Some(1), "not_changed_property", null, "default value of not changed property for a test", time)
+    )
   }
 }

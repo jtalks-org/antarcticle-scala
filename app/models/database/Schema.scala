@@ -8,8 +8,9 @@ trait Schema
   with ArticlesSchemaComponent
   with CommentsSchemaComponent
   with TagsSchemaComponent
-  with NotificationsSchemaComponent {
+  with NotificationsSchemaComponent
+  with PropertiesSchemaComponent {
   this: Profile =>
 
-  lazy val schema = Vector(users, articles, comments, tags, articlesTags, notifications)
+  lazy val schema = Vector(users, articles, comments, tags, articlesTags, notifications, properties)
 }

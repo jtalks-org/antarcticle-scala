@@ -28,18 +28,14 @@
             </li>
               @if(article.commentsCount > 0) {
                 <li class="footer-element">
-                  <span>
+                  <a href="@{routes.ArticleController.viewArticle(article.id) + "#comments"}">
                     <i class="glyphicon glyphicon-comment"></i>
                     <strong>@article.commentsCount</strong>
-                  </span>
+                  </a>
                 </li>
               }
             @for(tag <- article.tags) {
-              <a href="@routes.ArticleController.listArticles(Some(tag))">
-                <span class="pull-right tm-tag tm-tag-default">
-                  @tag
-                </span>
-              </a>
+              @templates.tag(tag)
             }
           </ul>
         </footer>

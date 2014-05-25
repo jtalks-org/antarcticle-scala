@@ -4,11 +4,11 @@
 <header>
   <h2>@article.title</h2>
 </header>
-<hr>
+<hr class="preview-hr">
 <div class="body">
   <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
 </div>
-<hr>
+<hr class="preview-hr">
 <ul class="breadcrumb preview-article-tags clearfix">
   <li>
     <i class="glyphicon glyphicon-user"></i>
@@ -16,9 +16,8 @@
     <a href="@routes.UserController.viewProfile(userName, None)">@userName</a>
   </li>
   @for(tag <- article.tags.distinct) {
-    <li class="pull-right">
-      <i class="glyphicon glyphicon-tags"></i> <a href="@routes.ArticleController.listArticles(Some(tag))"> @tag</a>
-    </li>
+    @templates.tag(tag)
   }
 </ul>
-<hr>
+<hr class="preview-hr">
+<br>

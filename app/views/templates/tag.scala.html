@@ -1,0 +1,6 @@
+@(tag: String)
+<a href="@routes.ArticleController.listArticles(Some(tag))">
+  <span class="pull-right tm-tag tm-tag-default">
+    @tag
+  </span>
+</a>

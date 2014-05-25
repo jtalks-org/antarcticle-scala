@@ -40,14 +40,12 @@
               <a href="@routes.UserController.viewProfile(article.author.username, None)">@article.author.username</a>
             </li>
               @for(tag <- article.tags) {
-                <a href="@routes.ArticleController.listArticles(Some(tag))">
-                  <span class="pull-right tm-tag tm-tag-default">@tag</span>
-                </a>
+                @templates.tag(tag)
               }
           </ul>
         </footer>
       </article>
-      <section class="comments" id="comments">
+      <section class="comments">
         <h3 class="comments-header"><b>@comments.size</b>Comments</h3>
         @if(comments.isEmpty) {
           <div class="centralized-inputs">
@@ -56,6 +54,7 @@
         } else {
           @for(comment <- comments) {
             <article class="clearfix comment comment-other">
+              <a id="comments"></a>
               <div id="comment@comment.id" class="comment-bubble comment-bubble-other">
                 <header>
                   <span class="glyphicon glyphicon-user"></span>

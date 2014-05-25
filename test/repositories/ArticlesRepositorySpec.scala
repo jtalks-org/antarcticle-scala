@@ -205,7 +205,6 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return articles count for certain tag" in withTestDb { implicit session: Session =>
-      println(articlesRepository.count(Some(Seq(1))))
       articlesRepository.count(Some(Seq(1))) must_== 2
     }
   }

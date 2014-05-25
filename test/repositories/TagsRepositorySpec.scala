@@ -38,7 +38,6 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
     "return all available tags" in withTestDb {
       implicit session =>
         val tags = tagsRepository.getAllTags()
-        println(tags)
         tags.map(_.name)forall Seq("tag1", "tag2", "tag3").contains must beTrue
     }
   }

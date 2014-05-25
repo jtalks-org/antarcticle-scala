@@ -2,7 +2,7 @@ package controllers
 
 import play.api.mvc.{Controller, Action}
 import services.{UsersServiceComponent, ArticlesServiceComponent}
-import security.Authentication
+import security.{AuthenticatedUser, Authentication}
 import models.database.UserRecord
 import scala.Some
 import models.UserModels.UpdateUserRoleModel
@@ -41,8 +41,10 @@ trait UserController {
           fail => NotFound(views.html.errors.notFound()),
           succ = usersPage => Ok(views.html.userRoles(usersPage, search))
         )
+      case user: AuthenticatedUser =>
+        Forbidden(views.html.errors.forbidden())
       case _ =>
-        Unauthorized(views.html.errors.forbidden())
+        defaultOnUnauthorized(request)
     }
   }
 

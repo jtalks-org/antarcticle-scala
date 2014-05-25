@@ -7,12 +7,17 @@ import services.{UsersServiceComponent, ArticlesServiceComponent}
 import util.FakeAuthentication
 import play.api.test._
 import play.api.test.Helpers._
-import models.database.UserRecord
-import models.{ArticlePage, Page}
-import security.{Entities, Permissions, AuthenticatedUser}
+import models.{UserPage, ArticlePage}
+import security._
 import scalaz._
 import Scalaz._
+import security.AuthenticatedUser
+import models.database.UserRecord
 import models.ArticleModels.ArticleListModel
+import scala.Some
+import security.Authorities.Admin
+import play.api.libs.json.Json
+import org.mockito.Matchers
 
 class UserControllerSpec extends Specification with Mockito with AfterExample {
 
@@ -33,19 +38,21 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
     org.mockito.Mockito.reset(usersRepository)
   }
 
-  "get user profile page" should {
+  val username = "user"
+  val password = "password"
+  val user = new UserRecord(Some(1), username, password, true)
+  implicit def principal = {
+    val usr = mock[AuthenticatedUser]
+    usr.userId returns 1
+    usr.username returns username
+    usr.authority returns Admin
+    usr.can(Permissions.Read, Entities.Article) returns true
+    usr.can(Permissions.Manage, Entities.Users) returns true
+    usr
+  }
 
-    val username = "user"
-    val password = "password"
-    val user = new UserRecord(Some(1), username, password, true)
+  "get user profile page" should {
     val articles = new ArticlePage(1, 0,List[ArticleListModel]()).successNel
-    implicit def principal = {
-      val usr = mock[AuthenticatedUser]
-      usr.userId returns 1
-      usr.username returns username
-      usr.can(Permissions.Read, Entities.Article) returns true
-      usr
-    }
 
     "fetch articles for profile owner" in {
       usersService.getByName(username) returns Some(user)
@@ -86,6 +93,92 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
       there was one(articlesService).getPageForUser(1, username, Some("tag"))
+    }
+  }
+
+  "get user list" should {
+    val users = new UserPage(1, 0,List[UserRecord]()).successNel
+    val someName = Some(username)
+
+    "list users paged" in {
+      controller.setPrincipal(principal)
+      usersService.getPage(1, someName) returns users
+
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+    }
+
+    "return 404 for missing page" in {
+      controller.setPrincipal(principal)
+      usersService.getPage(1, someName) returns "Not found".failureNel
+
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+
+      status(page) must equalTo(404)
+      contentType(page) must beSome("text/html")
+    }
+
+    "redirect to login page for anonymous user" in {
+      controller.setPrincipal(AnonymousPrincipal)
+
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+
+      status(page) must equalTo(303)
+    }
+
+    "show 403 page for insufficient permissions" in {
+      controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
+
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+
+      status(page) must equalTo(403)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "update user role" should {
+    val authenticatedPrincipal = AuthenticatedUser(1, "", Authorities.User)
+
+    "update requested role" in {
+      controller.setPrincipal(authenticatedPrincipal)
+      usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.Authorized(true.successNel)
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("role" -> "admin")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(200)
+    }
+
+    "validate incoming data" in {
+      controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
+      usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.Authorized(true.successNel)
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("lol" -> "wut")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(400)
+    }
+
+    "reject submissions from anonymous" in {
+      controller.setPrincipal(AnonymousPrincipal)
+      usersService.updateUserRole(any)(Matchers.eq(AnonymousPrincipal)) returns Result.NotAuthorized()
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("role" -> "admin")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(401)
+    }
+
+    "check user permissions" in {
+      controller.setPrincipal(authenticatedPrincipal)
+      usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.NotAuthorized()
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("role" -> "admin")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(401)
     }
   }
 }

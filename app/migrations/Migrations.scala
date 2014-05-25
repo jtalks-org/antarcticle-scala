@@ -14,7 +14,6 @@ import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend, GetResult}
  */
 class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
-  import profile.simple._
 
   val addPasswordColumnToUsersTable = new Migration {
     val version = 5
@@ -65,6 +64,22 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("alter table users add salt varchar(64)").execute()
       Q.updateNA("alter table users convert to character set utf8 collate utf8_bin").execute()
     }
+  }
+
+  val addProperties = new Migration {
+    val version: Int = 11
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("CREATE TABLE IF NOT EXISTS properties ( " +
+        " id int(11) NOT NULL AUTO_INCREMENT," +
+        " name varchar(100) NOT NULL," +
+        " value varchar(200) NOT NULL," +
+        " default_value varchar(200) NOT NULL," +
+        " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+        " PRIMARY KEY(id)" +
+        ");").execute()
+    }
+
   }
 
 }

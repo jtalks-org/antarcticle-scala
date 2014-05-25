@@ -7,9 +7,9 @@ jQuery(=>
         contentType: 'application/json',
         data: JSON.stringify({ role: $(this).find(":selected").val()}),
         success: () =>
-          showNotification("User role has been changed")
-        fail: (data) =>
-          showNotification(data)
+          showSuccessNotification("User role has been changed")
+        error: () =>
+          showFailureNotification("Operation cannot be performed due to insufficient permissions")
       })
     )
     # search with empty field should not leave any artifacts in url, like '?search='
@@ -24,9 +24,6 @@ jQuery(=>
   )
 )
 
-showNotification = (text) ->
-  elem = $('.bb-alert ')
-  elem.find("span").html(text);
-  elem.fadeIn().delay(3000).fadeOut();
+
 
 

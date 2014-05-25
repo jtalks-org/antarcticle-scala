@@ -2,8 +2,6 @@ package repositories
 
 import models.database._
 import scala.slick.jdbc.JdbcBackend
-import scala.slick.lifted
-import models.UserModels.UserModel
 
 trait UsersRepositoryComponent {
   val usersRepository: UsersRepository
@@ -68,9 +66,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   class SlickUsersRepository extends UsersRepository {
 
     val byUsernameCompiled = Compiled((username: Column[String]) => users.byUsername(username))
-    val byUsernameIgnoreCaseCompiled = Compiled {
-      username: Column[String] => users.byUsername(username, {_.toLowerCase})
-    }
+    val byUsernameIgnoreCaseCompiled = Compiled((username: Column[String]) => users.byUsername(username, {_.toLowerCase}))
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val userSearchCount = Compiled((search: Column[String]) => users.stringFieldsMatch(search).length)
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
@@ -87,7 +83,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
       // todo: cannot be compiled: https://github.com/slick/slick/pull/764
-      users.stringFieldsMatch(s"%$search%").drop(offset).take(portionSize).list
+      users.stringFieldsMatch(s"%$search%").sortBy(_.username).drop(offset).take(portionSize).list
 
     def countFindUser(search: String)(implicit session: JdbcBackend#Session) = userSearchCount(s"%$search%").run
 

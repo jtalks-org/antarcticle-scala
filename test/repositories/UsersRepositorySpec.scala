@@ -6,10 +6,12 @@ import util.TestDatabaseConfigurationWithFixtures
 import scala.slick.jdbc.JdbcBackend
 
 class UsersRepositorySpec extends Specification {
+
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
-    with UsersRepositoryComponentImpl {
+  with UsersRepositoryComponentImpl {
 
     import profile.simple._
+
     override def fixtures(implicit session: JdbcBackend#Session): Unit = {
       users ++= Seq(
         UserRecord(None, "user1", "password1", false, Some("fn"), Some("ln"), None),
@@ -80,6 +82,59 @@ class UsersRepositorySpec extends Specification {
     "assign id to new user" in withTestDb { implicit session =>
       val id: Int = usersRepository.insert(toInsert)
       true
+    }
+  }
+
+  "user search" should {
+
+    "search by login" in withTestDb { implicit session =>
+      val records = usersRepository.findUserPaged("user1", 0, 10)
+
+      records.size mustEqual 1
+      records.head.username mustEqual "user1"
+    }
+
+    "search by last name" in withTestDb { implicit session =>
+      val records = usersRepository.findUserPaged("ln", 0, 10)
+
+      records.size mustEqual 1
+      records.head.username mustEqual "user1"
+    }
+
+    "return all records for empty request" in withTestDb { implicit session =>
+      val records = usersRepository.findUserPaged("", 0, 10)
+
+      records.size mustEqual 2
+    }
+
+    "return paged results" in withTestDb { implicit session =>
+      val records = usersRepository.findUserPaged("", 1, 1)
+
+      records.size mustEqual 1
+      records.head.username mustEqual "user2"
+    }
+
+    "return sorted results" in withTestDb { implicit session =>
+      val records = usersRepository.findUserPaged("", 0, 10)
+
+      records.size mustEqual 2
+      records.head.username mustEqual "user1"
+      records.tail.head.username mustEqual "user2"
+    }
+  }
+
+  "user search count" should {
+
+    "search by login" in withTestDb { implicit session =>
+      usersRepository.countFindUser("user1") mustEqual 1
+    }
+
+    "search by last name" in withTestDb { implicit session =>
+      usersRepository.countFindUser("ln") mustEqual 1
+    }
+
+    "count all records for empty request" in withTestDb { implicit session =>
+      usersRepository.countFindUser("") mustEqual 2
     }
   }
 }

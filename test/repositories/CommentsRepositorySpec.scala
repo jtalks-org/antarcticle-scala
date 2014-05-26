@@ -6,7 +6,6 @@ import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import com.github.nscala_time.time.Imports._
 import utils.Implicits._
-import scala.Some
 import models.database.CommentToUpdate
 import scala.Some
 import models.database.CommentRecord
@@ -143,6 +142,10 @@ class CommentsRepositorySpec extends Specification with NoTimeConversions {
       val actualComment = comments.filter(_.id === commentId).firstOption
       comment must_== actualComment
 
+    }
+
+    "return None if no such comment exists" in withTestDb { implicit session =>
+      commentsRepository.get(999) must_== None
     }
   }
 

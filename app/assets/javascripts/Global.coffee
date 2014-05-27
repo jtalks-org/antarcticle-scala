@@ -5,6 +5,11 @@ jQuery(=>
     $('.trimmed-input').bind('blur', () ->
       input = $(this)
       input.val(input.val().trim()))
+    $('.faded-out').each(() ->
+      fadeoutHeight = $(this).prev().height() * 0.8
+      $(this).height(fadeoutHeight)
+      $(this).css('margin-top', -fadeoutHeight)
+    )
   )
 )
 

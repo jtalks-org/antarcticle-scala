@@ -642,15 +642,16 @@ div.table-column-left {
 }
 
 .description {
-  height: 200px;
+  max-height: 200px;
+  min-height: 70px;
   overflow: hidden;
 }
 
 .faded-out {
   position: relative;
-  margin-top: -200px;
+  margin-top: -80px;
   width: 100%;
-  height: 200px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
   pointer-events: none;
 }

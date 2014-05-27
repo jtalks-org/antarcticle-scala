@@ -622,8 +622,26 @@ div.table-column-left {
 .equal-height-column {
   margin-bottom: -99999px;
   padding-bottom: 99999px;
+  .panel-body {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
+.ellipsis-overflow {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+}
+
+.overflow-login {
+  max-width: 100px;
+}
+
+.overflow-name {
+  max-width: 140px;
+}
 /***********************************************
  * MODAL DIALOGS
  ***********************************************/

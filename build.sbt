@@ -34,6 +34,15 @@ templatesImport ++= Seq(
   "security.Principal"
 )
 
+// publish some SBT variables as scala object for application code
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq[BuildInfoKey](version)
+
+buildInfoPackage := "build"
+
 // Coffee Script compilation options
 coffeescriptOptions := Seq("bare")
 

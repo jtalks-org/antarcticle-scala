@@ -4,7 +4,7 @@
     <div class="col-md-offset-1 clearfix">
       <form class="form-inline" method="get" action="@routes.UserController.listUsers(None)">
         <div class="form-group">
-          <input value="@search" name="search" class="form-control search-input"
+          <input value="@search" name="search" class="form-control search-input" autofocus="autofocus"
           placeholder="By login, first or last name"/>
         </div>
         <button type="submit" class="btn btn-sm btn-info">Filter</button>
@@ -64,8 +64,12 @@
       <tbody>
       @for(user <- users) {
         <tr>
-          <td>@user.username</td>
-          <td>@user.firstName @user.lastName</td>
+          <td class="ellipsis-overflow overflow-login">
+            <span title="@user.username">@user.username</span>
+          </td>
+          <td class="ellipsis-overflow overflow-name">
+            <span title="@user.firstName @user.lastName">@user.firstName @user.lastName</span>
+          </td>
           <td>
             <select data-href="@routes.UserController.postChangedUserRole(user.id.get)" class="user-role"
               @{"disabled".when(user.id.get == principal.asInstanceOf[security.AuthenticatedUser].userId)}>

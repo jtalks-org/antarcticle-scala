@@ -53,7 +53,9 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     }
 
     def stringFieldsMatch(search: SColumn): Query[Users, C] = {
-      q.filter(user => user.username.like(search) || user.firstName.like(search) || user.lastName.like(search))
+      q.filter(user => user.username.toLowerCase.like(search.toLowerCase)
+        || user.firstName.toLowerCase.like(search.toLowerCase)
+        || user.lastName.toLowerCase.like(search.toLowerCase))
     }
   }
 

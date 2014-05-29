@@ -161,6 +161,16 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       status(page) must equalTo(400)
     }
 
+    "check if role is valid" in {
+      controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
+      usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.Authorized(true.successNel)
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("role" -> "stas")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(400)
+    }
+
     "reject submissions from anonymous" in {
       controller.setPrincipal(AnonymousPrincipal)
       usersService.updateUserRole(any)(Matchers.eq(AnonymousPrincipal)) returns Result.NotAuthorized()

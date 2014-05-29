@@ -50,12 +50,13 @@ trait UserController {
 
   def postChangedUserRole(id: Int) = Action(parse.json) {
     implicit request =>
-      (request.body \ "role").asOpt[String].fold(BadRequest(""))(role => {
-        usersService.updateUserRole(new UpdateUserRoleModel(id, "admin".equals(role))) match {
-          case Authorized(result) => Ok("")
-          case NotAuthorized() => Unauthorized("")
-        }
+      (request.body \ "role").asOpt[String].fold(BadRequest("")) {
+        case role@("admin" | "user") =>
+          usersService.updateUserRole(new UpdateUserRoleModel(id, "admin".equals(role))) match {
+            case Authorized(result) => Ok("")
+            case NotAuthorized() => Unauthorized("")
+          }
+        case _ => BadRequest("")
       }
-      )
   }
 }

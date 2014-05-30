@@ -1,8 +1,7 @@
-@(article: models.ArticleModels.ArticleDetailsModel,
-   comments: Seq[models.CommentModels.Comment], editCommentId: Int)(implicit user: Principal)
+@(article: models.ArticleModels.ArticleDetailsModel, comments: Seq[models.CommentModels.Comment], editCommentId: Int, instanceName: String)(implicit user: Principal)
 @import views.helpers.Markdown
 
-@templates.main(article.title) {
+@templates.main(article.title, instanceName) {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <article id="@article.id" class="entry">

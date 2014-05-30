@@ -1,6 +1,6 @@
-@()(implicit user: Principal)
+@(instanceName: String)(implicit user: Principal)
 @import views.helpers.Markdown
-@templates.main("Markdown syntax reference") {
+@templates.main("Markdown syntax reference", instanceName) {
 
   <div class="row">
     <div class="col-md-10 col-md-offset-1">

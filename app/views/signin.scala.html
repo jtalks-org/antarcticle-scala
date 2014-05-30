@@ -1,5 +1,5 @@
-@(form: Form[(String, String)])(implicit user: Principal)
-@templates.main("Sign In") {
+@(form: Form[(String, String)], instanceName: String)(implicit user: Principal)
+@templates.main("Sign In", instanceName) {
   <div class="row">
     <div class="col-md-4 col-md-offset-4 well2">
     @helper.form(routes.AuthenticationController.login, 'class -> "default-form") {

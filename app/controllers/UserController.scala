@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import services.{UsersServiceComponent, ArticlesServiceComponent}
+import services.{PropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
 import security.{AuthenticatedUser, Authentication}
 import models.database.UserRecord
 import scala.Some
@@ -16,33 +16,35 @@ import security.Result.{NotAuthorized, Authorized}
  * please refer to [[controllers.AuthenticationController]] for further details.
  */
 trait UserController {
-  this: Controller with ArticlesServiceComponent with UsersServiceComponent with Authentication =>
+  this: Controller with ArticlesServiceComponent with UsersServiceComponent with PropertiesServiceComponent with Authentication =>
 
   def viewProfile(userName: String, tags: Option[String] = None) = viewProfilePaged(userName, 1, tags)
 
   def viewProfilePaged(userName: String, page: Int, tags: Option[String] = None) = Action { implicit request =>
+    val instanceName = propertiesService.getInstanceName()
     usersService.getByName(userName) match {
       case user: Some[UserRecord] =>
         articlesService.getPageForUser(page, userName, tags).fold(
-          fail => NotFound(views.html.errors.notFound()),
-          succ = articles => Ok(views.html.profile(articles, user.get, tags))
+          fail => NotFound(views.html.errors.notFound(instanceName)),
+          succ = articles => Ok(views.html.profile(articles, user.get, tags, instanceName))
         )
       case None =>
-        NotFound(views.html.errors.notFound())
+        NotFound(views.html.errors.notFound(instanceName))
     }
   }
 
   def listUsers(tags: Option[String]) = listUsersPaged(tags)
 
   def listUsersPaged(search: Option[String], page: Int = 1) = Action { implicit request =>
+    val instanceName = propertiesService.getInstanceName()
     currentPrincipal match {
       case user if user.can(Manage, Users) =>
         usersService.getPage(page, search).fold(
-          fail => NotFound(views.html.errors.notFound()),
-          succ = usersPage => Ok(views.html.userRoles(usersPage, search))
+          fail => NotFound(views.html.errors.notFound(instanceName)),
+          succ = usersPage => Ok(views.html.userRoles(usersPage, search, instanceName))
         )
       case user: AuthenticatedUser =>
-        Forbidden(views.html.errors.forbidden())
+        Forbidden(views.html.errors.forbidden(instanceName))
       case _ =>
         defaultOnUnauthorized(request)
     }

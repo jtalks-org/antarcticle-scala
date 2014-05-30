@@ -15,14 +15,17 @@ import security.AuthenticatedUser
 import play.api.mvc.Cookie
 import scala.Some
 import org.mockito.Matchers
+import services.PropertiesServiceComponent
 
 class AuthenticationControllerSpec extends Specification with Mockito with AfterExample {
 
   object controller extends AuthenticationController
                      with SecurityServiceComponent
+                     with PropertiesServiceComponent
                      with FakeAuthentication {
     override val securityService = mock[SecurityService]
     override val usersRepository = mock[UsersRepository]
+    override val propertiesService = mock[PropertiesService]
   }
 
   import controller._

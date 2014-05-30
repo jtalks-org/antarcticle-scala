@@ -1,5 +1,5 @@
-@()(implicit user: Principal = security.AnonymousPrincipal)
-@templates.main("Internal service error"){
+@(instanceName: String)(implicit user: Principal = security.AnonymousPrincipal)
+@templates.main("Internal service error", instanceName){
   <div class="hero-unit">
     <div class="container">
       <div class="row">

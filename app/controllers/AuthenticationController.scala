@@ -8,6 +8,7 @@ import scala.Some
 import views.html
 import conf.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
+import services.PropertiesServiceComponent
 
 /**
  *  Handles sign in and sign out user actions.
@@ -15,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
-  this: Controller with SecurityServiceComponent with Authentication  =>
+  this: Controller with SecurityServiceComponent with PropertiesServiceComponent with Authentication  =>
 
   val loginForm = Form(
     tuple(
@@ -25,7 +26,8 @@ trait AuthenticationController {
   )
 
   def showLoginPage = Action { implicit request =>
-    Ok(html.signin(loginForm))
+    val instanceName = propertiesService.getInstanceName()
+    Ok(html.signin(loginForm, instanceName))
   }
 
   def login = Action.async { implicit request =>

@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{CommentsServiceComponent, ArticlesServiceComponent}
+import services.{PropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
@@ -13,7 +13,7 @@ import scalaz._
  * Serves web-based operations on articles
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with Authentication =>
+  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with PropertiesServiceComponent with Authentication =>
 
   /**
    * Describes binding between Article model object and web-form
@@ -33,22 +33,27 @@ trait ArticleController {
   def listArticles(tags: Option[String]) = listArticlesPaged(tags)
 
   def listArticlesPaged(tags: Option[String], page: Int = 1)  = Action {implicit request =>
+    val instanceName = propertiesService.getInstanceName()
     articlesService.getPage(page, tags).fold(
-      fail => NotFound(views.html.errors.notFound()),
-      succ = articlesPage => Ok(views.html.articles(articlesPage, tags))
+      fail => NotFound(views.html.errors.notFound(instanceName)),
+      succ = articlesPage => Ok(views.html.articles(articlesPage, tags, instanceName))
     )
   }
 
   def viewArticle(id: Int) = Action { implicit request =>
+    val instanceName = propertiesService.getInstanceName()
     articlesService.get(id) match {
-      case Some(article : ArticleDetailsModel) => Ok(views.html.article(article, commentsService.getByArticle(id)))
-      case _ => NotFound(views.html.errors.notFound())
+      case Some(article : ArticleDetailsModel) => Ok(views.html.article(article, commentsService.getByArticle(id), instanceName))
+      case _ => NotFound(views.html.errors.notFound(instanceName))
     }
   }
 
   def getNewArticlePage = Action { implicit request =>
     currentPrincipal match {
-      case user : AuthenticatedUser => Ok(views.html.createArticle(articleForm))
+      case user : AuthenticatedUser => {
+        val instanceName = propertiesService.getInstanceName()
+        Ok(views.html.createArticle(articleForm, instanceName))
+      }
       case _ => defaultOnUnauthorized(request)
     }
   }
@@ -90,9 +95,12 @@ trait ArticleController {
   def editArticle(id: Int = 0) = Action { implicit request =>
     currentPrincipal match {
       case user : AuthenticatedUser =>
+        val instanceName = propertiesService.getInstanceName()
         articlesService.get(id) match {
-          case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
-          case _ => NotFound(views.html.errors.notFound())
+          case Some(article : ArticleDetailsModel) => {
+            Ok(views.html.editArticle(articleForm.fill(article), instanceName))
+          }
+          case _ => NotFound(views.html.errors.notFound(instanceName))
         }
       case _ => defaultOnUnauthorized(request)
     }

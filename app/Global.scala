@@ -1,11 +1,8 @@
 import controllers.filters.CsrfFilter
 import play.api.Logger
-import scala.concurrent.ExecutionContext
-import ExecutionContext.Implicits.global
 import play.api.mvc.Results._
 import play.api.mvc.{SimpleResult, WithFilters, RequestHeader}
 import scala.concurrent.Future
-import security.AnonymousPrincipal
 
 object Global extends WithFilters(CsrfFilter) {
 
@@ -35,7 +32,7 @@ object Global extends WithFilters(CsrfFilter) {
         // this is likely to be submitted by user
         Logger.error(s"No suitable handler found for URL: ${request.uri}")
         // intentional combination: code shows the real error, while html displays more convenient explanation for the user
-        Future.successful(BadRequest(views.html.errors.notFound()))
+        Future.successful(BadRequest(views.html.errors.notFound("")))
     }
   }
 
@@ -48,7 +45,7 @@ object Global extends WithFilters(CsrfFilter) {
       Future.successful(request.headers.get("X-Requested-With") match {
         case Some("XMLHttpRequest") =>
           InternalServerError(views.html.templates.formErrors(List(s"Error: ${ex.getMessage}")))
-        case _ => Ok(views.html.errors.internalError())
+        case _ => Ok(views.html.errors.internalError(""))
       }
       )
     } catch {
@@ -62,6 +59,6 @@ object Global extends WithFilters(CsrfFilter) {
    */
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
     Logger.error(s"No suitable handler found for URL: ${request.uri}")
-    Future.successful(NotFound(views.html.errors.notFound()))
+    Future.successful(NotFound(views.html.errors.notFound("")))
   }
 }

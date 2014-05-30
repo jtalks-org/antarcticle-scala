@@ -1,4 +1,4 @@
-@(title: String)(content: Html)(customPageScripts: Html)(implicit user: Principal)
+@(title: String, instanceName: String)(content: Html)(customPageScripts: Html)(implicit user: Principal)
 <!DOCTYPE html>
 <html>
   <head>
@@ -19,9 +19,7 @@
             <li>
               <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
                 <i class="glyphicon glyphicon-book"></i>
-                <span id="application-name-container">
-                  JavaTalks Articles
-                </span>
+                <span id="application-name-container"> @instanceName </span>
               </a>
             </li>
           </ul>
@@ -98,6 +96,7 @@
           }
         </div>
       </nav>
+      @* Inline styles for alert containers are necessary to prevent flashing in FF 29.01 on page load *@
       <div class="bb-alert-container">
         <div class="bb-alert alert alert-success center-block" style="display : none">
           <span>Success notification message content</span>

@@ -32,8 +32,10 @@ trait PropertiesServiceComponentImpl extends PropertiesServiceComponent {
         }
     }
 
-    def changeInstanceName(newName: String): Unit = {
-
+    def changeInstanceName(newName: String): Unit = withSession {
+      implicit session =>
+        val propertyName = "INSTANCE_NAME"
+        propertiesRepository.changeProperty(propertyName, Some(newName))
     }
   }
 }

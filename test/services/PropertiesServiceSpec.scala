@@ -51,4 +51,15 @@ class PropertiesServiceSpec extends Specification
       foundInstanceName mustEqual propertyDefaultValue
     }
   }
+
+  "change instance name" should {
+    "save new value in database" in {
+      val propertyName = "INSTANCE_NAME"
+      val newValue = "New Instance Name"
+
+      propertiesService.changeInstanceName(newValue)
+
+      there was one(propertiesRepository).changeProperty(propertyName, Some(newValue)) (FakeSessionValue)
+    }
+  }
 }

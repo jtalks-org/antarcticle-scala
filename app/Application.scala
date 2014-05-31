@@ -41,7 +41,8 @@ trait Services
   with TagsServiceComponentImpl
   with CommentsServiceComponentImpl
   with NotificationsServiceComponentImpl
-  with UsersServiceComponentImpl {
+  with UsersServiceComponentImpl
+  with PropertiesServiceComponentImpl {
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator
@@ -53,6 +54,7 @@ trait Repositories
   with TagsRepositoryComponentImpl
   with CommentsRepositoryComponentImpl
   with NotificationsRepositoryComponentImpl
-  with UsersRepositoryComponentImpl {
+  with UsersRepositoryComponentImpl
+  with PropertiesRepositoryComponentImpl {
   this: Schema with Profile =>
 }

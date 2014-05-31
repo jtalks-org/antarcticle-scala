@@ -7,10 +7,7 @@ import play.api.data.Forms._
 import views.html
 import conf.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.data.format.Formatter
-import play.api.data.format.Formats.stringFormat
-import play.api.mvc.DiscardingCookie
-import play.api.mvc.Cookie
+import services.PropertiesServiceComponent
 import scala.Some
 
 /**
@@ -19,7 +16,7 @@ import scala.Some
  *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
-  this: Controller with SecurityServiceComponent with Authentication  =>
+  this: Controller with SecurityServiceComponent with PropertiesServiceComponent with Authentication  =>
 
   val loginForm = Form(
     tuple(
@@ -30,7 +27,8 @@ trait AuthenticationController {
   )
 
   def showLoginPage = Action { implicit request =>
-    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer))))
+    val instanceName = propertiesService.getInstanceName()
+    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer)), instanceName))
   }
 
 

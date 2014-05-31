@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{ArticlesServiceComponent, CommentsServiceComponent}
+import services.{PropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import security.Authentication
@@ -14,7 +14,7 @@ import Scalaz._
  * Handles all web operations related to article comments
  */
 trait CommentController {
-  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
+  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with PropertiesServiceComponent with Authentication  =>
 
   /**
    * Describes binding between Article model object and web-form
@@ -51,11 +51,12 @@ trait CommentController {
   }
 
   def editComment(articleId: Int, commentId: Int) = Action { implicit request =>
+    val instanceName = propertiesService.getInstanceName()
     articlesService.get(articleId) match {
       case article : Some[ArticleDetailsModel] =>
-        Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId))
+        Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId, instanceName))
       case None =>
-        NotFound(views.html.errors.notFound())
+        NotFound(views.html.errors.notFound(instanceName))
     }
   }
 

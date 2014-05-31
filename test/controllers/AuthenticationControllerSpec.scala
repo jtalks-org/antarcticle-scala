@@ -46,10 +46,11 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
 
     val username = "username"
     val password = "password"
+    val referer = "/articles/new"
     val rememberMeToken = "token"
     val user = mock[AuthenticatedUser]
     val request = FakeRequest("POST","/")
-      .withFormUrlEncodedBody(("login", username),("password", password))
+      .withFormUrlEncodedBody(("login", username),("password", password), ("referer", referer))
 
     "perform authentication with valid credentials" in {
       securityService.signInUser(username, password) returns Future.successful((rememberMeToken, user).successNel)

@@ -27,8 +27,7 @@ trait AuthenticationController {
   )
 
   def showLoginPage = Action { implicit request =>
-    val instanceName = propertiesService.getInstanceName()
-    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer)), instanceName))
+    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer))))
   }
 
 

@@ -19,6 +19,8 @@ object Application
 
   override val migrationsContainer = new Migrations(profile)
 
+  lazy val instanceName = propertiesService.getInstanceName()
+
   withSession { implicit session =>
     migrate
   }

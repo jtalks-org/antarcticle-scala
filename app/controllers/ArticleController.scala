@@ -33,26 +33,23 @@ trait ArticleController {
   def listArticles(tags: Option[String]) = listArticlesPaged(tags)
 
   def listArticlesPaged(tags: Option[String], page: Int = 1)  = Action {implicit request =>
-    val instanceName = propertiesService.getInstanceName()
     articlesService.getPage(page, tags).fold(
-      fail => NotFound(views.html.errors.notFound(instanceName)),
-      succ = articlesPage => Ok(views.html.articles(articlesPage, tags, instanceName))
+      fail => NotFound(views.html.errors.notFound()),
+      succ = articlesPage => Ok(views.html.articles(articlesPage, tags))
     )
   }
 
   def viewArticle(id: Int) = Action { implicit request =>
-    val instanceName = propertiesService.getInstanceName()
     articlesService.get(id) match {
-      case Some(article : ArticleDetailsModel) => Ok(views.html.article(article, commentsService.getByArticle(id), instanceName))
-      case _ => NotFound(views.html.errors.notFound(instanceName))
+      case Some(article : ArticleDetailsModel) => Ok(views.html.article(article, commentsService.getByArticle(id)))
+      case _ => NotFound(views.html.errors.notFound())
     }
   }
 
   def getNewArticlePage = Action { implicit request =>
     currentPrincipal match {
       case user : AuthenticatedUser => {
-        val instanceName = propertiesService.getInstanceName()
-        Ok(views.html.createArticle(articleForm, instanceName))
+        Ok(views.html.createArticle(articleForm))
       }
       case _ => defaultOnUnauthorized(request)
     }
@@ -95,12 +92,11 @@ trait ArticleController {
   def editArticle(id: Int = 0) = Action { implicit request =>
     currentPrincipal match {
       case user : AuthenticatedUser =>
-        val instanceName = propertiesService.getInstanceName()
         articlesService.get(id) match {
           case Some(article : ArticleDetailsModel) => {
-            Ok(views.html.editArticle(articleForm.fill(article), instanceName))
+            Ok(views.html.editArticle(articleForm.fill(article)))
           }
-          case _ => NotFound(views.html.errors.notFound(instanceName))
+          case _ => NotFound(views.html.errors.notFound())
         }
       case _ => defaultOnUnauthorized(request)
     }

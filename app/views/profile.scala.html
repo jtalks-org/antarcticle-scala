@@ -1,6 +1,6 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord,
-        lastUsedTags: Option[String] = None, instanceName: String)(implicit user: Principal)
-@templates.main(s"Articles by ${userDetails.username}", instanceName) {
+        lastUsedTags: Option[String] = None)(implicit user: Principal)
+@templates.main(s"Articles by ${userDetails.username}") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="user-profile clearfix">

@@ -21,30 +21,28 @@ trait UserController {
   def viewProfile(userName: String, tags: Option[String] = None) = viewProfilePaged(userName, 1, tags)
 
   def viewProfilePaged(userName: String, page: Int, tags: Option[String] = None) = Action { implicit request =>
-    val instanceName = propertiesService.getInstanceName()
     usersService.getByName(userName) match {
       case user: Some[UserRecord] =>
         articlesService.getPageForUser(page, userName, tags).fold(
-          fail => NotFound(views.html.errors.notFound(instanceName)),
-          succ = articles => Ok(views.html.profile(articles, user.get, tags, instanceName))
+          fail => NotFound(views.html.errors.notFound()),
+          succ = articles => Ok(views.html.profile(articles, user.get, tags))
         )
       case None =>
-        NotFound(views.html.errors.notFound(instanceName))
+        NotFound(views.html.errors.notFound())
     }
   }
 
   def listUsers(tags: Option[String]) = listUsersPaged(tags)
 
   def listUsersPaged(search: Option[String], page: Int = 1) = Action { implicit request =>
-    val instanceName = propertiesService.getInstanceName()
     currentPrincipal match {
       case user if user.can(Manage, Users) =>
         usersService.getPage(page, search).fold(
-          fail => NotFound(views.html.errors.notFound(instanceName)),
-          succ = usersPage => Ok(views.html.userRoles(usersPage, search, instanceName))
+          fail => NotFound(views.html.errors.notFound()),
+          succ = usersPage => Ok(views.html.userRoles(usersPage, search))
         )
       case user: AuthenticatedUser =>
-        Forbidden(views.html.errors.forbidden(instanceName))
+        Forbidden(views.html.errors.forbidden())
       case _ =>
         defaultOnUnauthorized(request)
     }

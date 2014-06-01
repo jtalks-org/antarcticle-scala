@@ -32,7 +32,7 @@ object Global extends WithFilters(CsrfFilter, KeepRefererFilter) {
         // this is likely to be submitted by user
         Logger.error(s"No suitable handler found for URL: ${request.uri}")
         // intentional combination: code shows the real error, while html displays more convenient explanation for the user
-        Future.successful(BadRequest(views.html.errors.notFound("")))
+        Future.successful(BadRequest(views.html.errors.notFound()))
     }
   }
 
@@ -45,7 +45,7 @@ object Global extends WithFilters(CsrfFilter, KeepRefererFilter) {
       Future.successful(request.headers.get("X-Requested-With") match {
         case Some("XMLHttpRequest") =>
           InternalServerError(views.html.templates.formErrors(List(s"Error: ${ex.getMessage}")))
-        case _ => Ok(views.html.errors.internalError(""))
+        case _ => Ok(views.html.errors.internalError())
       }
       )
     } catch {
@@ -59,6 +59,6 @@ object Global extends WithFilters(CsrfFilter, KeepRefererFilter) {
    */
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
     Logger.error(s"No suitable handler found for URL: ${request.uri}")
-    Future.successful(NotFound(views.html.errors.notFound("")))
+    Future.successful(NotFound(views.html.errors.notFound()))
   }
 }

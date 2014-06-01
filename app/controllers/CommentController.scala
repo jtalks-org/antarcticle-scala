@@ -7,8 +7,6 @@ import play.api.data.Forms._
 import security.Authentication
 import security.Result._
 import models.ArticleModels.ArticleDetailsModel
-import scalaz._
-import Scalaz._
 
 /**
  * Handles all web operations related to article comments
@@ -51,12 +49,11 @@ trait CommentController {
   }
 
   def editComment(articleId: Int, commentId: Int) = Action { implicit request =>
-    val instanceName = propertiesService.getInstanceName()
     articlesService.get(articleId) match {
       case article : Some[ArticleDetailsModel] =>
-        Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId, instanceName))
+        Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId))
       case None =>
-        NotFound(views.html.errors.notFound(instanceName))
+        NotFound(views.html.errors.notFound())
     }
   }
 

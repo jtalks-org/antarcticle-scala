@@ -1,5 +1,5 @@
-@(page: models.Page[models.database.UserRecord], search: Option[String] = None, instanceName: String)(implicit principal: security.Principal)
-@templates.main("Users & Roles", instanceName) {
+@(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit principal: security.Principal)
+@templates.main("Users & Roles") {
   <div class="row">
     <div class="col-md-offset-1 clearfix">
       <form class="form-inline" method="get" action="@routes.UserController.listUsers(None)">

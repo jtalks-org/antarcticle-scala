@@ -28,7 +28,7 @@ trait NotificationsController {
             Found(routes.ArticleController.viewArticle(
               notification.articleId).absoluteURL() + "#" + notification.commentId
             )
-          case None => NotFound(views.html.errors.notFound(propertiesService.getInstanceName()))
+          case None => NotFound(views.html.errors.notFound())
         }
       )
   }

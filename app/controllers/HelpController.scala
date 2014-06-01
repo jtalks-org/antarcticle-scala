@@ -12,6 +12,6 @@ trait HelpController {
   this: Controller with PropertiesServiceComponent with Authentication =>
 
   def markdownHelp() = Action {
-    implicit request => Ok(views.html.help.markdown(propertiesService.getInstanceName()))
+    implicit request => Ok(views.html.help.markdown())
   }
 }

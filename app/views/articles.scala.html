@@ -1,6 +1,6 @@
-@(page: models.Page[models.ArticleModels.ArticleListModel], lastUsedTags: Option[String] = None, instanceName: String)(implicit user: Principal)
+@(page: models.Page[models.ArticleModels.ArticleListModel], lastUsedTags: Option[String] = None)(implicit user: Principal)
 
-@templates.main("Articles", instanceName) {
+@templates.main("Articles") {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="clearfix">

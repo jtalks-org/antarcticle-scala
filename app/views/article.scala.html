@@ -1,7 +1,7 @@
-@(article: models.ArticleModels.ArticleDetailsModel, comments: Seq[models.CommentModels.Comment], instanceName: String)(implicit user: Principal, request: play.api.mvc.Request[Any])
+@(article: models.ArticleModels.ArticleDetailsModel, comments: Seq[models.CommentModels.Comment])(implicit user: Principal, request: play.api.mvc.Request[Any])
 @import views.helpers.Markdown
 
-@templates.main(article.title, instanceName) {
+@templates.main(article.title) {
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="pull-right page-header">

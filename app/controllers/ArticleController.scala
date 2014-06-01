@@ -48,14 +48,9 @@ trait ArticleController {
     }
   }
 
-  def getNewArticlePage = Action { implicit request =>
-    currentPrincipal match {
-      case user : AuthenticatedUser => {
-        val instanceName = propertiesService.getInstanceName()
-        Ok(views.html.createArticle(articleForm, instanceName))
-      }
-      case _ => defaultOnUnauthorized(request)
-    }
+  def getNewArticlePage = withUser { user => implicit request =>
+      val instanceName = propertiesService.getInstanceName()
+      Ok(views.html.createArticle(articleForm, instanceName))
   }
 
   def previewArticle = Action { implicit request =>
@@ -92,18 +87,14 @@ trait ArticleController {
       )
   }
 
-  def editArticle(id: Int = 0) = Action { implicit request =>
-    currentPrincipal match {
-      case user : AuthenticatedUser =>
-        val instanceName = propertiesService.getInstanceName()
-        articlesService.get(id) match {
-          case Some(article : ArticleDetailsModel) => {
-            Ok(views.html.editArticle(articleForm.fill(article), instanceName))
-          }
-          case _ => NotFound(views.html.errors.notFound(instanceName))
+  def editArticle(id: Int = 0) = withUser { user => implicit request =>
+      val instanceName = propertiesService.getInstanceName()
+      articlesService.get(id) match {
+        case Some(article : ArticleDetailsModel) => {
+          Ok(views.html.editArticle(articleForm.fill(article), instanceName))
         }
-      case _ => defaultOnUnauthorized(request)
-    }
+        case _ => NotFound(views.html.errors.notFound(instanceName))
+      }
   }
 
   def postArticleEdits() = Action { implicit request =>

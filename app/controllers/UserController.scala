@@ -35,19 +35,16 @@ trait UserController {
 
   def listUsers(tags: Option[String]) = listUsersPaged(tags)
 
-  def listUsersPaged(search: Option[String], page: Int = 1) = Action { implicit request =>
+  def listUsersPaged(search: Option[String], page: Int = 1) = withUser { user => implicit request =>
     val instanceName = propertiesService.getInstanceName()
-    currentPrincipal match {
-      case user if user.can(Manage, Users) =>
+      if (user.can(Manage, Users)) {
         usersService.getPage(page, search).fold(
           fail => NotFound(views.html.errors.notFound(instanceName)),
           succ = usersPage => Ok(views.html.userRoles(usersPage, search, instanceName))
         )
-      case user: AuthenticatedUser =>
+      } else {
         Forbidden(views.html.errors.forbidden(instanceName))
-      case _ =>
-        defaultOnUnauthorized(request)
-    }
+      }
   }
 
   def postChangedUserRole(id: Int) = Action(parse.json) {

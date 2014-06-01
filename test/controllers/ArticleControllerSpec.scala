@@ -6,12 +6,12 @@ import services.{PropertiesServiceComponent, CommentsServiceComponent, ArticlesS
 import util.FakeAuthentication
 import org.specs2.specification.AfterExample
 import com.github.nscala_time.time.Imports._
-import play.api.test.FakeRequest
+import play.api.test.{WithApplication, FakeRequest}
 import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
 import security.AnonymousPrincipal
-import models.{ArticlePage, Page}
+import models.ArticlePage
 import security.Result.NotAuthorized
 import scala.Some
 import security.Result.Authorized
@@ -111,17 +111,17 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   }
 
   "get new article page" should {
-    "return new article form page" in {
+    "return new article form page" in new WithApplication {
       controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
-      val page = controller.getNewArticlePage(FakeRequest())
+      val page = controller.getNewArticlePage(FakeRequest()).run
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
     }
 
-    "return login page for anonymous user" in {
-      val page = controller.getNewArticlePage(FakeRequest())
+    "return login page for anonymous user" in new WithApplication {
+      val page = controller.getNewArticlePage(FakeRequest()).run
 
       status(page) must equalTo(303)
     }
@@ -171,11 +171,11 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   }
 
   "get edit article page" should {
-    "fetch an existing article" in {
+    "fetch an existing article" in new WithApplication {
       articlesService.get(articleId) returns Some(articleDetailsModel)
       controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
-      val page = controller.editArticle(articleId)(FakeRequest())
+      val page = controller.editArticle(articleId)(FakeRequest()).run
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
@@ -184,20 +184,20 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
       there was one(articlesService).get(articleId)
     }
 
-    "show error page for illegal article id" in {
+    "show error page for illegal article id" in new WithApplication {
       articlesService.get(articleId) returns None
       controller.setPrincipal(new AuthenticatedUser(1,"", null))
 
-      val page = controller.editArticle(1)(FakeRequest())
+      val page = controller.editArticle(1)(FakeRequest()).run
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
     }
 
-    "show login page for anonymous user" in {
+    "show login page for anonymous user" in new WithApplication {
       articlesService.get(articleId) returns None
 
-      val page = controller.editArticle(1)(FakeRequest())
+      val page = controller.editArticle(1)(FakeRequest()).run
 
       status(page) must equalTo(303)
     }

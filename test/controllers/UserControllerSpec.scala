@@ -102,38 +102,38 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
     val users = new UserPage(1, 0,List[UserRecord]()).successNel
     val someName = Some(username)
 
-    "list users paged" in {
+    "list users paged" in new WithApplication {
       controller.setPrincipal(principal)
       usersService.getPage(1, someName) returns users
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
     }
 
-    "return 404 for missing page" in {
+    "return 404 for missing page" in new WithApplication {
       controller.setPrincipal(principal)
       usersService.getPage(1, someName) returns "Not found".failureNel
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
     }
 
-    "redirect to login page for anonymous user" in {
+    "redirect to login page for anonymous user" in new WithApplication {
       controller.setPrincipal(AnonymousPrincipal)
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(303)
     }
 
-    "show 403 page for insufficient permissions" in {
+    "show 403 page for insufficient permissions" in new WithApplication {
       controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(403)
       contentType(page) must beSome("text/html")

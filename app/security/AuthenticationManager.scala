@@ -6,6 +6,7 @@ import scalaz._
 import Scalaz._
 import play.api.libs.ws.WS
 import java.security.MessageDigest
+import utils.StringUtil
 
 private[security] trait AuthenticationManager {
   def authenticate(username: String, password: String): Future[Option[UserInfo]]
@@ -24,7 +25,7 @@ class FakeAuthenticationManager extends AuthenticationManager {
 
 class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManager {
   def authenticate(username: String, password: String) = {
-    val passwordHash = generateMd5Hash(password)
+    val passwordHash = StringUtil.generateMd5Hash(password)
 
     for {
       response <- sendRequest(poulpeUrl, username, passwordHash)
@@ -38,10 +39,6 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
          password = (xmlResponseBody \\ "password").headOption.map(_.text)
       } yield UserInfo(username, "todo",  firstName, lastName)
     }
-  }
-
-  private def generateMd5Hash(str: String) = {
-    MessageDigest.getInstance("MD5").digest(str.getBytes).map("%02X" format _).mkString.toLowerCase
   }
 
   private def sendRequest(poulpeUrl: String, username: String, password: String) = {

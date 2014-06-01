@@ -89,22 +89,24 @@ class SecurityServiceSpec extends Specification
 
       "update user when password does not match" in {
 
-        def withMockedAuthenticationManagerAndTokenProvider[T](test: => T) = {
+        def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
           authenticationManager.authenticate(username, password) returns future(userInfo.some)
           tokenProvider.generateToken returns generatedToken
-          test
+          doTest
+          UserRecord
           there was no(usersRepository).insert(any[UserRecord])(anySession)
-          there was one(usersRepository).updatePassword(===(1), anyString, any[Option[String]])(anySession)
+          val expectedRecord = UserRecord(Some(1), username, encodedPassword, false, salt, "fn".some, "ln".some)
+          there was one(usersRepository).update(beMostlyEqualTo(expectedRecord))(anySession)
         }
 
-        "and one user exists with case-insensetive username" in {
+        "and one user exists with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider{
             usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""))
             Await.result(securityService.signInUser(username, password), 10 seconds)
           }
         }
 
-        "and several users exist with case-insensetive username" in {
+        "and several users exist with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider {
             usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""), userFromDb2)
             Await.result(securityService.signInUser(username, password), 10 seconds)
@@ -113,7 +115,7 @@ class SecurityServiceSpec extends Specification
 
       }
 
-      "do case sensetive authorisation if several similar usernames are exists" in {
+      "do case sensitive authorisation if several similar usernames are exists" in {
         val m: Matcher[String]  = (_: String).equalsIgnoreCase(username)
         usersRepository.findByUserName(m)(anySession) returns List(userFromDb, userFromDb2)
         tokenProvider.generateToken returns generatedToken

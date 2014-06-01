@@ -10,8 +10,8 @@ import scala.slick.jdbc.JdbcBackend
 import scala.Predef._
 import models.database.UserRecord
 import utils.Implicits._
-import java.security.MessageDigest
 import scala.util.Random
+import utils.StringUtil
 
 trait SecurityServiceComponent {
   val securityService: SecurityService
@@ -37,8 +37,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     private [security] def encodePassword(password:String, salt:Option[String]) = {
       val mergedPasswordAndSalt = salt.cata(some = str => password + '{' + str + '}', none = password)
-      val digest = MessageDigest.getInstance("MD5").digest(mergedPasswordAndSalt.getBytes)
-      new java.math.BigInteger(1, digest).toString(16)
+      StringUtil.generateMd5Hash(mergedPasswordAndSalt)
     }
 
     def signInUser(username: String, password: String) = {
@@ -52,19 +51,10 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
       def getUserFromAuthManager: Future[Option[UserRecord]] = {
 
-        def randomString(length: Int) = {
-          val r = new Random
-          val sb = new StringBuilder
-          for (i <- 1 to length) {
-            sb.append(r.nextPrintableChar())
-          }
-          sb.toString()
-        }
-
         def createOrUpdateUser(userInfo:UserInfo) = withSession {
           implicit s: JdbcBackend#Session =>
 
-          val salt = some(randomString(64))
+          val salt = some(Random.alphanumeric.take(64).mkString)
           val encodedPassword = encodePassword(password, salt)
           val userRecord = usersRepository.findByUserName(username) match {
             case Nil => none
@@ -74,7 +64,8 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
           userRecord cata (
             some = user => {
-              usersRepository.updatePassword(user.id.get, encodedPassword, salt)
+              val record = user.copy(password = encodedPassword, salt = salt, firstName = userInfo.firstName, lastName = userInfo.lastName)
+              usersRepository.update(record)
               user.id
             },
             none = some {

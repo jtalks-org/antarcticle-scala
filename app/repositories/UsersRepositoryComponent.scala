@@ -21,6 +21,8 @@ trait UsersRepositoryComponent {
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
+    def update(user: UserRecord)(implicit session: JdbcBackend#Session)
+
     def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session)
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
@@ -103,6 +105,10 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {
       for (s <- salt) yield forUpdateCompiled(id).update(password, s)
+    }
+
+    def update(user: UserRecord)(implicit session: JdbcBackend#Session):Unit = {
+      for (id <- user.id) yield byIdCompiled(id).update(user)
     }
   }
 }

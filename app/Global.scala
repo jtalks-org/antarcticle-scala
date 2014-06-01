@@ -2,6 +2,7 @@ import controllers.filters.{KeepRefererFilter, CsrfFilter}
 import play.api.Logger
 import play.api.mvc.Results._
 import play.api.mvc.{SimpleResult, WithFilters, RequestHeader}
+import root.Application
 import scala.concurrent.Future
 
 object Global extends WithFilters(CsrfFilter, KeepRefererFilter) {

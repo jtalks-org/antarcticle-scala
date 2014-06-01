@@ -1,3 +1,5 @@
+package root
+
 import controllers._
 import migrations.{Migrations, MigrationTool}
 import security._

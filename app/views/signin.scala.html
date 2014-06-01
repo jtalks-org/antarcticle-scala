@@ -1,4 +1,4 @@
-@(form: Form[(String, String)])(implicit user: Principal)
+@(form: Form[(String, String, String)])(implicit user: Principal)
 @templates.main("Sign In") {
   <div class="row">
     <div class="col-md-4 col-md-offset-4 well2">
@@ -20,6 +20,7 @@
             <input type="password" name="password" class="col-md-3 form-control" placeholder="Password">
           </div>
         </div>
+        <input type="hidden" name="referer" value="@form("referer").value">
         <div class="form-group col-md-offset-2">
           <button type="submit" class="btn btn-primary btn-lg col-md-10">Sign in</button>
         </div>

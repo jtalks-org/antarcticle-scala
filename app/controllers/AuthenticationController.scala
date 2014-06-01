@@ -1,13 +1,14 @@
 package controllers
 
-import play.api.mvc.{DiscardingCookie, Cookie, Action, Controller}
+import play.api.mvc._
 import security.{Authentication, SecurityServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import scala.Some
 import views.html
 import conf.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
+import services.PropertiesServiceComponent
+import scala.Some
 
 /**
  *  Handles sign in and sign out user actions.
@@ -15,28 +16,34 @@ import scala.concurrent.ExecutionContext.Implicits.global
  *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
-  this: Controller with SecurityServiceComponent with Authentication  =>
+  this: Controller with SecurityServiceComponent with PropertiesServiceComponent with Authentication  =>
 
   val loginForm = Form(
     tuple(
       "login" -> text,
-      "password" -> text
+      "password" -> text,
+      "referer" -> text
     )
   )
 
   def showLoginPage = Action { implicit request =>
-    Ok(html.signin(loginForm))
+    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer))))
   }
 
+
+  def getReferer(implicit request: Request[AnyContent]) : String =
+    request.session.get(REFERER).getOrElse(routes.ArticleController.allArticles().absoluteURL())
+
+
   def login = Action.async { implicit request =>
-    val (username, password) = loginForm.bindFromRequest.get
+    val (username, password, referer) = loginForm.bindFromRequest.get
     for {
       signInResult <- securityService.signInUser(username, password)
     } yield {
       signInResult.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
         succ = { case (token, authUser) =>
-          Ok(routes.ArticleController.allArticles().absoluteURL())
+          Ok(referer)
             // http only to prevent session hijacking with XSS
             .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
         }

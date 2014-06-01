@@ -1,5 +1,4 @@
-@(article: models.ArticleModels.ArticleDetailsModel,
-   comments: Seq[models.CommentModels.Comment])(implicit user: Principal, request: play.api.mvc.Request[Any])
+@(article: models.ArticleModels.ArticleDetailsModel, comments: Seq[models.CommentModels.Comment])(implicit user: Principal, request: play.api.mvc.Request[Any])
 @import views.helpers.Markdown
 
 @templates.main(article.title) {

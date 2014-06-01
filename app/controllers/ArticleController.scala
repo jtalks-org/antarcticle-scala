@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{CommentsServiceComponent, ArticlesServiceComponent}
+import services.{PropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
@@ -13,7 +13,7 @@ import scalaz._
  * Serves web-based operations on articles
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with Authentication =>
+  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with PropertiesServiceComponent with Authentication =>
 
   /**
    * Describes binding between Article model object and web-form
@@ -46,11 +46,8 @@ trait ArticleController {
     }
   }
 
-  def getNewArticlePage = Action { implicit request =>
-    currentPrincipal match {
-      case user : AuthenticatedUser => Ok(views.html.createArticle(articleForm))
-      case _ => defaultOnUnauthorized(request)
-    }
+  def getNewArticlePage = withUser { user => implicit request =>
+      Ok(views.html.createArticle(articleForm))
   }
 
   def previewArticle = Action { implicit request =>
@@ -87,15 +84,13 @@ trait ArticleController {
       )
   }
 
-  def editArticle(id: Int = 0) = Action { implicit request =>
-    currentPrincipal match {
-      case user : AuthenticatedUser =>
-        articlesService.get(id) match {
-          case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
-          case _ => NotFound(views.html.errors.notFound())
+  def editArticle(id: Int = 0) = withUser { user => implicit request =>
+      articlesService.get(id) match {
+        case Some(article : ArticleDetailsModel) => {
+          Ok(views.html.editArticle(articleForm.fill(article)))
         }
-      case _ => defaultOnUnauthorized(request)
-    }
+        case _ => NotFound(views.html.errors.notFound())
+      }
   }
 
   def postArticleEdits() = Action { implicit request =>

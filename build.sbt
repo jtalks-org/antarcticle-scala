@@ -1,3 +1,4 @@
+import org.specs2.matcher.ExpectedParsedResult.toExpectedParsedResult
 import play.Project._
 import com.github.play2war.plugin._
 
@@ -33,6 +34,21 @@ templatesImport ++= Seq(
   "security.Authorities._",
   "security.Principal"
 )
+
+// publish some SBT variables as scala object for application code
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq[BuildInfoKey](version)
+
+buildInfoKeys ++= Seq[BuildInfoKey](
+  BuildInfoKey.action("fullVersion") {
+    sys.props.getOrElse("app.version", (version in version.scope).value + "-dev")
+  }
+)
+
+buildInfoPackage := "build"
 
 // Coffee Script compilation options
 coffeescriptOptions := Seq("bare")

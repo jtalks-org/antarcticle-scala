@@ -1,3 +1,5 @@
+package root
+
 import controllers._
 import migrations.{Migrations, MigrationTool}
 import security._
@@ -18,6 +20,8 @@ object Application
   with Controllers {
 
   override val migrationsContainer = new Migrations(profile)
+
+  lazy val instanceName = propertiesService.getInstanceName()
 
   withSession { implicit session =>
     migrate
@@ -41,7 +45,8 @@ trait Services
   with TagsServiceComponentImpl
   with CommentsServiceComponentImpl
   with NotificationsServiceComponentImpl
-  with UsersServiceComponentImpl {
+  with UsersServiceComponentImpl
+  with PropertiesServiceComponentImpl {
   this: Repositories with SessionProvider =>
 
   override val tagValidator = new TagValidator
@@ -53,6 +58,7 @@ trait Repositories
   with TagsRepositoryComponentImpl
   with CommentsRepositoryComponentImpl
   with NotificationsRepositoryComponentImpl
-  with UsersRepositoryComponentImpl {
+  with UsersRepositoryComponentImpl
+  with PropertiesRepositoryComponentImpl {
   this: Schema with Profile =>
 }

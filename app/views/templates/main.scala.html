@@ -15,9 +15,14 @@
     <div class="page-wrapper">
       <nav class="navbar navbar-inverse nav">
         <div class="col-md-8 global-block">
-          <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
-            <i class="glyphicon glyphicon-book"></i> JavaTalks Articles
-          </a>
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
+                <i class="glyphicon glyphicon-book"></i>
+                <span id="application-name-container">@root.Application.instanceName</span>
+              </a>
+            </li>
+          </ul>
           @user match {
             case authenticatedUser: security.AuthenticatedUser => {
               <ul class="nav navbar-nav">
@@ -41,7 +46,8 @@
                       <ul class="dropdown-menu">
                         <li>
                           <a href="#">
-                            <i class="glyphicon glyphicon-wrench"></i> Enter admin mode
+                            <i class="glyphicon glyphicon-wrench"></i>
+                            <span id="toggle-admin-mode">Your browser does not support admin mode</span>
                           </a>
                         </li>
                         <li>
@@ -56,8 +62,8 @@
                 }
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    @authenticatedUser.username <b class="caret"></b>
-                  </a>
+                  @authenticatedUser.username <b class="caret"></b>
+                </a>
                 <ul class="dropdown-menu">
                   <li>
                     <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)">
@@ -90,11 +96,12 @@
           }
         </div>
       </nav>
+      @* Inline styles for alert containers are necessary to prevent flashing in FF 29.01 on page load *@
       <div class="bb-alert-container">
-        <div class="bb-alert alert alert-success center-block">
+        <div class="bb-alert alert alert-success center-block" style="display : none">
           <span>Success notification message content</span>
         </div>
-        <div class="bb-alert alert alert-danger center-block">
+        <div class="bb-alert alert alert-danger center-block" style="display : none">
           <span>Error notification message content</span>
         </div>
       </div>
@@ -104,12 +111,10 @@
       <footer class="footer">
         <div class="col-md-8 global-block">
           <span class="pull-left">
-            Antarcticle project<br>© @{
-            com.github.nscala_time.time.Imports.DateTime.now.year().get()
-          } <a href="http://jtalks.org">jtalks.org</a>
+            Powered by Antarcticle @build.BuildInfo.fullVersion
           </span>
           <span class="pull-right">
-            <i class="icon-cogs"></i> Based on <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+            <i class="icon-cogs"></i> Based on <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
           </span>
         </div>
       </footer>
@@ -119,6 +124,7 @@
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="@routes.Assets.at("/public/javascripts", "Global.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("/public/javascripts", "NotificationsSupport.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.at("/public/javascripts", "AdminModeSupport.js")" type="text/javascript"></script>
     @customPageScripts
   </body>
 </html>

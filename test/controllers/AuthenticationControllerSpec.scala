@@ -15,14 +15,17 @@ import security.AuthenticatedUser
 import play.api.mvc.Cookie
 import scala.Some
 import org.mockito.Matchers
+import services.PropertiesServiceComponent
 
 class AuthenticationControllerSpec extends Specification with Mockito with AfterExample {
 
   object controller extends AuthenticationController
                      with SecurityServiceComponent
+                     with PropertiesServiceComponent
                      with FakeAuthentication {
     override val securityService = mock[SecurityService]
     override val usersRepository = mock[UsersRepository]
+    override val propertiesService = mock[PropertiesService]
   }
 
   import controller._
@@ -46,10 +49,11 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
 
     val username = "username"
     val password = "password"
+    val referer = "/articles/new"
     val rememberMeToken = "token"
     val user = mock[AuthenticatedUser]
     val request = FakeRequest("POST","/")
-      .withFormUrlEncodedBody(("login", username),("password", password))
+      .withFormUrlEncodedBody(("login", username),("password", password), ("referer", referer))
 
     "perform authentication with valid credentials" in {
       securityService.signInUser(username, password) returns Future.successful((rememberMeToken, user).successNel)

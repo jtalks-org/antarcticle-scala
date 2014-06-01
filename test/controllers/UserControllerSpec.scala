@@ -3,7 +3,7 @@ package controllers
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.AfterExample
-import services.{UsersServiceComponent, ArticlesServiceComponent}
+import services.{PropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
 import util.FakeAuthentication
 import play.api.test._
 import play.api.test.Helpers._
@@ -24,10 +24,12 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
   object controller extends UserController
                       with ArticlesServiceComponent
                       with UsersServiceComponent
+                      with PropertiesServiceComponent
                       with FakeAuthentication {
     override val articlesService = mock[ArticlesService]
     override val usersService = mock[UsersService]
     override val usersRepository = mock[UsersRepository]
+    override val propertiesService = mock[PropertiesService]
   }
 
   import controller._
@@ -100,38 +102,38 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
     val users = new UserPage(1, 0,List[UserRecord]()).successNel
     val someName = Some(username)
 
-    "list users paged" in {
+    "list users paged" in new WithApplication {
       controller.setPrincipal(principal)
       usersService.getPage(1, someName) returns users
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
     }
 
-    "return 404 for missing page" in {
+    "return 404 for missing page" in new WithApplication {
       controller.setPrincipal(principal)
       usersService.getPage(1, someName) returns "Not found".failureNel
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
     }
 
-    "redirect to login page for anonymous user" in {
+    "redirect to login page for anonymous user" in new WithApplication {
       controller.setPrincipal(AnonymousPrincipal)
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(303)
     }
 
-    "show 403 page for insufficient permissions" in {
+    "show 403 page for insufficient permissions" in new WithApplication {
       controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
 
-      val page = controller.listUsersPaged(someName, 1)(FakeRequest())
+      val page = controller.listUsersPaged(someName, 1)(FakeRequest()).run
 
       status(page) must equalTo(403)
       contentType(page) must beSome("text/html")
@@ -155,6 +157,16 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
       controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
       usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.Authorized(true.successNel)
       val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("lol" -> "wut")))
+
+      val page = controller.postChangedUserRole(1)(request)
+
+      status(page) must equalTo(400)
+    }
+
+    "check if role is valid" in {
+      controller.setPrincipal(AuthenticatedUser(1, "", Authorities.User))
+      usersService.updateUserRole(any)(Matchers.eq(authenticatedPrincipal)) returns Result.Authorized(true.successNel)
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("role" -> "stas")))
 
       val page = controller.postChangedUserRole(1)(request)
 

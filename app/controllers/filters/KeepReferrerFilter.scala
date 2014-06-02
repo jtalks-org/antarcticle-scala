@@ -8,7 +8,7 @@ import play.mvc.Http.HeaderNames
 /**
  *
  */
-object KeepRefererFilter extends Filter {
+object KeepReferrerFilter extends Filter {
   override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
     next(rh).map { result =>
       result.withSession(HeaderNames.REFERER -> rh.path)

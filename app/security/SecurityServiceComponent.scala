@@ -11,7 +11,7 @@ import scala.Predef._
 import models.database.UserRecord
 import utils.Implicits._
 import scala.util.Random
-import utils.StringUtil
+import utils.HashingUtil
 
 trait SecurityServiceComponent {
   val securityService: SecurityService
@@ -37,7 +37,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     private [security] def encodePassword(password:String, salt:Option[String]) = {
       val mergedPasswordAndSalt = salt.cata(some = str => password + '{' + str + '}', none = password)
-      StringUtil.generateMd5Hash(mergedPasswordAndSalt)
+      HashingUtil.generateMd5Hash(mergedPasswordAndSalt)
     }
 
     def signInUser(username: String, password: String) = {

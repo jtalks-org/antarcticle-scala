@@ -13,10 +13,9 @@ trait PropertiesController {
       val instanceName = (request.body \ "instanceName").asOpt[String]
       instanceName match {
         case None => BadRequest("")
-        case Some(x) =>  {
+        case Some(x) =>
           propertiesService.changeInstanceName(x)
           Ok("")
-        }
       }
   }
 }

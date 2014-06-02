@@ -6,7 +6,7 @@ import scalaz._
 import Scalaz._
 import play.api.libs.ws.WS
 import java.security.MessageDigest
-import utils.StringUtil
+import utils.HashingUtil
 
 private[security] trait AuthenticationManager {
   def authenticate(username: String, password: String): Future[Option[UserInfo]]
@@ -25,7 +25,7 @@ class FakeAuthenticationManager extends AuthenticationManager {
 
 class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManager {
   def authenticate(username: String, password: String) = {
-    val passwordHash = StringUtil.generateMd5Hash(password)
+    val passwordHash = HashingUtil.generateMd5Hash(password)
 
     for {
       response <- sendRequest(poulpeUrl, username, passwordHash)

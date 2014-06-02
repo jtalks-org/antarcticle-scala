@@ -1,16 +1,22 @@
 jQuery(=>
   $(document).ready(=>
+    # old browsers may not support local storage
     if(typeof(Storage) != "undefined")
-      if ("true" == sessionStorage.adminMode)
-        enterAdminMode()
+      if ($('#toggle-admin-mode').length > 0)
+        if ("true" == sessionStorage.adminMode)
+          enterAdminMode()
+        else
+          exitAdminMode()
       else
-        exitAdminMode()
+        # seems like we have no admin menu, make sure admin mode if off
+        sessionStorage.adminMode = false
     else
-      #fallback to cookies?
+      #todo: fallback to cookies?
   )
 )
 
 enterAdminMode = () ->
+  $('#application-icon').removeClass("glyphicon-book").addClass("glyphicon-pencil")
   # make app name editable
   appNameContainer = $('#application-name-container')
   appNameContainer.attr('contenteditable', "true")
@@ -33,15 +39,18 @@ enterAdminMode = () ->
   )
 
 exitAdminMode = () ->
-  # turn app name editor into plain caption
-  appNameContainer = $('#application-name-container')
-  appNameContainer.attr('contenteditable', "false")
-  appNameContainer.prop("onclick", null);
-  # alter menu item
-  menuItem = $('#toggle-admin-mode')
-  menuItem.text("Enter admin mode")
   sessionStorage.adminMode = false
-  menuItem.click((e) ->
+  $('#application-icon')
+  .removeClass("glyphicon-pencil")
+  .addClass("glyphicon-book")
+  # turn app name editor into plain caption
+  $('#application-name-container')
+  .attr('contenteditable', "false")
+  .unbind('click');
+  # alter menu item
+  $('#toggle-admin-mode')
+  .text("Enter admin mode")
+  .click((e) ->
     enterAdminMode()
     e.preventDefault()
   )

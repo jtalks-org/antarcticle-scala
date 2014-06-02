@@ -1,10 +1,10 @@
-import controllers.filters.{KeepRefererFilter, CsrfFilter}
+import controllers.filters.{KeepReferrerFilter, CsrfFilter}
 import play.api.Logger
 import play.api.mvc.Results._
 import play.api.mvc.{SimpleResult, WithFilters, RequestHeader}
 import scala.concurrent.Future
 
-object Global extends WithFilters(CsrfFilter, KeepRefererFilter) {
+object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) {
 
   /*
    * Get controller instances as Application instance, because all controllers

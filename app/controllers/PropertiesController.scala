@@ -1,6 +1,6 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Controller, Action}
 import services.PropertiesServiceComponent
 import security.Authentication
 
@@ -14,6 +14,7 @@ trait PropertiesController {
       instanceName match {
         case None => BadRequest("")
         case Some(x) =>  {
+          propertiesService.changeInstanceName(x)
           Ok("")
         }
       }

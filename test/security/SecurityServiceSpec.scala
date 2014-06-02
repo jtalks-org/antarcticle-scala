@@ -6,19 +6,16 @@ import repositories.UsersRepositoryComponent
 import util.FakeSessionProvider.FakeSessionValue
 import org.mockito.Matchers
 import models.database.UserRecord
-import org.specs2.specification.{Example, BeforeExample}
+import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.scalaz.ValidationMatchers
 import scala.concurrent.future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
 import org.specs2.time.NoTimeConversions
 import scala.slick.jdbc.JdbcBackend
 import org.specs2.matcher.Matcher
-import org.specs2.execute.AsResult
 
 class SecurityServiceSpec extends Specification
     with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
@@ -40,7 +37,6 @@ class SecurityServiceSpec extends Specification
 
   def anySession = any[JdbcBackend#Session]
 
-  //TODO: don't use await somehow?
   "sign in" should {
     "be success" in {
       val username = "userdfsd"
@@ -60,7 +56,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb)
         tokenProvider.generateToken returns generatedToken
 
-        securityService.signInUser(username, password) must beSuccessful((generatedToken, authUser)).await
+        securityService.signInUser(username, password) must beSuccessful(generatedToken, authUser)
       }
 
       "authenticated admin should have Admin authority" in {
@@ -68,7 +64,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(admin=true))
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+        securityService.signInUser(username, password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.authority == Authorities.Admin => ok
         }
       }
@@ -79,7 +75,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(username, password), 10 seconds)
+        securityService.signInUser(username, password) must beSuccessful
 
         val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
         there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
@@ -92,8 +88,9 @@ class SecurityServiceSpec extends Specification
         def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
           authenticationManager.authenticate(username, password) returns future(userInfo.some)
           tokenProvider.generateToken returns generatedToken
+
           doTest
-          UserRecord
+
           there was no(usersRepository).insert(any[UserRecord])(anySession)
           val expectedRecord = UserRecord(Some(1), username, encodedPassword, false, salt, "fn".some, "ln".some)
           there was one(usersRepository).update(beMostlyEqualTo(expectedRecord))(anySession)
@@ -102,14 +99,14 @@ class SecurityServiceSpec extends Specification
         "and one user exists with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider{
             usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""))
-            Await.result(securityService.signInUser(username, password), 10 seconds)
+            securityService.signInUser(username, password) must beSuccessful
           }
         }
 
         "and several users exist with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider {
             usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""), userFromDb2)
-            Await.result(securityService.signInUser(username, password), 10 seconds)
+            securityService.signInUser(username, password) must beSuccessful
           }
         }
 
@@ -120,11 +117,11 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(m)(anySession) returns List(userFromDb, userFromDb2)
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+        securityService.signInUser(username, password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.username == username => ok
         }
 
-        Await.result(securityService.signInUser(username.toUpperCase, password), 10 seconds) must beSuccessful.like {
+        securityService.signInUser(username.toUpperCase, password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.username == username.toUpperCase => ok
         }
 
@@ -138,7 +135,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(username, password), 10 seconds) must beSuccessful.like {
+        securityService.signInUser(username, password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.authority == Authorities.User => ok
         }
       }
@@ -151,7 +148,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.updateRememberToken(userId, generatedToken)(FakeSessionValue) returns true
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(username, password), 10 seconds)
+        securityService.signInUser(username, password) must beSuccessful
 
         there was one(usersRepository).updateRememberToken(userId, generatedToken)(FakeSessionValue)
       }
@@ -160,7 +157,7 @@ class SecurityServiceSpec extends Specification
         usersRepository.findByUserName(username)(FakeSessionValue) returns List(userFromDb)
         tokenProvider.generateToken returns generatedToken
 
-        Await.result(securityService.signInUser(' ' + username + ' ', password), 10 seconds) must beSuccessful.like {
+        securityService.signInUser(' ' + username + ' ', password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.username == username => ok
         }
 
@@ -175,7 +172,7 @@ class SecurityServiceSpec extends Specification
         authenticationManager.authenticate(anyString, anyString) returns future(None)
         usersRepository.findByUserName(anyString)(anySession) returns Nil
 
-        securityService.signInUser("", "") must beFailing.await
+        securityService.signInUser("", "") must beFailing
       }
     }
   }

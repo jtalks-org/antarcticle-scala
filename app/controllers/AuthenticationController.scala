@@ -34,20 +34,16 @@ trait AuthenticationController {
     request.session.get(REFERER).getOrElse(routes.ArticleController.allArticles().absoluteURL())
 
 
-  def login = Action.async { implicit request =>
+  def login = Action { implicit request =>
     val (username, password, referer) = loginForm.bindFromRequest.get
-    for {
-      signInResult <- securityService.signInUser(username, password)
-    } yield {
-      signInResult.fold(
-        fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-        succ = { case (token, authUser) =>
-          Ok(referer)
-            // http only to prevent session hijacking with XSS
-            .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
-        }
-      )
-    }
+    securityService.signInUser(username, password).fold(
+      fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
+      succ = { case (token, authUser) =>
+        Ok(referer)
+          // http only to prevent session hijacking with XSS
+          .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
+      }
+    )
   }
 
   def logout = Action {

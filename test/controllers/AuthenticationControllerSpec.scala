@@ -56,7 +56,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
       .withFormUrlEncodedBody(("login", username),("password", password), ("referer", referer))
 
     "perform authentication with valid credentials" in {
-      securityService.signInUser(username, password) returns Future.successful((rememberMeToken, user).successNel)
+      securityService.signInUser(username, password) returns (rememberMeToken, user).successNel
 
       val page = controller.login(request)
 
@@ -68,7 +68,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     }
 
     "return an error if credentials are invalid" in {
-      securityService.signInUser(username, password) returns Future.successful("Invalid credentials".failureNel)
+      securityService.signInUser(username, password) returns "Invalid credentials".failureNel
 
       val page = controller.login(request)
 

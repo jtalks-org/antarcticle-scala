@@ -5,7 +5,6 @@ import services.SessionProvider
 import scalaz._
 import Scalaz._
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.slick.jdbc.JdbcBackend
 import scala.Predef._
 import models.database.UserRecord
@@ -20,7 +19,7 @@ trait SecurityServiceComponent {
     /*
      * @return new remember me token for user if success
      */
-    def signInUser(username: String, password: String): Future[ValidationNel[String, (String, AuthenticatedUser)]]
+    def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
   }
 }
 
@@ -42,16 +41,17 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     def signInUser(username: String, password: String) = {
        Option(username) match {
-         case None => future(failedSignIn)
+         case None => failedSignIn
          case _ => doSignIn(username.trim, password)
        }
     }
 
-    private def doSignIn(username: String, password: String) = {
+    private def doSignIn(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)] = {
 
-      def getUserFromAuthManager: Future[Option[UserRecord]] = {
+      def getUserFromAuthManager: Option[UserRecord] = {
+        import scala.concurrent.duration._
 
-        def createOrUpdateUser(userInfo:UserInfo) = withSession {
+        def createOrUpdateUser(userInfo:UserInfo):UserRecord = withSession {
           implicit s: JdbcBackend#Session =>
 
           val salt = some(Random.alphanumeric.take(64).mkString)
@@ -66,61 +66,47 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
             some = user => {
               val record = user.copy(password = encodedPassword, salt = salt, firstName = userInfo.firstName, lastName = userInfo.lastName)
               usersRepository.update(record)
-              user.id
+              record
             },
-            none = some {
+            none = {
               val record = UserRecord(None, username, encodedPassword, false, salt, userInfo.firstName, userInfo.lastName)
-              usersRepository.insert(record)
+              val userId = usersRepository.insert(record)
+              record.copy(id = some(userId))
             }
           )
         }
 
-       authenticationManager.authenticate(username, password) map (result => {
-         for {
-           userInfo <- result
-           id = createOrUpdateUser(userInfo)
-         } yield UserRecord(id, username, password, false, userInfo.firstName, userInfo.lastName)
-       })
+        for (
+          userInfo <- Await.result(authenticationManager.authenticate(username, password), 10.seconds)
+        ) yield createOrUpdateUser(userInfo)
       }
 
-      def getUserFormDatabase: Future[Option[UserRecord]] =
-        withSession {
-          implicit s: JdbcBackend#Session =>
+      def getUserFormDatabase: Option[UserRecord] = withSession { implicit s: JdbcBackend#Session =>
 
-            future {
+          def isValidPassword(user:UserRecord): Boolean = {
+            !password.isEmpty && user.password === encodePassword(password, user.salt)
+          }
 
-              def isValidPassword(user:UserRecord): Boolean = {
-                !password.isEmpty && user.password === encodePassword(password, user.salt)
-              }
-
-              usersRepository.findByUserName(username) match {
-                case Nil => none
-                case user :: Nil => if (isValidPassword(user)) some(user) else none
-                case users => users find {
-                  user => (user.username === username) && isValidPassword(user)
-                }
-              }
-            }
-        }
-
-      def getUserRecord: Future[Option[UserRecord]] = {
-        val dbUser: Future[Option[UserRecord]] = getUserFormDatabase
-        dbUser flatMap {
-          user => {
-            user match {
-              case u: Some[UserRecord] => dbUser
-              case None => getUserFromAuthManager
+          usersRepository.findByUserName(username) match {
+            case Nil => none
+            case user :: Nil => if (isValidPassword(user)) some(user) else none
+            case users => users find {
+              user => (user.username === username) && isValidPassword(user)
             }
           }
         }
+
+      def getUserRecord: Option[UserRecord] = {
+        val dbUser = getUserFormDatabase
+        dbUser.cata(some => dbUser, none = getUserFromAuthManager)
       }
 
       (for {
-        user <- OptionT.optionT(getUserRecord)
+        user <- getUserRecord
         authority = if (user.admin) Authorities.Admin else Authorities.User
         authenticatedUser = AuthenticatedUser(user.id.get, user.username, authority)
         token = issueRememberMeTokenTo(authenticatedUser.userId)
-      } yield (token, authenticatedUser)).fold(
+      } yield (token, authenticatedUser)).cata(
           some = _.successNel,
           none = failedSignIn
       )

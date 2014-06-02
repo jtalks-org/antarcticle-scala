@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{PropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
+import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article}
@@ -13,7 +13,7 @@ import scalaz._
  * Serves web-based operations on articles
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with PropertiesServiceComponent with Authentication =>
+  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with Authentication =>
 
   /**
    * Describes binding between Article model object and web-form

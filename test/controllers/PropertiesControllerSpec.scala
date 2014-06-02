@@ -7,6 +7,8 @@ import services.PropertiesServiceComponent
 import util.FakeAuthentication
 import play.api.test._
 import play.api.libs.json.Json
+import play.api.test.Helpers._
+import play.api.test.FakeHeaders
 
 
 class PropertiesControllerSpec extends Specification with Mockito with AfterExample {
@@ -33,6 +35,8 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
       val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
 
       val page = controller.postChangedInstanceName()(request)
+
+      status(page) must equalTo(200)
 
       there was one(propertiesService).changeInstanceName(newInstanceName)
     }

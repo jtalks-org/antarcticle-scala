@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import services.{PropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
+import services.{ArticlesServiceComponent, CommentsServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import security.Authentication
@@ -12,7 +12,7 @@ import models.ArticleModels.ArticleDetailsModel
  * Handles all web operations related to article comments
  */
 trait CommentController {
-  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with PropertiesServiceComponent with Authentication  =>
+  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
 
   /**
    * Describes binding between Article model object and web-form

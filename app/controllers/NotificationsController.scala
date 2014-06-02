@@ -3,7 +3,7 @@ package controllers
 import play.api.mvc.{Action, Controller}
 import security.Authentication
 import models.database.Notification
-import services.{PropertiesServiceComponent, NotificationsServiceComponent}
+import services.NotificationsServiceComponent
 
 
 /**
@@ -11,7 +11,7 @@ import services.{PropertiesServiceComponent, NotificationsServiceComponent}
  *  All requests are AJAX, so this controller does not generate full-featured pages.
  */
 trait NotificationsController {
-  this: Controller with NotificationsServiceComponent with PropertiesServiceComponent with Authentication =>
+  this: Controller with NotificationsServiceComponent with Authentication =>
 
   def getNotifications = Action {
     implicit request =>

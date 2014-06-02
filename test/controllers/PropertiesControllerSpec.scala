@@ -30,7 +30,7 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
 
   "update instance name" should {
 
-    "update it" in {
+    "update it when it's passed" in {
       val newInstanceName: String = "New Antarcticle"
       val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
 
@@ -39,6 +39,16 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
       status(page) must equalTo(200)
 
       there was one(propertiesService).changeInstanceName(newInstanceName)
+    }
+
+    "not update it when it isn't passed" in {
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
+
+      val page = controller.postChangedInstanceName()(request)
+
+      status(page) must equalTo(400)
+
+      there was no(propertiesService).changeInstanceName(any)
     }
   }
 }

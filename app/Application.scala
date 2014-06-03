@@ -34,7 +34,8 @@ trait Controllers
   with HelpController
   with NotificationsController
   with CommentController
-  with TagsController {
+  with TagsController
+  with PropertiesController {
   this: Services with SecurityComponent =>
 }
 

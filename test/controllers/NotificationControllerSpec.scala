@@ -20,7 +20,8 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
   object controller extends NotificationsController
     with NotificationsServiceComponent
     with PropertiesServiceComponent
-    with FakeAuthentication {
+    with FakeAuthentication
+    with PropertiesProvider {
     override val notificationsService = mock[NotificationsService]
     override val usersRepository = mock[UsersRepository]
     override val propertiesService = mock[PropertiesService]

@@ -26,7 +26,8 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
                       with ArticlesServiceComponent
                       with CommentsServiceComponent
                       with PropertiesServiceComponent
-                      with FakeAuthentication{
+                      with FakeAuthentication
+                      with PropertiesProvider {
      override val articlesService = mock[ArticlesService]
      override val usersRepository = mock[UsersRepository]
      override val commentsService = mock[CommentsService]

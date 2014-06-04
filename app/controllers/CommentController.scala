@@ -12,7 +12,7 @@ import models.ArticleModels.ArticleDetailsModel
  * Handles all web operations related to article comments
  */
 trait CommentController {
-  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with Authentication  =>
+  this: Controller with CommentsServiceComponent with ArticlesServiceComponent with PropertiesProvider with Authentication  =>
 
   /**
    * Describes binding between Article model object and web-form

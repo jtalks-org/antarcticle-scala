@@ -24,7 +24,8 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
                       with CommentsServiceComponent
                       with ArticlesServiceComponent
                       with PropertiesServiceComponent
-                      with FakeAuthentication{
+                      with FakeAuthentication
+                      with PropertiesProvider {
     override val usersRepository = mock[UsersRepository]
     override val commentsService = mock[CommentsService]
     override val articlesService = mock[ArticlesService]

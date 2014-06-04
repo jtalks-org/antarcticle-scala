@@ -13,7 +13,7 @@ import scalaz._
  * Serves web-based operations on articles
  */
 trait ArticleController {
-  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with Authentication =>
+  this: Controller with ArticlesServiceComponent with CommentsServiceComponent with PropertiesProvider with Authentication =>
 
   /**
    * Describes binding between Article model object and web-form

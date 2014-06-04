@@ -22,7 +22,8 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
   object controller extends AuthenticationController
                      with SecurityServiceComponent
                      with PropertiesServiceComponent
-                     with FakeAuthentication {
+                     with FakeAuthentication
+                     with PropertiesProvider {
     override val securityService = mock[SecurityService]
     override val usersRepository = mock[UsersRepository]
     override val propertiesService = mock[PropertiesService]

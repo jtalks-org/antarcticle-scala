@@ -1,4 +1,4 @@
-@(title: String)(content: Html)(customPageScripts: Html)(implicit user: Principal)
+@(title: String)(content: Html)(customPageScripts: Html)(implicit user: Principal, properties: models.PropertyModels.MainPageProperties)
 <!DOCTYPE html>
 <html>
   <head>
@@ -19,7 +19,7 @@
             <li>
               <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
                 <i id="application-icon" class="glyphicon glyphicon-book"></i>
-                <span id="application-name-container">Antarcticle</span>
+                <span id="application-name-container">@properties.instanceName</span>
               </a>
             </li>
           </ul>
@@ -45,7 +45,7 @@
                       </a>
                       <ul class="dropdown-menu">
                         <li>
-                          <a href="#" data-href="@routes.PropertiesController.postChangedInstanceName()">
+                          <a href="#">
                             <i class="glyphicon glyphicon-wrench"></i>
                             <span id="toggle-admin-mode">Your browser does not support admin mode</span>
                           </a>

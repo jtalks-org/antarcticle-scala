@@ -25,7 +25,7 @@ class FakeAuthenticationManager extends AuthenticationManager {
 
 class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManager {
   def authenticate(username: String, password: String) = {
-    val passwordHash = HashingUtil.generateMd5Hash(password)
+    val passwordHash = HashingUtil.md5(password)
 
     for {
       response <- sendRequest(poulpeUrl, username, passwordHash)

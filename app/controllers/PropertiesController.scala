@@ -14,8 +14,11 @@ trait PropertiesController {
       instanceName match {
         case None => BadRequest("")
         case Some(x) =>
-          propertiesService.changeInstanceName(x)
-          Ok("")
+          val changeResult = propertiesService.changeInstanceName(x)
+          changeResult.fold(
+            fail = nel => Forbidden(""),
+            succ = nel => Ok("")
+          )
       }
   }
 }

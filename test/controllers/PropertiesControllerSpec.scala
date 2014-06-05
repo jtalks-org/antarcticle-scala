@@ -9,6 +9,9 @@ import play.api.test._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.FakeHeaders
+import security.{Principal, AnonymousPrincipal, Authorities, AuthenticatedUser}
+import scalaz._
+import Scalaz._
 
 
 class PropertiesControllerSpec extends Specification with Mockito with AfterExample {
@@ -27,28 +30,39 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
     org.mockito.Mockito.reset(propertiesService)
   }
 
+  val currentUserId = 1
+  val authenticatedUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
+  val anonymousUser = AnonymousPrincipal
+
 
   "update instance name" should {
 
     "update it when it's passed" in {
       val newInstanceName: String = "New Antarcticle"
       val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
+      propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".successNel
 
       val page = controller.postChangedInstanceName()(request)
 
       status(page) must equalTo(200)
-
-      there was one(propertiesService).changeInstanceName(newInstanceName)
     }
 
-    "not update it when it isn't passed" in {
+    "show error when it isn't passed" in {
       val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
 
       val page = controller.postChangedInstanceName()(request)
 
       status(page) must equalTo(400)
+    }
 
-      there was no(propertiesService).changeInstanceName(any)
+    "show error when user isn't authenticated" in {
+      val newInstanceName: String = "New Antarcticle"
+      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
+      propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".failNel
+
+      val page = controller.postChangedInstanceName()(request)
+
+      status(page) must equalTo(403)
     }
   }
 }

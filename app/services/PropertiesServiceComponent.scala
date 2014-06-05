@@ -1,6 +1,14 @@
 package services
 
 import repositories.PropertiesRepositoryComponent
+import security.{AuthenticatedUser, Principal}
+import scalaz._
+import Scalaz._
+import security.Result.AuthorizationResult
+
+object PropertyNames {
+  val instanceNameProperty = "INSTANCE_NAME"
+}
 
 trait PropertiesServiceComponent {
   val propertiesService: PropertiesService
@@ -8,7 +16,7 @@ trait PropertiesServiceComponent {
   trait PropertiesService {
     def getInstanceName(): String
 
-    def changeInstanceName(newName: String)
+    def changeInstanceName(newName: String)(implicit principal: Principal): ValidationNel[String, String]
   }
 }
 
@@ -21,9 +29,8 @@ trait PropertiesServiceComponentImpl extends PropertiesServiceComponent {
 
     def getInstanceName(): String = withSession {
       implicit session =>
-        val propertyName = "INSTANCE_NAME"
         val defaultValue = "ANTARCTICLE"
-        val property = propertiesRepository.getProperty(propertyName)
+        val property = propertiesRepository.getProperty(PropertyNames.instanceNameProperty)
 
         property match {
           case Some(x) =>
@@ -32,10 +39,16 @@ trait PropertiesServiceComponentImpl extends PropertiesServiceComponent {
         }
     }
 
-    def changeInstanceName(newName: String): Unit = withSession {
+    def changeInstanceName(newName: String)(implicit principal: Principal): ValidationNel[String, String] = withSession {
       implicit session =>
-        val propertyName = "INSTANCE_NAME"
-        propertiesRepository.changeProperty(propertyName, Some(newName))
+        principal match {
+          case user: AuthenticatedUser  => {
+            propertiesRepository.changeProperty(PropertyNames.instanceNameProperty, Some(newName))
+            ""
+          }.successNel
+          case _ => "Authentication required".failureNel
+        }
+
     }
   }
 }

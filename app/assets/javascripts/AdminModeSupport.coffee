@@ -18,22 +18,33 @@ jQuery(=>
 enterAdminMode = () ->
   $('#application-icon').removeClass("glyphicon-book").addClass("glyphicon-pencil")
   # make app name editable
-  appNameContainer = $('#application-name-container')
-  appNameContainer.attr('contenteditable', "true")
-  appNameContainer.click((e) ->
+  $('#application-name-container')
+  .attr('contenteditable', "true")
+  .click((e) ->
     e.preventDefault()
   )
-  appNameContainer.keypress((e) ->
+  .keypress((e) ->
     if (e.which == 13)
-      appNameContainer.blur()
-      #todo: submit data to server
       e.preventDefault()
+      $.ajax({
+        type: "POST",
+        url: $('#toggle-admin-mode').closest('a').attr('data-href'),
+        contentType: 'application/json',
+        data: JSON.stringify({ instanceName: this.innerText}),
+        success: () ->
+          showSuccessNotification("Application name has been updated")
+          $('#application-name-container').blur()
+        error: (data) ->
+          showFailureNotification(data)
+          $('#application-name-container').focus()
+      })
+
   )
   # alter menu item
-  menuItem = $('#toggle-admin-mode')
-  menuItem.text("Exit admin mode")
   sessionStorage.adminMode = true
-  menuItem.click((e) ->
+  $('#toggle-admin-mode')
+  .text("Exit admin mode")
+  .click((e) ->
     exitAdminMode()
     e.preventDefault()
   )

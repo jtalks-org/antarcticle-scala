@@ -11,7 +11,7 @@ import services.NotificationsServiceComponent
  *  All requests are AJAX, so this controller does not generate full-featured pages.
  */
 trait NotificationsController {
-  this: Controller with NotificationsServiceComponent with Authentication =>
+  this: Controller with NotificationsServiceComponent with PropertiesProvider with Authentication =>
 
   def getNotifications = Action {
     implicit request =>

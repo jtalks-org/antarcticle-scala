@@ -1,4 +1,4 @@
-@(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit principal: security.Principal)
+@(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit principal: security.Principal, properties: models.PropertyModels.MainPageProperties)
 @templates.main("Users & Roles") {
   <div class="row">
     <div class="col-md-offset-1 clearfix">

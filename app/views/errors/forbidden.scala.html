@@ -1,4 +1,4 @@
-@()(implicit user: Principal = security.AnonymousPrincipal)
+@()(implicit user: Principal = security.AnonymousPrincipal, properties: models.PropertyModels.MainPageProperties)
 @templates.main("Forbidden"){
   <div class="hero-unit">
     <div class="container">

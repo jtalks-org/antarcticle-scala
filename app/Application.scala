@@ -15,7 +15,8 @@ object Application
   with Repositories
   with SecurityComponent
   with Services
-  with Controllers {
+  with Controllers
+  with PropertiesProvider {
 
   override val migrationsContainer = new Migrations(profile)
 
@@ -34,8 +35,9 @@ trait Controllers
   with HelpController
   with NotificationsController
   with CommentController
+  with PropertiesController
   with TagsController {
-  this: Services with SecurityComponent =>
+  this: Services with SecurityComponent with PropertiesProvider =>
 }
 
 trait Services

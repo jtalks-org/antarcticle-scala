@@ -1,4 +1,4 @@
-@(form: Form[ArticleModels.Article])(implicit user: Principal)
+@(form: Form[ArticleModels.Article])(implicit user: Principal, properties: models.PropertyModels.MainPageProperties)
 @templates.main("New article") {
   <div class="row">
     <div class="col-md-9 center well2">

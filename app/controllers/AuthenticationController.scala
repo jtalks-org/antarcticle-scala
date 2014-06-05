@@ -15,7 +15,7 @@ import scala.Some
  *  cookies to prevent session fixation attacks. By default this cookie is valid for four weeks. 
  */
 trait AuthenticationController {
-  this: Controller with SecurityServiceComponent with Authentication  =>
+  this: Controller with SecurityServiceComponent with PropertiesProvider with Authentication  =>
 
   val loginForm = Form(
     tuple(

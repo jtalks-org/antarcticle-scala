@@ -8,7 +8,7 @@ import play.api.mvc.Action
  * Renders application help pages
  */
 trait HelpController {
-  this: Controller with Authentication =>
+  this: Controller with PropertiesProvider with Authentication =>
 
   def markdownHelp() = Action {
     implicit request => Ok(views.html.help.markdown())

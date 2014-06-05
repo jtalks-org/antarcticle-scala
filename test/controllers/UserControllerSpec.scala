@@ -3,7 +3,7 @@ package controllers
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.AfterExample
-import services.{ UsersServiceComponent, ArticlesServiceComponent}
+import services.{PropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
 import util.FakeAuthentication
 import play.api.test._
 import play.api.test.Helpers._
@@ -24,10 +24,14 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
   object controller extends UserController
                       with ArticlesServiceComponent
                       with UsersServiceComponent
-                      with FakeAuthentication {
+                      with PropertiesServiceComponent
+                      with PropertiesProvider
+                      with FakeAuthentication
+                       {
     override val articlesService = mock[ArticlesService]
     override val usersService = mock[UsersService]
     override val usersRepository = mock[UsersRepository]
+    override val propertiesService = mock[PropertiesService]
   }
 
   import controller._

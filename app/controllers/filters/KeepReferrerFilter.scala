@@ -12,6 +12,7 @@ import play.mvc.Http.HeaderNames
 object KeepReferrerFilter extends Filter {
 
   val ignoredPaths = Seq(
+    "/fonts",
     "/stylesheets",
     "/images",
     "/javascripts"

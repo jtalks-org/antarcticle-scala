@@ -6,30 +6,40 @@ import views.helpers.MarkdownNestedData._
 
 class MarkdownSpec extends Specification {
 
+  def removeNewLines(str:String) = str.replaceAll("(\r\n)|\r|\n", "")
+
+  def beEqualIgnoreNewLinesTo(str: String) = {
+    beEqualTo(removeNewLines(str)) ^^ {(t: String) => removeNewLines(t)}
+  }
+
+  def containIgnoreNewLines(str:String) = {
+    contain(removeNewLines(str)) ^^ {(t: String) => removeNewLines(t)}
+  }
+
   "markdown to html" should {
     "produce extended syntax highlighting for code blocks" in {
       val expectedCodeTag = "<code class='scala'>"
 
-      Markdown.toHtml(fencedScalaBlock) must contain(expectedCodeTag)
+      Markdown.toHtml(fencedScalaBlock) must containIgnoreNewLines(expectedCodeTag)
     }
 
     "produce html for fenced code blocks without explicit language" in {
       val expectedCodeTag = "<code"
 
-      Markdown.toHtml(fencedCodeBlock) must contain(expectedCodeTag)
+      Markdown.toHtml(fencedCodeBlock) must containIgnoreNewLines(expectedCodeTag)
     }
 
     "produce html for code block indented with four spaces" in {
       val expectedCodeTag = "<code"
 
-      Markdown.toHtml(codeBlockIndentedWithSpaces) must contain(expectedCodeTag)
+      Markdown.toHtml(codeBlockIndentedWithSpaces) must containIgnoreNewLines(expectedCodeTag)
     }
 
     "recognize code blocks with preceding text" in {
       val expectedCodeTag = "<code class='scala'>"
       val textWithCode = "\n" + fencedScalaBlock
 
-      Markdown.toHtml(textWithCode) must contain(expectedCodeTag)
+      Markdown.toHtml(textWithCode) must containIgnoreNewLines(expectedCodeTag)
     }
 
     "properly escape symbols to prevent xss and broken formatting" in {
@@ -45,43 +55,43 @@ class MarkdownSpec extends Specification {
     "produce ordered list" in {
       val result = Markdown.toHtml(orderedList)
 
-      result mustEqual orderedListResult
+      result must beEqualIgnoreNewLinesTo(orderedListResult)
     }
 
     "produce correct html for tables" in {
       val result = Markdown.toHtml(table)
 
-      result must contain(tableResult)
+      result must containIgnoreNewLines(tableResult)
     }
 
     "produce correct html for tables with inline markdown" in {
       val result = Markdown.toHtml(tableWithInlineMarkdown)
 
-      result must contain(tableWithInlineMarkdownResult)
+      result must containIgnoreNewLines(tableWithInlineMarkdownResult)
     }
 
     "produce correct blockquoted text" in {
       val result = Markdown.toHtml(blockquotedText)
 
-      result must contain(blockquotedTextResult)
+      result must containIgnoreNewLines(blockquotedTextResult)
     }
 
     "produce correct italic and bold text" in {
       val result = Markdown.toHtml(italicAndBoldText)
 
-      result must contain(italicAndBoldTextResult)
+      result must containIgnoreNewLines(italicAndBoldTextResult)
     }
 
     "produce correct html with horizontal lines" in {
       val result = Markdown.toHtml(horizontalLines)
 
-      result must contain(horizontalLinesResult)
+      result must containIgnoreNewLines(horizontalLinesResult)
     }
 
     "produce correct html for emphasis" in {
       val result = Markdown.toHtml(emphasis)
 
-      result must contain(emphasisResult)
+      result must containIgnoreNewLines(emphasisResult)
     }
 
     "produce correct html for nested emphasis" in {
@@ -89,7 +99,7 @@ class MarkdownSpec extends Specification {
 
       val result = Markdown.toHtml(markdownSource)
 
-      result must contain("<p><strong>strong <em>nestedemph</em></strong></p>")
+      result must containIgnoreNewLines("<p><strong>strong <em>nestedemph</em></strong></p>")
     }
 
     "correctly handle underscores in text" in {
@@ -97,7 +107,7 @@ class MarkdownSpec extends Specification {
 
       val result = Markdown.toHtml(markdownSource)
 
-      result must contain("<p><strong>strong _nestedemph</strong></p>")
+      result must containIgnoreNewLines("<p><strong>strong _nestedemph</strong></p>")
     }
 
     "produce correct html for email" in {
@@ -105,43 +115,43 @@ class MarkdownSpec extends Specification {
 
       val result = Markdown.toHtml(markdownSource)
 
-      result must contain("mailto:")
+      result must containIgnoreNewLines("mailto:")
     }
 
     "produce correct html for nested lists" in {
       val result = Markdown.toHtml(nestedList)
 
-      result must contain(nestedListResult)
+      result must containIgnoreNewLines(nestedListResult)
     }
 
     "produce correct html for ordered list with paragraphs" in {
       val result = Markdown.toHtml(listWithParagraphs)
 
-      result must contain(listWithParagraphsResult)
+      result must containIgnoreNewLines(listWithParagraphsResult)
     }
 
     "produce correct html for list with different indents" in {
       val result = Markdown.toHtml(listWithIndents)
 
-      result must contain(listWithIndentsResult)
+      result must containIgnoreNewLines(listWithIndentsResult)
     }
 
     "produce correct html for headers" in {
       val result = Markdown.toHtml(headers)
 
-      result must contain(headersResult)
+      result must containIgnoreNewLines(headersResult)
     }
 
     "produce correct html for inline code" in {
       val result = Markdown.toHtml(inlineCode)
 
-      result must contain(inlineCodeResult)
+      result must containIgnoreNewLines(inlineCodeResult)
     }
 
     "produce correct html for links" in {
       val result = Markdown.toHtml(links)
 
-      result must contain(linksResult)
+      result must containIgnoreNewLines(linksResult)
     }
   }
 
@@ -149,91 +159,91 @@ class MarkdownSpec extends Specification {
     "correctly handle bold text in blockquotes" in {
       val result = Markdown.toHtml(boldTextInsideBlockquotes)
 
-      result must contain(boldTextInsideBlockquotesResult)
+      result must containIgnoreNewLines(boldTextInsideBlockquotesResult)
     }
 
     "correctly handle italic and strikethrough text in blockquotes" in {
       val result = Markdown.toHtml(strikethroughAndItalicsInsideBlockquotes)
 
-      result must contain(strikethroughAndItalicsInsideBlockquotesResult)
+      result must containIgnoreNewLines(strikethroughAndItalicsInsideBlockquotesResult)
     }
 
     "correctly handle ordered list in blockquotes" in {
       val result = Markdown.toHtml(listsInsideBlockquotes)
 
-      result must contain(listsInsideBlockquotesResult)
+      result must containIgnoreNewLines(listsInsideBlockquotesResult)
     }
 
     "correctly handle headers in blockquotes" in {
       val result = Markdown.toHtml(headersInsideBlockquotes)
 
-      result must contain(headersInsideBlockquotesResult)
+      result must containIgnoreNewLines(headersInsideBlockquotesResult)
     }
 
     "correctly handle links in blockquotes" in {
       val result = Markdown.toHtml(linksInsideBlockquotes)
 
-      result must contain(linksInsideBlockquotesResult)
+      result must containIgnoreNewLines(linksInsideBlockquotesResult)
     }
 
     "correctly handle inline code in blockquotes" in {
       val result = Markdown.toHtml(inlineCodeInsideBlockquotes)
 
-      result must contain(inlineCodeInsideBlockquotesResult)
+      result must containIgnoreNewLines(inlineCodeInsideBlockquotesResult)
     }
 
     "correctly handle horizonal lines in blockquotes" in {
       val result = Markdown.toHtml(horizLinesInsideBlockquotes)
 
-      result must contain(horizLinesInsideBlockquotesResult)
+      result must containIgnoreNewLines(horizLinesInsideBlockquotesResult)
     }
 
     "correctly handle bold italic and crossed text inside inline code" in {
       val result = Markdown.toHtml(boldItalicCrossedInsideCode)
 
-      result must contain(boldItalicCrossedInsideCodeResult)
+      result must containIgnoreNewLines(boldItalicCrossedInsideCodeResult)
     }
 
     "correctly handle inline code in lists" in {
       val result = Markdown.toHtml(inlineCodeInsideLists)
 
-      result must contain(inlineCodeInsideListsResult)
+      result must containIgnoreNewLines(inlineCodeInsideListsResult)
     }
 
     "correct html for inline bold links" in {
       val result = Markdown.toHtml(boldLinks)
 
-      result must contain(boldLinksResult)
+      result must containIgnoreNewLines(boldLinksResult)
     }
 
     "correct html for inline italic links" in {
       val result = Markdown.toHtml(italicLinks)
 
-      result must contain(italicLinksResult)
+      result must containIgnoreNewLines(italicLinksResult)
     }
 
     "correct html for inline crossed links" in {
       val result = Markdown.toHtml(crossedLinks)
 
-      result must contain(crossedLinksResult)
+      result must containIgnoreNewLines(crossedLinksResult)
     }
 
     "correctly handle bold, italic and crossed text in lists" in {
       val result = Markdown.toHtml(boldItalicCrossedTextInList)
 
-      result must contain(boldItalicCrossedTextInListResult)
+      result must containIgnoreNewLines(boldItalicCrossedTextInListResult)
     }
 
     "correctly handle bold, italic and crossed text in ordered lists" in {
       val result = Markdown.toHtml(boldItalicCrossedTextInOrderedList)
 
-      result must contain(boldItalicCrossedTextInOrderedListResult)
+      result must containIgnoreNewLines(boldItalicCrossedTextInOrderedListResult)
     }
 
     "correctly handle bold, italic and crossed text in headers" in {
       val result = Markdown.toHtml(boldItalicCrossedTextInHeaders)
 
-      result must contain(boldItalicCrossedTextInHeadersResult)
+      result must containIgnoreNewLines(boldItalicCrossedTextInHeadersResult)
     }
   }
 }

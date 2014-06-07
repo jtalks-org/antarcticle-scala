@@ -7,8 +7,6 @@ import Result._
 import models.ArticleModels.ArticleListModel
 import models.ArticleModels.ArticleDetailsModel
 import models.CommentModels.Comment
-import scalaz._
-import Scalaz._
 import models.database._
 
 object Permissions {

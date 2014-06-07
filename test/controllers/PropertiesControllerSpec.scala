@@ -37,9 +37,11 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
 
   "update instance name" should {
 
-    "update it when it's passed" in {
+    val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> "New Antarcticle")))
+    val badRequest = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
+
+    "pass when incoming json is correct" in {
       val newInstanceName: String = "New Antarcticle"
-      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
       propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".successNel
 
       val page = controller.postChangedInstanceName()(request)
@@ -47,17 +49,13 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
       status(page) must equalTo(200)
     }
 
-    "show error when it isn't passed" in {
-      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
-
-      val page = controller.postChangedInstanceName()(request)
+    "show error for bad request" in {
+      val page = controller.postChangedInstanceName()(badRequest)
 
       status(page) must equalTo(400)
     }
 
     "show error when user isn't authenticated" in {
-      val newInstanceName: String = "New Antarcticle"
-      val request = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("instanceName" -> newInstanceName)))
       propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".failNel
 
       val page = controller.postChangedInstanceName()(request)

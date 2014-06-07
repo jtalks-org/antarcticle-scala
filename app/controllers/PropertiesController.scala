@@ -10,12 +10,10 @@ trait PropertiesController {
 
   def postChangedInstanceName() = Action(parse.json) {
     implicit request =>
-      val instanceName = (request.body \ "instanceName").asOpt[String]
-      instanceName match {
+      (request.body \ "instanceName").asOpt[String] match {
         case None => BadRequest("")
         case Some(x) =>
-          val changeResult = propertiesService.changeInstanceName(x)
-          changeResult.fold(
+          propertiesService.changeInstanceName(x).fold(
             fail = nel => Forbidden(""),
             succ = nel => Ok("")
           )

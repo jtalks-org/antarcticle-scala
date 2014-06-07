@@ -86,9 +86,7 @@ trait ArticleController {
 
   def editArticle(id: Int = 0) = withUser { user => implicit request =>
       articlesService.get(id) match {
-        case Some(article : ArticleDetailsModel) => {
-          Ok(views.html.editArticle(articleForm.fill(article)))
-        }
+        case Some(article : ArticleDetailsModel) => Ok(views.html.editArticle(articleForm.fill(article)))
         case _ => NotFound(views.html.errors.notFound())
       }
   }

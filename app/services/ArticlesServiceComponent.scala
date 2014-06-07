@@ -78,7 +78,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def validate(article: Article) = articleValidator.validate(article)
 
     def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
-        //TODO: create NotFound Result to prevent nested ValidataionNel?
+        //TODO: create NotFound Result to prevent nested ValidationNel?
         article.id.flatMap(articlesRepository.get).map { case (article, _, _) => article }.cata(
           some = persistentArticle => {
             principal.doAuthorizedOrFail(Update, persistentArticle) { () =>

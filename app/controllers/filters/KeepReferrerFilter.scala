@@ -11,6 +11,7 @@ import play.mvc.Http.HeaderNames
  */
 object KeepReferrerFilter extends Filter {
 
+  // todo: it would be nice to extract path prefixes from router or controllers.Assets instead of hardcoding 'em here
   val ignoredPaths = Seq(
     "/fonts",
     "/stylesheets",
@@ -19,13 +20,13 @@ object KeepReferrerFilter extends Filter {
   )
 
   override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
-    next(rh).map { result =>
-      rh.method match {
-          case "GET" if !"XMLHttpRequest".equalsIgnoreCase(rh.headers.get("X-Requested-With").getOrElse(""))
-            && !ignoredPaths.exists(x => rh.path.startsWith(x)) =>
-            result.withSession(HeaderNames.REFERER -> rh.path)
-          case _ => result
-        }
+
+    def shouldSaveReferrer(rh: RequestHeader) = rh.method == "GET" &&
+      !"XMLHttpRequest".equalsIgnoreCase(rh.headers.get("X-Requested-With").getOrElse("")) &&
+      !ignoredPaths.exists(x => rh.path.startsWith(x))
+
+    next(rh).map {
+      result => if (shouldSaveReferrer(rh)) result.withSession(HeaderNames.REFERER -> rh.path) else result
     }
   }
 }

@@ -383,6 +383,7 @@
             }
             this.name = o.name || utils.getUniqueId();
             this.limit = o.limit || 5;
+            this.suggestionFilter = o.suggestionFilter || function(list){return list};
             this.minLength = o.minLength || 1;
             this.header = o.header;
             this.footer = o.footer;
@@ -525,7 +526,7 @@
                     return;
                 }
                 terms = utils.tokenizeQuery(query);
-                suggestions = this._getLocalSuggestions(terms).slice(0, this.limit);
+                suggestions = this.suggestionFilter(this._getLocalSuggestions(terms)).slice(0, this.limit);
                 if (suggestions.length < this.limit && this.transport) {
                     cacheHit = this.transport.get(query, processRemoteData);
                 }

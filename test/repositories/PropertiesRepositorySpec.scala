@@ -16,13 +16,26 @@ class PropertiesRepositorySpec extends Specification with NoTimeConversions {
   "update property" should {
     "update value in db" in withTestDb { implicit session =>
       val propertyName = "property_for_update"
-      val newPropertyValue = Some("new property value of already set property")
+      val newPropertyValue = Some("new property value")
 
       propertiesRepository.updateProperty(propertyName, newPropertyValue)
 
       val changedProperty = getProperty(propertyName)
       changedProperty should beSome
       changedProperty.get.value must_== newPropertyValue
+    }
+  }
+
+  "create new property" should {
+    "create new property in db" in withTestDb { implicit session =>
+      val propertyName = "new property"
+      val newPropertyValue = Some("new property value")
+
+      propertiesRepository.createNewProperty(propertyName, newPropertyValue)
+
+      val createdProperty = getProperty(propertyName)
+      createdProperty should beSome
+      createdProperty.get.value must_== newPropertyValue
     }
   }
 

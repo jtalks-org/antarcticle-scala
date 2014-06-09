@@ -5,11 +5,11 @@ import org.specs2.mutable.Specification
 import services.{PropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
 import util.FakeAuthentication
 import org.specs2.mock.Mockito
-import play.api.test.FakeRequest
+import play.api.test.{WithApplication, FakeRequest}
 import play.api.test.Helpers._
 import scalaz._
 import Scalaz._
-import security.AnonymousPrincipal
+import security.{AuthenticatedUser, AnonymousPrincipal}
 import models.database.CommentRecord
 import scala.Some
 import org.joda.time.DateTime
@@ -38,6 +38,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
     org.mockito.Mockito.reset(usersRepository)
     org.mockito.Mockito.reset(commentsService)
     org.mockito.Mockito.reset(articlesService)
+    controller.reset()
   }
 
   val comment = "content"
@@ -114,23 +115,31 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
     val userModel = new UserModel(1, "name")
     val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
 
-    "have article content and comments" in {
+    "have article content and comments" in new WithApplication  {
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
       articlesService.get(articleId) returns Some(articleDetailsModel)
       commentsService.getByArticle(articleId) returns List()
 
-      val page = controller.editComment(articleId, commentId)(FakeRequest())
+      val page = controller.editComment(articleId, commentId)(FakeRequest()).run
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")
     }
 
-    "return 404 if no comment found for edit" in {
+    "return 404 if no comment found for edit" in new WithApplication {
+      controller.setPrincipal(new AuthenticatedUser(1,"", null))
       articlesService.get(articleId) returns None
 
-      val page = controller.editComment(articleId, commentId)(FakeRequest())
+      val page = controller.editComment(articleId, commentId)(FakeRequest()).run
 
       status(page) must equalTo(404)
       contentType(page) must beSome("text/html")
+    }
+
+    "redirect non-authenticated user to login page" in new WithApplication {
+      val page = controller.editComment(articleId, commentId)(FakeRequest()).run
+
+      status(page) must equalTo(303)
     }
   }
 

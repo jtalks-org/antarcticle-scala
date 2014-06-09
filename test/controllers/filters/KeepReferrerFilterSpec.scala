@@ -33,7 +33,7 @@ class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeE
 
     "not set referrer for javascript resources" in {
       running(FakeApplication(additionalConfiguration = Map("application.secret" -> "test"))) {
-        val requestUrl = "/javascripts/default.js"
+        val requestUrl = "context/javascripts/default.js"
         val request = FakeRequest("GET", requestUrl, headers = FakeHeaders(), body = "")
 
         await(KeepReferrerFilter(action)(request).run)
@@ -44,7 +44,7 @@ class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeE
 
     "not set referrer for style resources" in {
       running(FakeApplication(additionalConfiguration = Map("application.secret" -> "test"))) {
-        val requestUrl = "/stylesheets/style.css"
+        val requestUrl = "context/stylesheets/style.css"
         val request = FakeRequest("GET", requestUrl, headers = FakeHeaders(), body = "")
 
         await(KeepReferrerFilter(action)(request).run)
@@ -55,7 +55,7 @@ class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeE
 
     "not set referrer for images" in {
       running(FakeApplication(additionalConfiguration = Map("application.secret" -> "test"))) {
-        val requestUrl = "/images/logo.png"
+        val requestUrl = "context/images/logo.png"
         val request = FakeRequest("GET", requestUrl, headers = FakeHeaders(), body = "")
 
         await(KeepReferrerFilter(action)(request).run)
@@ -66,7 +66,7 @@ class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeE
 
     "not set referrer for fonts" in {
       running(FakeApplication(additionalConfiguration = Map("application.secret" -> "test"))) {
-        val requestUrl = "/fonts/FontAwesome.otf"
+        val requestUrl = "context/fonts/FontAwesome.otf"
         val request = FakeRequest("GET", requestUrl, headers = FakeHeaders(), body = "")
 
         await(KeepReferrerFilter(action)(request).run)

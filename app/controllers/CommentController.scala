@@ -48,7 +48,7 @@ trait CommentController {
     )
   }
 
-  def editComment(articleId: Int, commentId: Int) = Action { implicit request =>
+  def editComment(articleId: Int, commentId: Int) = withUser { user => implicit request =>
     articlesService.get(articleId) match {
       case article : Some[ArticleDetailsModel] =>
         Ok(views.html.editComment(article.get, commentsService.getByArticle(articleId), commentId))

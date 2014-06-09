@@ -13,17 +13,17 @@ object KeepReferrerFilter extends Filter {
 
   // todo: it would be nice to extract path prefixes from router or controllers.Assets instead of hardcoding 'em here
   val ignoredPaths = Seq(
-    "/fonts",
-    "/stylesheets",
-    "/images",
-    "/javascripts"
+    "/fonts/",
+    "/stylesheets/",
+    "/images/",
+    "/javascripts/"
   )
 
   override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
 
     def shouldSaveReferrer(rh: RequestHeader) = rh.method == "GET" &&
       !"XMLHttpRequest".equalsIgnoreCase(rh.headers.get("X-Requested-With").getOrElse("")) &&
-      !ignoredPaths.exists(x => rh.path.startsWith(x))
+      !ignoredPaths.exists(x => rh.path.contains(x))
 
     next(rh).map {
       result => if (shouldSaveReferrer(rh)) result.withSession(HeaderNames.REFERER -> rh.path) else result

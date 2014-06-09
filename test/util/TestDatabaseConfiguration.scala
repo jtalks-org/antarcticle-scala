@@ -83,9 +83,8 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     )
 
     properties ++= Seq(
-      Property(Some(1), "changed_property", Some("changed property for a test"), "default value of changed property for a test", time),
-      Property(Some(2), "not_changed_property", None, "default value of not changed property for a test", time),
-      Property(Some(3), "already_changed_property", Some("value of already changed property"), "default value of already changed property", time)
+      Property(Some(1), "property", Some("property for a test"), "default value of property for a test", time),
+      Property(Some(2), "property_for_update", Some("property for update"), "property for update", time)
     )
   }
 }

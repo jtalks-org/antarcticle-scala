@@ -9,7 +9,9 @@ trait PropertiesRepositoryComponent {
   val propertiesRepository: PropertiesRepository
 
   trait PropertiesRepository {
-    def changeProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session)
+    def updateProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session)
+
+    def createNewProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session)
 
     def getProperty(propertyName: String)(implicit session: JdbcBackend#Session): Option[Property]
   }
@@ -26,16 +28,13 @@ trait PropertiesRepositoryComponentImpl extends PropertiesRepositoryComponent {
     val updateValueCompiled = Compiled((name: Column[String]) => properties.filter(name === _.name).map(_.value))
     val compiledForInsert = properties.insertInvoker
 
-    def changeProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session) {
-      val editedProperty = getProperty(propertyName)
-      editedProperty match {
-        case Some(x) =>
-          updateValueCompiled(propertyName).update(value)
-        case None => {
-          val newProperty = Property(None, propertyName, value, value.getOrElse(""), DateTime.now)
-          compiledForInsert.insert(newProperty)
-        }
-      }
+    def updateProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session) {
+      updateValueCompiled(propertyName).update(value)
+    }
+
+    def createNewProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session) {
+      val newProperty = Property(None, propertyName, value, value.getOrElse(""), DateTime.now)
+      compiledForInsert.insert(newProperty)
     }
 
     def getProperty(propertyName: String)(implicit session: JdbcBackend#Session) =

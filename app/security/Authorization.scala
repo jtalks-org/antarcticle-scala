@@ -25,6 +25,7 @@ object Entities {
   case object Comment extends Entity
   case object Notification extends Entity
   case object Users extends Entity
+  case object Property extends Entity
 }
 
 // user "roles"

@@ -10,8 +10,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.FakeHeaders
 import security.{Principal, AnonymousPrincipal, Authorities, AuthenticatedUser}
-import scalaz._
-import Scalaz._
+import security.Result.{Authorized, NotAuthorized}
 
 
 class PropertiesControllerSpec extends Specification with Mockito with AfterExample {
@@ -41,8 +40,7 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
     val badRequest = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
 
     "pass when incoming json is correct" in {
-      val newInstanceName: String = "New Antarcticle"
-      propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".successNel
+      propertiesService.changeInstanceName(anyString)(any[Principal]) returns Authorized(Unit)
 
       val page = controller.postChangedInstanceName()(request)
 
@@ -55,12 +53,12 @@ class PropertiesControllerSpec extends Specification with Mockito with AfterExam
       status(page) must equalTo(400)
     }
 
-    "show error when user isn't authenticated" in {
-      propertiesService.changeInstanceName(anyString)(any[Principal]) returns "".failNel
+    "show error when user isn't admin" in {
+      propertiesService.changeInstanceName(anyString)(any[Principal]) returns NotAuthorized()
 
       val page = controller.postChangedInstanceName()(request)
 
-      status(page) must equalTo(403)
+      status(page) must equalTo(401)
     }
   }
 }

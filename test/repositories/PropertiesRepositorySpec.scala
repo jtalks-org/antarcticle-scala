@@ -13,23 +13,12 @@ class PropertiesRepositorySpec extends Specification with NoTimeConversions {
   import repository._
   import profile.simple._
 
-  "change property" should {
-    "set value when it hasn't already set" in withTestDb { implicit session =>
-      val propertyName = "not_changed_property"
-      val propertyValue = Some("new property value")
-
-      propertiesRepository.changeProperty(propertyName, propertyValue)
-
-      val changedProperty = getProperty(propertyName)
-      changedProperty should beSome
-      changedProperty.get.value must_== propertyValue
-    }
-
-    "set new value when it's already defined" in withTestDb { implicit session =>
-      val propertyName = "already_changed_property"
+  "update property" should {
+    "update value in db" in withTestDb { implicit session =>
+      val propertyName = "property_for_update"
       val newPropertyValue = Some("new property value of already set property")
 
-      propertiesRepository.changeProperty(propertyName, newPropertyValue)
+      propertiesRepository.updateProperty(propertyName, newPropertyValue)
 
       val changedProperty = getProperty(propertyName)
       changedProperty should beSome
@@ -39,10 +28,10 @@ class PropertiesRepositorySpec extends Specification with NoTimeConversions {
 
   "get property" should {
     "return it by name" in withTestDb { implicit session =>
-      val propertyName = "changed_property"
+      val propertyName = "property"
       val expectedPropertyId = Some(1)
-      val expectedValue = Some("changed property for a test")
-      val expectedDefaultValue = "default value of changed property for a test"
+      val expectedValue = Some("property for a test")
+      val expectedDefaultValue = "default value of property for a test"
 
       val foundProperty = propertiesRepository.getProperty(propertyName)
 

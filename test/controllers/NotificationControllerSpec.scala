@@ -1,6 +1,6 @@
 package controllers
 
-import services.{PropertiesServiceComponent, NotificationsServiceComponent}
+import services.{ApplicationPropertiesServiceComponent, NotificationsServiceComponent}
 import security.{Principal, Authorities}
 import java.sql.Timestamp
 
@@ -19,12 +19,12 @@ import models.database.Notification
 class NotificationControllerSpec extends Specification with Mockito with AfterExample {
   object controller extends NotificationsController
     with NotificationsServiceComponent
-    with PropertiesServiceComponent
+    with ApplicationPropertiesServiceComponent
     with FakeAuthentication
     with PropertiesProvider {
     override val notificationsService = mock[NotificationsService]
     override val usersRepository = mock[UsersRepository]
-    override val propertiesService = mock[PropertiesService]
+    override val propertiesService = mock[ApplicationPropertiesService]
   }
 
   import controller._

@@ -1,29 +1,29 @@
 package repositories
 
-import models.database.{Property, Profile, PropertiesSchemaComponent}
+import models.database.{ApplicationProperty, Profile, ApplicationPropertiesSchemaComponent}
 import scala.slick.jdbc.JdbcBackend
 import utils.Implicits._
 import org.joda.time.DateTime
 
-trait PropertiesRepositoryComponent {
-  val propertiesRepository: PropertiesRepository
+trait ApplicationPropertiesRepositoryComponent {
+  val propertiesRepository: ApplicationPropertiesRepository
 
-  trait PropertiesRepository {
+  trait ApplicationPropertiesRepository {
     def updateProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session)
 
     def createNewProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session)
 
-    def getProperty(propertyName: String)(implicit session: JdbcBackend#Session): Option[Property]
+    def getProperty(propertyName: String)(implicit session: JdbcBackend#Session): Option[ApplicationProperty]
   }
 }
 
-trait PropertiesRepositoryComponentImpl extends PropertiesRepositoryComponent {
-  this: PropertiesSchemaComponent with Profile =>
-  val propertiesRepository = new PropertiesRepositoryImpl
+trait ApplicationPropertiesRepositoryComponentImpl extends ApplicationPropertiesRepositoryComponent {
+  this: ApplicationPropertiesSchemaComponent with Profile =>
+  val propertiesRepository = new ApplicationPropertiesRepositoryImpl
 
   import profile.simple._
 
-  class PropertiesRepositoryImpl extends PropertiesRepository {
+  class ApplicationPropertiesRepositoryImpl extends ApplicationPropertiesRepository {
     val compiledByName = Compiled((name: Column[String]) => properties.filter(name === _.name))
     val updateValueCompiled = Compiled((name: Column[String]) => properties.filter(name === _.name).map(_.value))
     val compiledForInsert = properties.insertInvoker
@@ -33,7 +33,7 @@ trait PropertiesRepositoryComponentImpl extends PropertiesRepositoryComponent {
     }
 
     def createNewProperty(propertyName: String, value: Option[String])(implicit session: JdbcBackend#Session) {
-      val newProperty = Property(None, propertyName, value, value.getOrElse(""), DateTime.now)
+      val newProperty = ApplicationProperty(None, propertyName, value, value.getOrElse(""), DateTime.now)
       compiledForInsert.insert(newProperty)
     }
 

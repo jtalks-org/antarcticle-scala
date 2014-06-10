@@ -1,13 +1,13 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import services.PropertiesServiceComponent
+import services.ApplicationPropertiesServiceComponent
 import security.Authentication
 import security.Result.{NotAuthorized, Authorized}
 
 
-trait PropertiesController {
-  this: Controller with PropertiesServiceComponent with Authentication =>
+trait ApplicationPropertiesController {
+  this: Controller with ApplicationPropertiesServiceComponent with Authentication =>
 
   def postChangedInstanceName() = Action(parse.json) {
     implicit request =>
@@ -15,10 +15,8 @@ trait PropertiesController {
         case None => BadRequest("")
         case Some(x) =>
           propertiesService.changeInstanceName(x) match {
-            case Authorized(created) =>
-              Ok("")
-            case NotAuthorized() =>
-              Unauthorized("You are not authorized to create comments")
+            case Authorized(created) => Ok("")
+            case NotAuthorized() => Unauthorized("You are not authorized to create comments")
           }
       }
   }

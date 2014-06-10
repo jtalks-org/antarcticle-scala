@@ -38,7 +38,7 @@ DELETE        /notifications                     @controllers.NotificationsContr
 # Tags
 GET           /tags                              @controllers.TagsController.listTags()
 # Administration
-POST           /administration/appname           @controllers.PropertiesController.postChangedInstanceName()
+POST           /administration/appname           @controllers.ApplicationPropertiesController.postChangedInstanceName()
 # Static resources: styles, scripts, images, fonts, etc
 GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)
 GET           /javascripts/:file                 controllers.Assets.at(path="/public/javascripts", file)

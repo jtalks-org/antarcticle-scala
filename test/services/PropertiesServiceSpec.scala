@@ -6,9 +6,9 @@ import org.specs2.mock.Mockito
 import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers
 import util.FakeSessionProvider
-import repositories.PropertiesRepositoryComponent
+import repositories.ApplicationPropertiesRepositoryComponent
 import util.FakeSessionProvider._
-import models.database.Property
+import models.database.ApplicationProperty
 import java.sql.Timestamp
 import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
 import security.Result.Authorized
@@ -17,8 +17,8 @@ import org.joda.time.DateTime
 class PropertiesServiceSpec extends Specification
   with NoTimeConversions with Mockito with BeforeExample with ValidationMatchers{
 
-  object service extends PropertiesServiceComponentImpl with PropertiesRepositoryComponent with FakeSessionProvider {
-    val propertiesRepository = mock[PropertiesRepository]
+  object service extends ApplicationPropertiesServiceComponentImpl with ApplicationPropertiesRepositoryComponent with FakeSessionProvider {
+    val propertiesRepository = mock[ApplicationPropertiesRepository]
   }
 
   import service._
@@ -38,7 +38,7 @@ class PropertiesServiceSpec extends Specification
     "return instance name saved in database" in {
       val expectedInstanceName = "JTalks"
       val propertyName = "INSTANCE_NAME"
-      val property = Property(Some(1), propertyName, Some(expectedInstanceName), "Default value", time)
+      val property = ApplicationProperty(Some(1), propertyName, Some(expectedInstanceName), "Default value", time)
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
@@ -50,7 +50,7 @@ class PropertiesServiceSpec extends Specification
     "return default instance name when it hasn't been set yet" in {
       val propertyName = "INSTANCE_NAME"
       val propertyDefaultValue = "ANTARCTICLE"
-      val property = Property(Some(1), propertyName, None, propertyDefaultValue, time)
+      val property = ApplicationProperty(Some(1), propertyName, None, propertyDefaultValue, time)
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
@@ -78,7 +78,7 @@ class PropertiesServiceSpec extends Specification
     "update property when it's already exist" in {
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
-      val existProperty = Property(None, propertyName, Some("value"), "value", time)
+      val existProperty = ApplicationProperty(None, propertyName, Some("value"), "value", time)
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(existProperty)
 
       val result = propertiesService.changeInstanceName(newValue)(adminUser)

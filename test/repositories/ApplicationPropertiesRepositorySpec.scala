@@ -7,10 +7,10 @@ import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import scala.Some
 
-class PropertiesRepositorySpec extends Specification with NoTimeConversions {
-  object repository extends TestDatabaseConfigurationWithFixtures with Schema with PropertiesRepositoryComponentImpl
+class ApplicationPropertiesRepositorySpec extends Specification with NoTimeConversions {
+  object repository$Application extends TestDatabaseConfigurationWithFixtures with Schema with ApplicationPropertiesRepositoryComponentImpl
 
-  import repository._
+  import repository$Application._
   import profile.simple._
 
   "update property" should {

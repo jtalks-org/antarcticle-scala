@@ -2,7 +2,7 @@ package controllers
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import services.{PropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
+import services.{ApplicationPropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
 import util.FakeAuthentication
 import org.specs2.specification.AfterExample
 import com.github.nscala_time.time.Imports._
@@ -25,13 +25,13 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   object controller extends ArticleController
                       with ArticlesServiceComponent
                       with CommentsServiceComponent
-                      with PropertiesServiceComponent
+                      with ApplicationPropertiesServiceComponent
                       with FakeAuthentication
                       with PropertiesProvider {
      override val articlesService = mock[ArticlesService]
      override val usersRepository = mock[UsersRepository]
      override val commentsService = mock[CommentsService]
-     override val propertiesService = mock[PropertiesService]
+     override val propertiesService = mock[ApplicationPropertiesService]
    }
 
   import controller._

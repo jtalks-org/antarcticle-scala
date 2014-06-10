@@ -2,7 +2,7 @@ package controllers
 
 import org.specs2.specification.AfterExample
 import org.specs2.mutable.Specification
-import services.{PropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
+import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
 import util.FakeAuthentication
 import org.specs2.mock.Mockito
 import play.api.test.{WithApplication, FakeRequest}
@@ -23,13 +23,13 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
   object controller extends CommentController
                       with CommentsServiceComponent
                       with ArticlesServiceComponent
-                      with PropertiesServiceComponent
+                      with ApplicationPropertiesServiceComponent
                       with FakeAuthentication
                       with PropertiesProvider {
     override val usersRepository = mock[UsersRepository]
     override val commentsService = mock[CommentsService]
     override val articlesService = mock[ArticlesService]
-    override val propertiesService = mock[PropertiesService]
+    override val propertiesService = mock[ApplicationPropertiesService]
   }
 
   import controller._

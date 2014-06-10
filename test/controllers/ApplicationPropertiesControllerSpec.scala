@@ -3,7 +3,7 @@ package controllers
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.AfterExample
-import services.PropertiesServiceComponent
+import services.ApplicationPropertiesServiceComponent
 import util.FakeAuthentication
 import play.api.test._
 import play.api.libs.json.Json
@@ -13,13 +13,13 @@ import security.{Principal, AnonymousPrincipal, Authorities, AuthenticatedUser}
 import security.Result.{Authorized, NotAuthorized}
 
 
-class PropertiesControllerSpec extends Specification with Mockito with AfterExample {
+class ApplicationPropertiesControllerSpec extends Specification with Mockito with AfterExample {
 
-  object controller extends PropertiesController
-  with PropertiesServiceComponent
+  object controller extends ApplicationPropertiesController
+  with ApplicationPropertiesServiceComponent
   with FakeAuthentication {
     override val usersRepository = mock[UsersRepository]
-    override val propertiesService = mock[PropertiesService]
+    override val propertiesService = mock[ApplicationPropertiesService]
   }
 
   import controller._

@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import services.{PropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
+import services.{ApplicationPropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
 import security.Authentication
 import models.database.UserRecord
 import scala.Some
@@ -16,7 +16,7 @@ import security.Result.{NotAuthorized, Authorized}
  * please refer to [[controllers.AuthenticationController]] for further details.
  */
 trait UserController {
-  this: Controller with ArticlesServiceComponent with UsersServiceComponent with PropertiesServiceComponent with PropertiesProvider with Authentication =>
+  this: Controller with ArticlesServiceComponent with UsersServiceComponent with ApplicationPropertiesServiceComponent with PropertiesProvider with Authentication =>
 
   def viewProfile(userName: String, tags: Option[String] = None) = viewProfilePaged(userName, 1, tags)
 

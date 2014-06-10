@@ -1,4 +1,4 @@
-@()(implicit user: Principal = security.AnonymousPrincipal, properties: models.PropertyModels.MainPageProperties = models.PropertyModels.MainPageProperties(""))
+@()(implicit user: Principal = security.AnonymousPrincipal, properties: models.ApplicationPropertyModels.MainTemplateProperties = models.ApplicationPropertyModels.MainTemplateProperties(""))
 @templates.main("Internal service error"){
   <div class="hero-unit">
     <div class="container">

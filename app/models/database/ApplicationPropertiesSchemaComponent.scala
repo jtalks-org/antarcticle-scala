@@ -2,6 +2,12 @@ package models.database
 
 import java.sql.Timestamp
 
+/**
+ * Represent application property, that sets a configuration for whole application.
+ * Application properties can be edited by admins only, all other users don't
+ * have permissions to change app properties.
+ * For example admin can change the name of application and new name will be displayed for all users.
+ */
 case class ApplicationProperty (id: Option[Int], name: String, var value: Option[String], defaultValue: String, createdAt: Timestamp)
 
 trait ApplicationPropertiesSchemaComponent {

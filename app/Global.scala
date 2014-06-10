@@ -1,6 +1,6 @@
 import controllers.filters.{KeepReferrerFilter, CsrfFilter}
 import controllers.PropertiesProvider
-import models.PropertyModels.MainPageProperties
+import models.ApplicationPropertyModels.MainTemplateProperties
 import play.api.Logger
 import play.api.mvc.Results._
 import play.api.mvc.{SimpleResult, WithFilters, RequestHeader}

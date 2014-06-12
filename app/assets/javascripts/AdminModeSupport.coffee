@@ -62,7 +62,8 @@ exitAdminMode = () ->
   $('#application-name-container')
   .attr('contenteditable', "false")
   .removeClass("editable-content")
-  .unbind('click');
+  .unbind('click')
+  .unbind('keypress')
   # alter menu item
   $('#toggle-admin-mode')
   .text("Enter admin mode")

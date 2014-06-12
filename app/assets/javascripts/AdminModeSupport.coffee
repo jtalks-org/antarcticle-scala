@@ -15,16 +15,20 @@ jQuery(=>
   )
 )
 
+operationInProgress = false
+
 enterAdminMode = () ->
   $('#application-icon').removeClass("glyphicon-book").addClass("glyphicon-pencil")
   # make app name editable
   $('#application-name-container')
   .attr('contenteditable', "true")
+  .addClass("editable-content")
   .click((e) ->
     e.preventDefault()
   )
   .keypress((e) ->
-    if (e.which == 13)
+    if (e.which == 13 && !operationInProgress)
+      operationInProgress == true
       e.preventDefault()
       $.ajax({
         type: "POST",
@@ -44,7 +48,7 @@ enterAdminMode = () ->
   sessionStorage.adminMode = true
   $('#toggle-admin-mode')
   .text("Exit admin mode")
-  .click((e) ->
+  .closest('li').click((e) ->
     exitAdminMode()
     e.preventDefault()
   )
@@ -57,11 +61,12 @@ exitAdminMode = () ->
   # turn app name editor into plain caption
   $('#application-name-container')
   .attr('contenteditable', "false")
+  .removeClass("editable-content")
   .unbind('click');
   # alter menu item
   $('#toggle-admin-mode')
   .text("Enter admin mode")
-  .click((e) ->
+  .closest('li').click((e) ->
     enterAdminMode()
     e.preventDefault()
   )

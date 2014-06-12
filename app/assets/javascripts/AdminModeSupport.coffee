@@ -18,6 +18,7 @@ jQuery(=>
 operationInProgress = false
 
 enterAdminMode = () ->
+  oldApplicationName = $('#application-name-container').text()
   $('#application-icon').removeClass("glyphicon-book").addClass("glyphicon-pencil")
   # make app name editable
   $('#application-name-container')
@@ -27,22 +28,33 @@ enterAdminMode = () ->
     e.preventDefault()
   )
   .keypress((e) ->
-    if (e.which == 13 && !operationInProgress)
-      operationInProgress == true
+    if e.keyCode == 13  # Enter
       e.preventDefault()
-      $.ajax({
-        type: "POST",
-        url: $('#toggle-admin-mode').closest('a').attr('data-href'),
-        contentType: 'application/json',
-        data: JSON.stringify({ instanceName: this.innerText}),
-        success: () ->
-          showSuccessNotification("Application name has been updated")
-          $('#application-name-container').blur()
-        error: (data) ->
-          showFailureNotification(data)
-          $('#application-name-container').focus()
-      })
-
+      if !operationInProgress
+        operationInProgress = true
+        $.ajax({
+          type: "POST",
+          url: $('#toggle-admin-mode').closest('a').attr('data-href'),
+          contentType: 'application/json',
+          data: JSON.stringify({ instanceName: this.innerText}),
+          statusCode:{
+            401: () ->
+              showFailureNotification("Your session has ended. Please refresh the page.")
+              $('#application-name-container').focus()
+          }
+          success: () ->
+            showSuccessNotification("Application name has been updated")
+            $('#application-name-container').blur()
+          error: (data) ->
+            showFailureNotification(data)
+            $('#application-name-container').focus()
+          complete: () ->
+            operationInProgress = false
+        })
+  )
+  .keyup ((e) ->
+    if e.keyCode == 27  # Escape
+      $('#application-name-container').text(oldApplicationName).blur()
   )
   # alter menu item
   sessionStorage.adminMode = true
@@ -63,7 +75,8 @@ exitAdminMode = () ->
   .attr('contenteditable', "false")
   .removeClass("editable-content")
   .unbind('click')
-  .unbind('keypress')
+  .removeAttr('keypress')
+  .removeAttr('keyup')
   # alter menu item
   $('#toggle-admin-mode')
   .text("Enter admin mode")

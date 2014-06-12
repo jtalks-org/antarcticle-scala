@@ -30,10 +30,9 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
 
     def getInstanceName(): String = withSession {
       implicit session =>
+        // todo: bind default into property class itself
         val defaultValue = "ANTARCTICLE"
-        val property = propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty)
-
-        property match {
+        propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
           case Some(x) => x.value.getOrElse(defaultValue)
           case None => defaultValue
         }
@@ -42,8 +41,7 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
     def changeInstanceName(newName: String)(implicit principal: Principal) = withTransaction {
       implicit session =>
         principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
-            val property = propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty)
-            property match {
+            propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
               case Some(x) =>
                 propertiesRepository.updateProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
               case None =>

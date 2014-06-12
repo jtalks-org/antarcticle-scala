@@ -5,7 +5,11 @@ import services.ApplicationPropertiesServiceComponent
 import security.Authentication
 import security.Result.{NotAuthorized, Authorized}
 
-
+/**
+ * Manages application properties - global per-instance values, that
+ * represent application configuration: application instance name,
+ * default language and so on.
+ */
 trait ApplicationPropertiesController {
   this: Controller with ApplicationPropertiesServiceComponent with Authentication =>
 
@@ -16,7 +20,7 @@ trait ApplicationPropertiesController {
         case Some(x) =>
           propertiesService.changeInstanceName(x) match {
             case Authorized(created) => Ok("")
-            case NotAuthorized() => Unauthorized("You are not authorized to create comments")
+            case NotAuthorized() => Unauthorized("You are not authorized to perform this action")
           }
       }
   }

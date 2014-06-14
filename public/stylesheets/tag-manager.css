@@ -20,6 +20,11 @@
     -webkit-transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
     vertical-align: middle;
 }
+
+.tm-tag-default:hover {
+    text-decoration: underline;
+}
+
 .tm-tag .tm-tag-remove {
     color: #000000;
     font-weight: bold;

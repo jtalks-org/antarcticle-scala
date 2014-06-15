@@ -18,10 +18,17 @@ jQuery(=>
 operationInProgress = false
 
 enterAdminMode = () ->
-  oldApplicationName = $('#application-name-container').text()
-  $('#application-icon').removeClass("glyphicon-book").addClass("glyphicon-pencil")
+  appNameContainer = $('#application-name-container')
+  oldApplicationName = appNameContainer.text()
+  $('#application-icon')
+  .removeClass("glyphicon-book")
+  .addClass("glyphicon-pencil")
+  .click((e) ->
+    e.preventDefault()
+    appNameContainer.focus()
+  )
   # make app name editable
-  $('#application-name-container')
+  appNameContainer
   .attr('contenteditable', "true")
   .addClass("editable-content")
   .click((e) ->
@@ -36,7 +43,7 @@ enterAdminMode = () ->
           type: "POST",
           url: $('#toggle-admin-mode').closest('a').attr('data-href'),
           contentType: 'application/json',
-          data: JSON.stringify({ instanceName: this.innerText}),
+          data: JSON.stringify({ instanceName: this.textContent}),
           statusCode:{
             401: () ->
               showFailureNotification("Your session has ended. Please refresh the page.")
@@ -54,7 +61,7 @@ enterAdminMode = () ->
   )
   .keyup ((e) ->
     if e.keyCode == 27  # Escape
-      $('#application-name-container').text(oldApplicationName).blur()
+      appNameContainer.text(oldApplicationName).blur()
   )
   # alter menu item
   sessionStorage.adminMode = true
@@ -70,6 +77,7 @@ exitAdminMode = () ->
   $('#application-icon')
   .removeClass("glyphicon-pencil")
   .addClass("glyphicon-book")
+  .unbind('click')
   # turn app name editor into plain caption
   $('#application-name-container')
   .attr('contenteditable', "false")

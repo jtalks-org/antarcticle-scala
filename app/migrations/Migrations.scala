@@ -1,7 +1,7 @@
 package migrations
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend, GetResult}
+import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
 
 /**
  * This class contains all database schema migrations, which are applied to the database
@@ -89,4 +89,12 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     }
   }
 
+  val properValueTypeForApplicationProperties = new Migration {
+    val version: Int = 13
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE properties MODIFY value TEXT").execute
+      Q.updateNA("ALTER TABLE properties MODIFY default_value TEXT").execute
+    }
+  }
 }

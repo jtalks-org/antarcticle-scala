@@ -15,11 +15,13 @@
     <div class="page-wrapper">
       <nav class="navbar navbar-inverse nav">
         <div class="col-md-8 global-block">
-          <ul class="nav navbar-nav">
+          <ul class="nav navbar-nav brand-container">
             <li>
               <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
-                <i id="application-icon" class="glyphicon glyphicon-book"></i>
-                <span id="application-name-container">@properties.instanceName</span>
+                <nobr>
+                  <i id="application-icon" class="glyphicon glyphicon-book"></i>
+                  <span id="application-name-container" class="ellipsis-overflow">@properties.instanceName</span>
+                </nobr>
               </a>
             </li>
           </ul>

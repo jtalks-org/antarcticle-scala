@@ -19,8 +19,8 @@ trait ApplicationPropertiesSchemaComponent {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name", O.NotNull)
-    def value = column[Option[String]]("value", O.Nullable)
-    def defaultValue = column[String]("default_value", O.NotNull)
+    def value = column[Option[String]]("value", O.Nullable, O.DBType("text"))
+    def defaultValue = column[String]("default_value", O.NotNull, O.DBType("text"))
     def createdAt = column[Timestamp]("created_at", O.Nullable)
 
     def * = (id.?, name, value, defaultValue, createdAt) <> (ApplicationProperty.tupled, ApplicationProperty.unapply)

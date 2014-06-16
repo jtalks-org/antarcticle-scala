@@ -18,6 +18,7 @@ jQuery(=>
 operationInProgress = false
 
 enterAdminMode = () ->
+  # change icon into pencil
   appNameContainer = $('#application-name-container')
   oldApplicationName = appNameContainer.text()
   $('#application-icon')
@@ -37,27 +38,7 @@ enterAdminMode = () ->
   .keypress((e) ->
     if e.keyCode == 13  # Enter
       e.preventDefault()
-      if !operationInProgress
-        operationInProgress = true
-        $.ajax({
-          type: "POST",
-          url: $('#toggle-admin-mode').closest('a').attr('data-href'),
-          contentType: 'application/json',
-          data: JSON.stringify({ instanceName: this.textContent}),
-          statusCode:{
-            401: () ->
-              showFailureNotification("Your session has ended. Please refresh the page.")
-              $('#application-name-container').focus()
-          }
-          success: () ->
-            showSuccessNotification("Application name has been updated")
-            $('#application-name-container').blur()
-          error: (data) ->
-            showFailureNotification(data)
-            $('#application-name-container').focus()
-          complete: () ->
-            operationInProgress = false
-        })
+      submitData(this.textContent)
   )
   .keyup ((e) ->
     if e.keyCode == 27  # Escape
@@ -71,6 +52,32 @@ enterAdminMode = () ->
     exitAdminMode()
     e.preventDefault()
   )
+
+submitData = (newName) ->
+  if !operationInProgress
+    if (newName.length > 256)
+      showFailureNotification("Application name cannot exceed 256 chars")
+    else
+      operationInProgress = true
+      $.ajax({
+        type: "POST",
+        url: $('#toggle-admin-mode').closest('a').attr('data-href'),
+        contentType: 'application/json',
+        data: JSON.stringify({ instanceName: newName}),
+        statusCode:{
+          401: () ->
+            showFailureNotification("Your session has ended. Please refresh the page.")
+            $('#application-name-container').focus()
+        }
+        success: () ->
+          showSuccessNotification("Application name has been updated")
+          $('#application-name-container').blur()
+        error: (data) ->
+          showFailureNotification(data)
+          $('#application-name-container').focus()
+        complete: () ->
+          operationInProgress = false
+      })
 
 exitAdminMode = () ->
   sessionStorage.adminMode = false

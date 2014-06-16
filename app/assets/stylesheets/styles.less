@@ -25,10 +25,29 @@
   border-radius: 0px;
   min-height: 35px !important;
 }
-
-.navbar-brand {
-  padding-top: 7px !important;
-  padding-bottom: 7px !important;
+.brand-container {
+  display: inline-block;
+  max-width: 60%;
+  li{
+    width: 100%;
+  }
+  .navbar-brand {
+    max-width: 100%;
+    padding-top: 8px !important;
+    padding-bottom: 2px !important;
+    text-align: center;
+    nobr {
+      display: inline-block;
+      width: 100%;
+      span {
+        display: inline-block;
+        width: 100%;
+      }
+      i {
+        display: inline-block;
+      }
+    }
+  }
 }
 
 .navbar-nav > li > a {

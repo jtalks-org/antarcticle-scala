@@ -79,7 +79,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
                 record
               },
               none = {
-                val record = UserRecord(None, username, encodedPassword, false, salt, userInfo.firstName, userInfo.lastName)
+                val record = UserRecord(None, userInfo.username, encodedPassword, false, salt, userInfo.firstName, userInfo.lastName)
                 val userId = usersRepository.insert(record)
                 record.copy(id = some(userId))
               }

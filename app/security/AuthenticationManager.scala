@@ -34,10 +34,11 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
       for {
          status <- (xmlResponseBody \\ "status").headOption.map(_.text) if status == "success"
          enabled <- (xmlResponseBody \\ "enabled").headOption.map(_.text) if enabled == "true"
+         returnedUsername <- (xmlResponseBody \\ "username").headOption.map(_.text)
          firstName = (xmlResponseBody \\ "firstName").headOption.map(_.text)
          lastName = (xmlResponseBody \\ "lastName").headOption.map(_.text)
          password = (xmlResponseBody \\ "password").headOption.map(_.text)
-      } yield UserInfo(username, "todo",  firstName, lastName)
+      } yield UserInfo(returnedUsername, "todo",  firstName, lastName)
     }
   }
 

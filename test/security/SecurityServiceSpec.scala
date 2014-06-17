@@ -71,17 +71,36 @@ class SecurityServiceSpec extends Specification
 
 
       "create new user when not exists" in {
-        authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
-        tokenProvider.generateToken returns generatedToken
 
-        securityService.signInUser(username, password) must beSuccessful
+        def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
+          val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
+          authenticationManager.authenticate(usernameIgnoreCase, ===(password)) returns future(userInfo.some)
+          usersRepository.findByUserName(usernameIgnoreCase)(anySession) returns Nil
+          tokenProvider.generateToken returns generatedToken
 
-        val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
-        there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
-        there was no(usersRepository).updatePassword(anyInt, anyString, any[Option[String]])(anySession)
+          doTest
+
+          val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
+          there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
+          there was no(usersRepository).updatePassword(anyInt, anyString, any[Option[String]])(anySession)
+        }
+
+        "and username has a correct case" in {
+          withMockedAuthenticationManagerAndTokenProvider {
+            securityService.signInUser(username, password) must beSuccessful
+
+            there was one (authenticationManager).authenticate(===(username), ===(password))
+          }
+        }
+
+        "and username has another case" in {
+          withMockedAuthenticationManagerAndTokenProvider {
+            securityService.signInUser(username.toUpperCase, password) must beSuccessful
+
+            there was one (authenticationManager).authenticate(===(username.toUpperCase), ===(password))
+          }
+        }
       }
-
 
       "update user when password does not match" in {
 

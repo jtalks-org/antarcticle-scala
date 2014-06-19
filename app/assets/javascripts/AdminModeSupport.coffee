@@ -31,7 +31,6 @@ enterAdminMode = () ->
   # make app name editable
   appNameContainer
   .attr('contenteditable', "true")
-  .addClass("editable-content")
   .click((e) ->
     e.preventDefault()
   )
@@ -88,7 +87,6 @@ exitAdminMode = () ->
   # turn app name editor into plain caption
   $('#application-name-container')
   .attr('contenteditable', "false")
-  .removeClass("editable-content")
   .unbind('click')
   .removeAttr('keypress')
   .removeAttr('keyup')

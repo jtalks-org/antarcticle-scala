@@ -7,7 +7,9 @@
         <div class="main-content">
           <header>
             @templates.prettyDate(article.createdAt)
-          <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+          <div class="article-header">
+            <h2><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></h2>
+          </div>
           </header>
           <div class="body">
             <div class="content description">

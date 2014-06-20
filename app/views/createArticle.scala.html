@@ -1,9 +1,9 @@
-@(form: Form[ArticleModels.Article])(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
-@templates.main("New article") {
+@(form: Form[ArticleModels.Article], title: String)(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
+@templates.main(title) {
   <div class="row">
     <div class="col-md-9 center well2">
       <header class="page-header hide-on-preview">
-        <h2><i class="glyphicon glyphicon-pencil"></i> New article</h2>
+        <h2><i class="glyphicon glyphicon-pencil"></i> @title</h2>
       </header>
       <ul class="nav nav-tabs">
         <li class="active"><a href="#write" data-toggle="tab">Write</a></li>
@@ -23,6 +23,14 @@
                 Editor uses Markdown markup language. You can read reference
                 <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
               </label>
+              <span class="language-selection pull-right">
+                  <label for="language-combo" class="language-label">Choose language:</label>
+                  <select id="language-combo">
+                      <option value="en">English</option>
+                      <option value="ru">Russian</option>
+                      <option value="ua">Ukrainian</option>
+                  </select>
+              </span>
               <textarea id="content" name="content" class="form-control article-input"
               placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
             </div>

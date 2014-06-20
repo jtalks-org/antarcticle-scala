@@ -11,6 +11,7 @@ GET           /signout                           @controllers.AuthenticationCont
 GET           /articles                          @controllers.ArticleController.listArticles(tags: Option[String])
 GET           /articles/page/:page               @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
 GET           /articles/new                      @controllers.ArticleController.getNewArticlePage
+GET           /articles/translate                @controllers.ArticleController.getTranslateArticlePage
 POST          /articles/preview                  @controllers.ArticleController.previewArticle
 POST          /articles/new                      @controllers.ArticleController.postNewArticle
 GET           /articles/:id                      @controllers.ArticleController.viewArticle(id: Int)

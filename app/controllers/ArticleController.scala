@@ -47,11 +47,12 @@ trait ArticleController {
   }
 
   def getNewArticlePage = withUser { user => implicit request =>
-      Ok(views.html.createArticle(articleForm, "New Article"))
+      Ok(views.html.createArticle(articleForm, None))
   }
 
-  def getTranslateArticlePage = withUser { user => implicit request =>
-    Ok(views.html.createArticle(articleForm, "Article Translation"))
+  def getTranslateArticlePage(articleId: Int) = withUser { user => implicit request =>
+    articlesService.get(articleId)
+    Ok(views.html.createArticle(articleForm, articlesService.get(articleId)))
   }
 
   def previewArticle = Action { implicit request =>

@@ -1,9 +1,17 @@
-@(form: Form[ArticleModels.Article], title: String)(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
-@templates.main(title) {
+@(form: Form[ArticleModels.Article], sourceArticle: Option[models.ArticleModels.ArticleDetailsModel])(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
+@templates.main(if (sourceArticle.isDefined) "Article Translation" else "New Article") {
   <div class="row">
     <div class="col-md-9 center well2">
       <header class="page-header hide-on-preview">
-        <h2><i class="glyphicon glyphicon-pencil"></i> @title</h2>
+        @sourceArticle match {
+          case Some(article) => {
+            <h2><i class="glyphicon glyphicon-file"></i> Article Translation</h2>
+            <div><label class="source-article-label">Source article:</label><a href="@routes.ArticleController.viewArticle(article.id)">@article.title</a></div>
+          }
+          case None => {
+            <h2><i class="glyphicon glyphicon-pencil"></i> New Article</h2>
+          }
+        }
       </header>
       <ul class="nav nav-tabs">
         <li class="active"><a href="#write" data-toggle="tab">Write</a></li>

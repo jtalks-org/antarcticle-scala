@@ -83,7 +83,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       byTokenCompiled(token).firstOption
 
     def getByUsername(username: String)(implicit session: JdbcBackend#Session) =
-      byUsernameCompiled(username).firstOption
+      byUsernameCompiled(username).list().find(user => user.username == username)
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
       // todo: cannot be compiled: https://github.com/slick/slick/pull/764

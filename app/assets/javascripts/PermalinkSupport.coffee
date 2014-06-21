@@ -9,7 +9,7 @@ class PermalinkSupport
       $("#comment" + urlParts[1]).addClass("comment-highlighted");
     # install permalink handlers
     $(@selector).click(->
-      html = 'Press Ctrl+C to copy link to clipboard:<br/><br/>'
+      html = 'Copy link to clipboard:<br/><br/>'
       html += '<span id="post-permalink">'
       html += window.location.toString().split('#')[0] + $(this).attr('href')
       html += '</span>'

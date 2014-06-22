@@ -1,0 +1,86 @@
+@(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
+<nav class="navbar navbar-inverse nav">
+  <div class="col-md-9 global-block">
+    <ul class="nav navbar-nav brand-container">
+      <li>
+        <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
+          <nobr>
+            <i id="application-icon" class="glyphicon glyphicon-book"></i>
+            <span id="application-name-container" class="ellipsis-overflow">@properties.instanceName</span>
+          </nobr>
+        </a>
+      </li>
+    </ul>
+    @user match {
+      case authenticatedUser: security.AuthenticatedUser => {
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a id="notifications-link" href="@routes.NotificationsController.getNotifications()"
+            data-target="#" class="dropdown-toggle" data-toggle="dropdown" title="Recent notifications">
+              <i class="glyphicon glyphicon-inbox"></i>
+              <span class="badge notifications-badge"></span>
+            </a>
+            <ul id="notifications-dropdown" class="dropdown-menu inbox-dialog">
+                </ul>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          @authenticatedUser.authority match {
+            case Admin => {
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Administration <b class="caret"></b>
+                      </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a href="#" data-href="@routes.ApplicationPropertiesController.postChangedInstanceName()">
+                      <i class="glyphicon glyphicon-wrench"></i>
+                      <span id="toggle-admin-mode">Your browser does not support admin mode</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="@routes.UserController.listUsers(None)">
+                      <i class="glyphicon glyphicon-user"></i> Role management
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            }
+            case _ => {}
+          }
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            @authenticatedUser.username <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)">
+                <i class="glyphicon glyphicon-file"></i> My articles
+              </a>
+            </li>
+            <li>
+              <a href="@routes.HelpController.markdownHelp()">
+                <i class="glyphicon glyphicon-question-sign"></i> Online help
+              </a>
+            </li>
+            <li>
+              <a href="@routes.AuthenticationController.logout">
+                <i class="glyphicon glyphicon-log-out"></i> Sign out
+              </a>
+            </li>
+          </ul>
+        </li>
+        </ul>
+      }
+      case _ => {
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="@routes.AuthenticationController.showLoginPage">
+              <i class="glyphicon glyphicon-log-in"></i> Sign in
+            </a>
+          </li>
+        </ul>
+      }
+    }
+  </div>
+</nav>

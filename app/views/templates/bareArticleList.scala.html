@@ -1,7 +1,7 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], paginationHandler: Int => Call)
   @import views.helpers.Markdown
-  @if(!page.list.isEmpty) {
-    <section class="articles-list">
+  @if(page.list.nonEmpty) {
+    <section>
     @for(article <- page.list) {
       <article id="@article.id" class="entry">
         <div class="main-content">
@@ -44,11 +44,9 @@
     </section>
   } else {
     <br>
-
-    <div class="articles-not-found" style="">
+    <div class="articles-not-found">
       <h3>There are no articles</h3>
     </div>
   }
-
   @templates.pagination(page, paginationHandler)
 

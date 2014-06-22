@@ -21,7 +21,7 @@
     vertical-align: middle;
 }
 
-.tm-tag-default:hover {
+.tm-tag.pull-right:hover {
     text-decoration: underline;
 }
 

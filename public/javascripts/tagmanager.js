@@ -41,7 +41,7 @@
             validator: null,
             onlyTagList: false,
             tagList: null,
-            fillInputOnTagRemove: false,
+            fillInputOnTagRemove: false
         },
 
         publicMethods = {
@@ -82,7 +82,7 @@
                 // call the validator (if any) and do not let the tag pass if invalid
                 if (opts.validator && !opts.validator(tag)) { return; }
 
-                // dont accept new tags beyond the defined maximum
+                // don't accept new tags beyond the defined maximum
                 if (opts.maxTags > 0 && tlis.length >= opts.maxTags) { return; }
 
                 alreadyInList = false;

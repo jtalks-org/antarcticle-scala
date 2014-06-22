@@ -66,12 +66,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
             val salt = some(Random.alphanumeric.take(64).mkString)
             val encodedPassword = encodePassword(password, salt)
-            val userRecord = usersRepository.findByUserName(username) match {
-              case Nil => none
-              case users => users find { user => user.username === username}
-            }
-
-            userRecord cata(
+            usersRepository.getByUsername(username).cata(
               some = user => {
                 val record = user.copy(password = encodedPassword, salt = salt, firstName = userInfo.firstName, lastName = userInfo.lastName)
                 usersRepository.update(record)
@@ -99,7 +94,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           !password.isEmpty && user.password === encodePassword(password, user.salt)
         }
 
-        usersRepository.findByUserName(username) match {
+        usersRepository.findByUsername(username) match {
           case Nil => none
           case user :: Nil => if (isValidPassword(user)) some(user) else none
           case users => users find {

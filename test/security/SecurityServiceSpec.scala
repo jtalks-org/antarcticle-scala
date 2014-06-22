@@ -54,7 +54,7 @@ class SecurityServiceSpec extends Specification
 
       "return remember me token and authenticated user" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb)
+        usersRepository.findByUsername(userInfo.username)(FakeSessionValue) returns List(userFromDb)
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(username, password) must beSuccessful(generatedToken, authUser)
@@ -62,7 +62,7 @@ class SecurityServiceSpec extends Specification
 
       "authenticated admin should have Admin authority" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(admin=true))
+        usersRepository.findByUsername(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(admin=true))
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(username, password) must beSuccessful.like {
@@ -75,7 +75,8 @@ class SecurityServiceSpec extends Specification
 
         def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
           authenticationManager.authenticate(usernameIgnoreCase, ===(password)) returns future(userInfo.some)
-          usersRepository.findByUserName(usernameIgnoreCase)(anySession) returns Nil
+          usersRepository.findByUsername(usernameIgnoreCase)(anySession) returns Nil
+          usersRepository.getByUsername(usernameIgnoreCase)(anySession) returns None
           tokenProvider.generateToken returns generatedToken
 
           doTest
@@ -114,7 +115,8 @@ class SecurityServiceSpec extends Specification
         val petyaUserRecord =  UserRecord(Some(2), petya, petyaPassEncoded, false, salt)
 
         authenticationManager.authenticate(===(petya2), ===(petya2Password)) returns future(petya2UserInfo.some)
-        usersRepository.findByUserName(===(petya2))(anySession) returns List(petyaUserRecord)
+        usersRepository.findByUsername(===(petya2))(anySession) returns List(petyaUserRecord)
+        usersRepository.getByUsername(===(petya2))(anySession) returns None
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(petya2, petya2Password) must beSuccessful
@@ -138,16 +140,19 @@ class SecurityServiceSpec extends Specification
           there was one(usersRepository).update(beMostlyEqualTo(expectedRecord))(anySession)
         }
 
+        val userWithEmptyPassword: UserRecord = userFromDb.copy(password = "")
         "and one user exists with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider{
-            usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""))
+            usersRepository.findByUsername(userInfo.username)(FakeSessionValue) returns List(userWithEmptyPassword)
+            usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userWithEmptyPassword.some
             securityService.signInUser(username, password) must beSuccessful
           }
         }
 
         "and several users exist with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider {
-            usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns List(userFromDb.copy(password=""), userFromDb2)
+            usersRepository.findByUsername(userInfo.username)(FakeSessionValue) returns List(userWithEmptyPassword, userFromDb2)
+            usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userWithEmptyPassword.some
             securityService.signInUser(username, password) must beSuccessful
           }
         }
@@ -156,7 +161,8 @@ class SecurityServiceSpec extends Specification
 
       "do case sensitive authorisation if several similar usernames are exists" in {
         val m: Matcher[String]  = (_: String).equalsIgnoreCase(username)
-        usersRepository.findByUserName(m)(anySession) returns List(userFromDb, userFromDb2)
+        usersRepository.findByUsername(m)(anySession) returns List(userFromDb, userFromDb2)
+        usersRepository.getByUsername(===(username))(anySession) returns userFromDb.some
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(username, password) must beSuccessful.like {
@@ -167,14 +173,15 @@ class SecurityServiceSpec extends Specification
           case (_, user:AuthenticatedUser) if user.username == username.toUpperCase => ok
         }
 
-        there was one(usersRepository).findByUserName(===(username))(anySession)
-        there was one(usersRepository).findByUserName(===(username.toUpperCase))(anySession)
+        there was one(usersRepository).findByUsername(===(username))(anySession)
+        there was one(usersRepository).findByUsername(===(username.toUpperCase))(anySession)
         there was no (authenticationManager).authenticate(anyString, anyString)
       }
 
       "created user should have User authority" in {
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.findByUserName(userInfo.username)(FakeSessionValue) returns Nil
+        usersRepository.findByUsername(userInfo.username)(FakeSessionValue) returns Nil
+        usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(username, password) must beSuccessful.like {
@@ -185,7 +192,8 @@ class SecurityServiceSpec extends Specification
       "issue remember me token to authenticated user" in {
         val userId = 1
         authenticationManager.authenticate(username, password) returns future(userInfo.some)
-        usersRepository.findByUserName(username)(FakeSessionValue) returns Nil
+        usersRepository.findByUsername(username)(FakeSessionValue) returns Nil
+        usersRepository.getByUsername(username)(FakeSessionValue) returns None
         usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns userId
         usersRepository.updateRememberToken(userId, generatedToken)(FakeSessionValue) returns true
         tokenProvider.generateToken returns generatedToken
@@ -196,14 +204,14 @@ class SecurityServiceSpec extends Specification
       }
 
       "trim username" in {
-        usersRepository.findByUserName(username)(FakeSessionValue) returns List(userFromDb)
+        usersRepository.findByUsername(username)(FakeSessionValue) returns List(userFromDb)
         tokenProvider.generateToken returns generatedToken
 
         securityService.signInUser(' ' + username + ' ', password) must beSuccessful.like {
           case (_, user:AuthenticatedUser) if user.username == username => ok
         }
 
-        there was one(usersRepository).findByUserName(===(username))(anySession)
+        there was one(usersRepository).findByUsername(===(username))(anySession)
         there was no (authenticationManager).authenticate(anyString, anyString)
       }
 
@@ -212,7 +220,7 @@ class SecurityServiceSpec extends Specification
     "fail" in {
       "return validation error" in {
         authenticationManager.authenticate(anyString, anyString) returns future(None)
-        usersRepository.findByUserName(anyString)(anySession) returns Nil
+        usersRepository.findByUsername(anyString)(anySession) returns Nil
 
         securityService.signInUser("", "") must beFailing
       }

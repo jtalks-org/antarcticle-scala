@@ -15,7 +15,7 @@ trait UsersRepositoryComponent {
 
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
+    def findByUsername(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
 
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
@@ -100,7 +100,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
 
-    def findByUserName(username: String)(implicit session: JdbcBackend#Session) =
+    def findByUsername(username: String)(implicit session: JdbcBackend#Session) =
       byUsernameIgnoreCaseCompiled(username).list
 
     def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {

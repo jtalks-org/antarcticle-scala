@@ -68,7 +68,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
             val encodedPassword = encodePassword(password, salt)
             val userRecord = usersRepository.findByUserName(username) match {
               case Nil => none
-              case user :: Nil => some(user)
               case users => users find { user => user.username === username}
             }
 

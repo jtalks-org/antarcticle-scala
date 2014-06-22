@@ -48,6 +48,7 @@ class SecurityServiceSpec extends Specification
       val userFromDb = UserRecord(Some(1), username, encodedPassword, false, salt)
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, false, salt)
       val generatedToken = "2314"
+      val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
 
       def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
 
@@ -73,7 +74,6 @@ class SecurityServiceSpec extends Specification
       "create new user when not exists" in {
 
         def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
-          val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
           authenticationManager.authenticate(usernameIgnoreCase, ===(password)) returns future(userInfo.some)
           usersRepository.findByUserName(usernameIgnoreCase)(anySession) returns Nil
           tokenProvider.generateToken returns generatedToken
@@ -100,6 +100,29 @@ class SecurityServiceSpec extends Specification
             there was one (authenticationManager).authenticate(===(username.toUpperCase), ===(password))
           }
         }
+      }
+
+      "create a new user if username has another case and password is different" in {
+
+        val petya = "petya"
+        val petyaPassword = "password"
+        val petyaPassEncoded = service.securityService.encodePassword(petyaPassword, salt)
+        val petya2 = "Petya"
+        val petya2Password = "qweerty"
+        val petya2PassEncoded = service.securityService.encodePassword(petya2Password, salt)
+        val petya2UserInfo = UserInfo(petya2, petya2Password, "fn".some, "ln".some)
+        val petyaUserRecord =  UserRecord(Some(2), petya, petyaPassEncoded, false, salt)
+
+        authenticationManager.authenticate(===(petya2), ===(petya2Password)) returns future(petya2UserInfo.some)
+        usersRepository.findByUserName(===(petya2))(anySession) returns List(petyaUserRecord)
+        tokenProvider.generateToken returns generatedToken
+
+        securityService.signInUser(petya2, petya2Password) must beSuccessful
+
+        val expectedRecord = UserRecord(None, petya2, petya2PassEncoded, false, salt, "fn".some, "ln".some)
+        there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
+        there was no(usersRepository).update(any[UserRecord])(anySession)
+
       }
 
       "update user when password does not match" in {

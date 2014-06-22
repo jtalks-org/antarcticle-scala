@@ -31,14 +31,19 @@
                 Editor uses Markdown markup language. You can read reference
                 <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
               </label>
-              <span class="language-selection pull-right">
-                  <label for="language-combo" class="language-label">Choose language:</label>
-                  <select id="language-combo">
-                      <option value="en">English</option>
-                      <option value="ru">Russian</option>
-                      <option value="ua">Ukrainian</option>
-                  </select>
-              </span>
+                <div class="input-group pull-right">
+                    <label for="language-combo" class="language-label">Choose language:</label>
+                    <div class="btn-group language-selection">
+                        <button class="btn btn-default btn-xs dropdown-toggle btn-primary" type="button" data-toggle="dropdown">
+                            English <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li value="en">English</li>
+                            <li value="ru">Russian</li>
+                            <li value="ua">Ukrainian</li>
+                        </ul>
+                    </div>
+                </div>
               <textarea id="content" name="content" class="form-control article-input"
               placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
             </div>

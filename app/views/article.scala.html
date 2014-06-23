@@ -5,6 +5,9 @@
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
       <div class="pull-right page-header">
+        <a class="btn btn-sm btn-primary article-toolbar" href="@routes.ArticleController.getTranslateArticlePage(article.id)">
+          <i class="glyphicon glyphicon glyphicon glyphicon-file icon-white"></i> Translate
+        </a>
         @if(user.can(Manage, article)) {
           <a class="btn btn-sm btn-primary article-toolbar" href="@routes.ArticleController.editArticle(article.id)">
             <i class="glyphicon glyphicon-pencil icon-white"></i> Edit
@@ -25,7 +28,12 @@
         <div class="main-content">
           <header>
             @templates.prettyDate(article.createdAt)
-            <h2>@article.title</h2>
+            <div class="article-header">
+              <h2>@article.title</h2>
+              @if(article.title.contains("test")) {
+                <span>Article available on: English <a href="#">Russian</a> <a href="#">Ukrainian</a></span>
+              }
+            </div>
           </header>
           <div class="body">
             <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>

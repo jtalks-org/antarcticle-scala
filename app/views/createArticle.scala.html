@@ -1,4 +1,5 @@
 @(form: Form[ArticleModels.Article], sourceArticle: Option[models.ArticleModels.ArticleDetailsModel])(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
+@import models.ArticleModels.Language
 @templates.main(if (sourceArticle.isDefined) "Article Translation" else "New Article") {
   <div class="row">
     <div class="col-md-9 center well2">
@@ -38,9 +39,9 @@
                             English <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li value="en">English</li>
-                            <li value="ru">Russian</li>
-                            <li value="ua">Ukrainian</li>
+                            @for(language <- Language.values.iterator) {
+                              <li><a href="#">@language</a></li>
+                            }
                         </ul>
                     </div>
                 </div>

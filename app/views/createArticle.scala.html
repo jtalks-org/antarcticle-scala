@@ -27,24 +27,25 @@
               <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
             </div>
             <div class="form-group input-group article-input">
-              <i class="glyphicon glyphicon-info-sign"></i>
-              <label for="content" class="editor-hint">
-                Editor uses Markdown markup language. You can read reference
-                <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
-              </label>
-                <div class="input-group pull-right">
-                    <label for="language-combo" class="language-label">Choose language:</label>
-                    <div class="btn-group language-selection">
-                        <button class="btn btn-default btn-xs dropdown-toggle btn-primary" type="button" data-toggle="dropdown">
-                            English <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            @for(language <- Language.values.iterator) {
-                              <li><a href="#">@language</a></li>
-                            }
-                        </ul>
-                    </div>
+              <div class="article-toolbar">
+                    <i class="glyphicon glyphicon-info-sign"></i>
+                    <label for="content" class="editor-hint">
+                        Editor uses Markdown markup language. You can read reference
+                        <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
+                    </label>
+                <div class="input-group pull-right language-picker">
+                    <label for="language-button" class="language-label">Choose language:</label>
+                    <button id="language-button" class="btn btn-default btn-sm dropdown-toggle btn-primary" type="button" data-toggle="dropdown">
+                      <span class="lang-label">@Language.values.head</span>&nbsp;&nbsp;<span class="caret"></span>
+                      <input class="lang-input" name="language" type="hidden" value="@Language.values.head"/>
+                    </button>
+                    <ul class="dropdown-menu">
+                      @for(language <- Language.values.iterator) {
+                        <li><a class="language-item" href="#">@language</a></li>
+                      }
+                   </ul>
                 </div>
+              </div>
               <textarea id="content" name="content" class="form-control article-input"
               placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>
             </div>
@@ -73,4 +74,5 @@
   <script src="@routes.Assets.at("/public/javascripts", "bootbox.min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("/public/javascripts", "PreviewSupport.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("/public/javascripts", "TagEditorSupport.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("/public/javascripts", "LanguageSupprt.js")" type="text/javascript"></script>
 }

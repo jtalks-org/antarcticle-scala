@@ -37,7 +37,7 @@
       }
       <div class="tag-search-container">
         <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
-          <input value="@lastUsedTags" id="search-input" class="form-control"
+          <input value="@lastUsedTags" id="search-input" class="form-control" autofocus
           data-url="@routes.TagsController.listTags()" placeholder="Tag filter"/>
         </form>
         <br/>

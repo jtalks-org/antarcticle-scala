@@ -3,7 +3,7 @@
 
 @templates.main(article.title) {
   <div class="row">
-    <div class="col-md-10 col-md-offset-1">
+    <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
       <div class="pull-right page-header">
         @if(user.can(Create, Article)) {
           <a class="btn btn-sm btn-primary article-toolbar" href="@routes.ArticleController.getTranslateArticlePage(article.id)">

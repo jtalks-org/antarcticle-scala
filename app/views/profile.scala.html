@@ -1,7 +1,7 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: Option[String] = None)(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 @templates.main(s"Articles by ${userDetails.username}") {
   <div class="row">
-    <div class="col-md-10 col-md-offset-1 user-profile">
+    <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
       <header class="user-profile-header clearfix">
         <div class="pull-left">
           <h2 class="username"><i class="glyphicon glyphicon-user"></i>

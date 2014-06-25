@@ -2,7 +2,7 @@
 @import models.ArticleModels.Language
 @templates.main(if (sourceArticle.isDefined) "Article Translation" else "New Article") {
   <div class="row">
-    <div class="col-md-9 center well2">
+    <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12 well2">
       <header class="page-header hide-on-preview">
         @sourceArticle match {
           case Some(article) => {

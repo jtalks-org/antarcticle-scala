@@ -1,7 +1,7 @@
 @(page: models.Page[models.database.UserRecord], search: Option[String] = None)(implicit principal: security.Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 @templates.main("Users & Roles") {
   <div class="row">
-    <div class="col-md-offset-1 clearfix">
+    <div class="col-md-offset-1 col-md-10 col-sm-offset-2 col-sm-8 col-xs-offset-2 col-xs-8 clearfix search-input-container">
       <form class="form-inline" method="get" action="@routes.UserController.listUsers(None)">
         <div class="form-group">
           <input value="@search" name="search" class="form-control search-input" autofocus="autofocus"
@@ -17,18 +17,18 @@
       <div class="clearfix">
       @defining(conf.Constants.PAGE_SIZE_USERS / 2) { columnSize =>
         @if(page.list.size > columnSize) {
-          <div class="panel panel-default col-md-5 col-md-offset-1 table-column-left equal-height-column">
+          <div class="panel panel-default col-lg-5 col-lg-offset-1 col-md-5 col-md-offset-1 col-sm-offset-2 col-sm-8 col-xs-offset-2 col-xs-8 table-column-left equal-height-column">
             <div class="panel-body">
             @userTable(page.list.take(columnSize))
             </div>
           </div>
-          <div class="panel panel-default col-md-5 table-column equal-height-column">
+          <div class="panel panel-default col-lg-5 col-md-5 col-sm-offset-2 col-sm-8 col-xs-offset-2 col-xs-8 table-column equal-height-column">
             <div class="panel-body">
             @userTable(page.list.drop(columnSize))
             </div>
           </div>
         } else {
-          <div class="panel panel-default col-md-8 col-md-offset-1">
+          <div class="panel panel-default col-md-8 col-md-offset-1 col-sm-offset-2 col-sm-8 col-xs-offset-2 col-xs-8">
             <div class="panel-body">
             @userTable(page.list)
             </div>

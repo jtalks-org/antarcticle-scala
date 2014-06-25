@@ -1,6 +1,6 @@
 @(page: models.Page[models.ArticleModels.ArticleListModel], userDetails: models.database.UserRecord, lastUsedTags: Option[String] = None)(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 @templates.main(s"Articles by ${userDetails.username}") {
-  <div class="row">
+  <div class="row user-profile">
     <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
       <header class="user-profile-header clearfix">
         <div class="pull-left">
@@ -37,7 +37,7 @@
       }
       <div class="tag-search-container">
         <form class="tags-search-form" method="get" action="@routes.UserController.viewProfile(userDetails.username, None)">
-          <input value="@lastUsedTags" id="search-input" class="form-control" autofocus
+          <input value="@lastUsedTags" id="search-input" class="form-control"
           data-url="@routes.TagsController.listTags()" placeholder="Tag filter"/>
         </form>
         <br/>

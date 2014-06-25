@@ -34,6 +34,7 @@ jQuery(=>
     $('.tm-tag-remove').click(() ->
       input.closest('form').submit()
     )
+    input.focus()
     input.closest('form').on 'submit', (e) ->
       inputData = input.val()
       if (inputData.trim() != "")

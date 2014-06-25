@@ -15,7 +15,7 @@
         }
         <div class="tag-search-container">
           <form class="tags-search-form" method="get" action="@routes.ArticleController.listArticles(None)">
-            <input value="@lastUsedTags" id="search-input" class="form-control" autofocus
+            <input value="@lastUsedTags" id="search-input" class="form-control"
             data-url="@routes.TagsController.listTags()" placeholder="Tag filter"/>
           </form>
           <br/>

@@ -1,5 +1,6 @@
 package controllers
 
+import models.ArticleModels.Language._
 import org.specs2.specification.AfterExample
 import org.specs2.mutable.Specification
 import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
@@ -113,7 +114,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterExample
 
     val now = DateTime.now.toDate
     val userModel = new UserModel(1, "name")
-    val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
+    val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId)
 
     "have article content and comments" in new WithApplication  {
       controller.setPrincipal(new AuthenticatedUser(1,"", null))

@@ -1,5 +1,6 @@
 package validators
 
+import models.ArticleModels.Language._
 import org.specs2.mutable.Specification
 import scalaz._
 import Scalaz._
@@ -10,7 +11,7 @@ class ArticleValidatorSpec extends Specification with ValidationMatchers {
   val validator = new ArticleValidator(new TagValidator)
 
   "article validation" should {
-    val article = Article(None, "dfds", "", List("tag1", "tag 2"))
+    val article = Article(None, "dfds", "", List("tag1", "tag 2"), Russian, None)
 
     "fail when title is too long" in {
       validator.validate(article.copy(title = "a" * 61)) must beFailing

@@ -1,5 +1,6 @@
 package services
 
+import models.ArticleModels.Language._
 import org.specs2.mutable.Specification
 import models.database._
 import utils.Implicits._
@@ -49,7 +50,7 @@ class ArticlesServiceSpec extends Specification
   }
 
   val dbRecord = {
-    val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1)
+    val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1, Russian, 1.some)
     val user = UserRecord(1.some, "", "")
     val tags = List("tag1", "tag2")
     (article, user, tags)
@@ -246,12 +247,12 @@ class ArticlesServiceSpec extends Specification
         .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Article))
       usr
     }
-    val article = Article(None, "", "", List())
+    val article = Article(None, "", "", List(), Russian, None)
     val userRecord = UserRecord(1.some, "user", "password").some
 
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>
-          val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId)
+          val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId, Russian, None)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
           tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
@@ -334,7 +335,7 @@ class ArticlesServiceSpec extends Specification
   "article update" should {
     val articleId = 1
     val tags = dbRecord._3
-    val article = Article(articleId.some, "", "", tags)
+    val article = Article(articleId.some, "", "", tags, Russian, articleId.some)
     implicit def getCurrentUser = {
       val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
       org.mockito.Mockito.doReturn(true)

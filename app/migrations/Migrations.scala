@@ -1,5 +1,7 @@
 package migrations
 
+import models.ArticleModels.Language
+
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
 
@@ -95,6 +97,16 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("ALTER TABLE properties MODIFY value TEXT").execute
       Q.updateNA("ALTER TABLE properties MODIFY default_value TEXT").execute
+    }
+  }
+
+  val addArticleLanguages = new Migration {
+    val version: Int = 14
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE articles ADD (language varchar(30), source_id int)").execute()
+      Q.updateNA("UPDATE articles SET source_id = id").execute()
+      Q.updateNA(s"UPDATE articles SET language = '${Language.Russian}'").execute()
     }
   }
 }

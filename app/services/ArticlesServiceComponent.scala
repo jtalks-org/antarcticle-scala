@@ -63,7 +63,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             id = articlesRepository.insert(newRecord)
             tags <- tagsService.createTagsForArticle(id, article.tags)
             user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
-          } yield recordToDetailsModel(newRecord.copy(id = Some(id)), user, tags)
+            sourceId = if (newRecord.sourceId.isDefined) newRecord.sourceId else some(id)
+          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags)
 
           if (result.isFailure) {
             // article should not be persisted, when tags creation failed
@@ -151,7 +152,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     //TODO: Extract conversions and write tests for them
 
     private def articleToInsert(article: Article, creationTime: Timestamp, authorId: Int) = {
-      ArticleRecord(None, article.title, article.content, creationTime, creationTime, article.description, authorId)
+      ArticleRecord(None, article.title, article.content, creationTime, creationTime, article.description, authorId, article.language, article.sourceId)
     }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
@@ -161,7 +162,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {
       ArticleDetailsModel(articleRecord.id.get, articleRecord.title,
         articleRecord.content, articleRecord.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username), tags)
+        UserModel(authorRecord.id.get, authorRecord.username), tags, articleRecord.language, articleRecord.sourceId.get)
     }
 
     private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String],

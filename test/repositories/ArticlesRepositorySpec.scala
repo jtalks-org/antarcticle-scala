@@ -1,5 +1,6 @@
 package repositories
 
+import models.ArticleModels.Language._
 import org.specs2.mutable._
 
 import models.database._
@@ -132,7 +133,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
       val oldCount = articlesCount
 
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None)
 
       articlesRepository.insert(newArticle)
 
@@ -141,7 +142,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
     "assigns id to new article" in withTestDb { implicit session =>
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None)
 
       val insertedArticleId: Int = articlesRepository.insert(newArticle)
       true

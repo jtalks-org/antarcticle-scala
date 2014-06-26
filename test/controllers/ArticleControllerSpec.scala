@@ -1,5 +1,6 @@
 package controllers
 
+import models.ArticleModels.Language.Russian
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import services.{ApplicationPropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
@@ -47,7 +48,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   val userModel = new UserModel(1, "name")
   val articleId = 1
   val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq(), 1)
-  val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq())
+  val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId)
   implicit def principal = AnonymousPrincipal
 
   "list of all articles" should {
@@ -131,7 +132,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   "post new article" should {
 
     val validRequest = FakeRequest("POST","/")
-      .withFormUrlEncodedBody(("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"))
+      .withFormUrlEncodedBody(("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"), ("language", "Russian"))
     val badRequest = FakeRequest("POST","/")
       .withFormUrlEncodedBody(("content", ""), ("tags","#$%^&"))
     val article = controller.articleForm.bindFromRequest()(validRequest).get
@@ -207,7 +208,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   "article preview" should {
 
     val validRequest = FakeRequest("POST","/")
-      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"))
+      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"), ("language", "Russian"))
     val badRequest = FakeRequest("POST","/")
       .withFormUrlEncodedBody(("content", ""), ("tags","#$%^&"))
     val article = controller.articleForm.bindFromRequest()(validRequest).get
@@ -254,7 +255,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   "post article edit" should {
 
     val validRequest = FakeRequest("POST","/")
-      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"))
+      .withFormUrlEncodedBody(("id", "" + articleId),("title", "title"), ("content", "content"), ("tags","tag, oneMoreTag"), ("language", "Russian"))
     val badRequest = FakeRequest("POST","/")
       .withFormUrlEncodedBody(("content", ""), ("tags","#$%^&"))
     val article = controller.articleForm.bindFromRequest()(validRequest).get

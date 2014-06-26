@@ -88,6 +88,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     val forRemoveCompiled = Compiled((id: Column[Int]) => articles.byId(id))
     val forUpdateCompiled = Compiled((id: Column[Int]) =>
       articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description)))
+    val forUdateSourceId = Compiled((id: Column[Int]) => articles.byId(id).map(a => a.sourceId))
     val articleTagsCompiled = Compiled((id: Column[Int]) => for {
       articleTag <- articlesTags if articleTag.articleId === id
       tag <- tags if articleTag.tagId === tag.id
@@ -114,7 +115,13 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       articles.byId(id).withAuthor().firstOption.map(fetchTags)
     }
 
-    def insert(article: ArticleRecord)(implicit s: Session) = forInsertCompiled.insert(article)
+    def insert(article: ArticleRecord)(implicit s: Session) = {
+      val id = forInsertCompiled.insert(article)
+      if (!article.sourceId.isDefined) {
+        forUdateSourceId(id).update(id)
+      }
+      id
+    }
 
     def update(id: Int, articleToUpdate: ArticleToUpdate)(implicit s: JdbcBackend#Session) =
       forUpdateCompiled(id).update(ArticleToUpdate.unapply(articleToUpdate).get) > 0

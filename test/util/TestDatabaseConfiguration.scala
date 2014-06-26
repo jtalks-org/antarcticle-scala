@@ -1,5 +1,6 @@
 package util
 
+import models.ArticleModels.Language._
 import models.database._
 import services.SlickSessionProvider
 import scala.slick.driver.{H2Driver, JdbcProfile}
@@ -53,11 +54,11 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
       UserRecord(None, "doesn't have notifications", "password3")
     )
 
-    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(
-        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
-        ("New title 2", "<i>html text</i>", time, time, "description2", 2),
-        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2),
-        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2)
+    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId, a.language, a.sourceId)) ++= Seq(
+        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1, Russian, 1),
+        ("New title 2", "<i>html text</i>", time, time, "description2", 2, Russian, 1),
+        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2, Russian, 1),
+        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2, Russian, 1)
       )
 
     articlesTags ++= Seq(

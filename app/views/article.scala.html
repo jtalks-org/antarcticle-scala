@@ -32,8 +32,16 @@
             @templates.prettyDate(article.createdAt)
             <div class="article-header">
               <h2>@article.title</h2>
-              @if(article.title.contains("test")) {
-                <span>Article available on: English <a href="#">Russian</a> <a href="#">Ukrainian</a></span>
+              @if(article.translations.size > 1) {
+                <span>Article available on:
+                   @article.translations.map { translation =>
+                     @if(translation.id == article.id) {
+                       @translation.language
+                     } else {
+                       <a href="@routes.ArticleController.viewArticle(translation.id).absoluteURL()">@translation.language</a>
+                     }
+                   }
+                </span>
               }
             </div>
           </header>

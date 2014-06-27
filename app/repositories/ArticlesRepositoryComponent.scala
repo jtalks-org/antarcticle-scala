@@ -33,6 +33,8 @@ trait ArticlesRepositoryComponent {
     def count(tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
 
     def countForUser(userId: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session): Int
+
+    def getTranslations(id: Int)(implicit s: JdbcBackend#Session): List[(Int,String)]
   }
 
 }
@@ -97,6 +99,10 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
       comment <- comments if comment.articleId === id
     } yield comment.id)
 
+    val translationCompiled = Compiled((sourceId: Column[Int]) => for {
+      article <- articles if article.sourceId === sourceId
+    } yield (article.id, article.language))
+
     def getList(offset: Int, portionSize: Int, tagsIds: Option[Seq[Int]] = None)(implicit s: JdbcBackend#Session) = {
       (tagsIds match {
         case Some(x) => articlesByTags(x)
@@ -140,6 +146,13 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
         case Some(ids) => articlesByTags(ids).byAuthor(userId)
         case None => articles.filter(_.authorId === userId)
       }).length.run
+    }
+
+    def getTranslations(id: Int)(implicit s: JdbcBackend#Session) = {
+      forRemoveCompiled(id).firstOption match {
+        case Some(article) => translationCompiled(article.sourceId.get).list
+        case None => List()
+      }
     }
 
     private def fetchTags(t: (ArticleRecord, UserRecord))(implicit s: JdbcBackend#Session) = t match {

@@ -1,5 +1,6 @@
 package services
 
+import models.ArticleModels.Language
 import org.joda.time.DateTime
 import java.sql.Timestamp
 import repositories.{TagsRepositoryComponent, UsersRepositoryComponent, ArticlesRepositoryComponent}
@@ -16,19 +17,19 @@ import security.Result._
 import models.database.ArticleToUpdate
 import models.{ArticlePage, Page}
 import scala.Some
-import models.ArticleModels.ArticleDetailsModel
+import models.ArticleModels._
+import models.ArticleModels.Language._
 import models.UserModels.UserModel
 import security.AuthenticatedUser
-import models.ArticleModels.ArticleListModel
 import models.database.UserRecord
 import models.database.ArticleRecord
-import models.ArticleModels.Article
 
 trait ArticlesServiceComponent {
   val articlesService: ArticlesService
 
   trait ArticlesService {
     def get(id: Int): Option[ArticleDetailsModel]
+    def getTranslations(id: Option[Int]): ValidationNel[String, List[Translation]]
     def getPage(page: Int, tag: Option[String] = None):  ValidationNel[String, Page[ArticleListModel]]
     def getPageForUser(page: Int, userName: String, tag: Option[String] = None): ValidationNel[String, Page[ArticleListModel]]
     def validate(article: Article):  ValidationNel[String, Article]
@@ -59,12 +60,16 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
           val result = for {
             _ <- articleValidator.validate(article)
-            newRecord = createRecord
+            translations <- getTranslations(article.sourceId)
+            newRecord <- {
+              if (translations.find(t => t.language == article.language).isEmpty) createRecord.successNel
+              else "Article on selected language has been already created".failureNel
+            }
             id = articlesRepository.insert(newRecord)
             tags <- tagsService.createTagsForArticle(id, article.tags)
             user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
             sourceId = if (newRecord.sourceId.isDefined) newRecord.sourceId else some(id)
-          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags)
+          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags, Translation(id, article.language) :: translations)
 
           if (result.isFailure) {
             // article should not be persisted, when tags creation failed
@@ -75,6 +80,15 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
           result
         }
       }
+
+    def toTranslation(id: Int, lang: String): Translation = Translation(id, Language.withName(lang))
+
+    def getTranslations(id: Option[Int]): ValidationNel[String, List[Translation]] = withTransaction { implicit session =>
+
+      id.cata(
+        some = some => articlesRepository.getTranslations(some).map{case (uid, lang) => Translation(uid, Language.withName(lang))}.successNel,
+        none = List().successNel)
+    }
 
     def validate(article: Article) = articleValidator.validate(article)
 
@@ -109,7 +123,11 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     def get(id: Int) = withSession { implicit session =>
-      articlesRepository.get(id).map((recordToDetailsModel _).tupled)
+      for {
+        (article, user, tags) <- articlesRepository.get(id)
+        translations = articlesRepository.getTranslations(id).map{case (uid,lang) => Translation(uid, lang)}
+      } yield recordToDetailsModel(article, user, tags, translations)
+
     }
 
     def getPage(page: Int, tags : Option[String] = None) = withSession { implicit session =>
@@ -152,17 +170,18 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     //TODO: Extract conversions and write tests for them
 
     private def articleToInsert(article: Article, creationTime: Timestamp, authorId: Int) = {
-      ArticleRecord(None, article.title, article.content, creationTime, creationTime, article.description, authorId, article.language, article.sourceId)
+      ArticleRecord(None, article.title, article.content, creationTime, creationTime,
+        article.description, authorId, article.language, article.sourceId)
     }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
       ArticleToUpdate(article.title, article.content, updatedAt, article.description)
     }
 
-    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String]) = {
-      ArticleDetailsModel(articleRecord.id.get, articleRecord.title,
-        articleRecord.content, articleRecord.createdAt,
-        UserModel(authorRecord.id.get, authorRecord.username), tags, articleRecord.language, articleRecord.sourceId.get)
+    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String], translations: List[Translation]) = {
+      ArticleDetailsModel(articleRecord.id.get, articleRecord.title, articleRecord.content, articleRecord.createdAt,
+        UserModel(authorRecord.id.get, authorRecord.username), tags, articleRecord.language,
+        articleRecord.sourceId.get, translations)
     }
 
     private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String],

@@ -66,6 +66,7 @@ class ArticlesServiceSpec extends Specification
     "return model" in {
       tagsRepository.getByName(any)(Matchers.eq(session)) returns None
       articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
+      articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns List()
 
       val model = articlesService.get(1)
 
@@ -74,6 +75,7 @@ class ArticlesServiceSpec extends Specification
 
     "have correct author" in {
       articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
+      articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns List()
 
       val model = articlesService.get(1)
 
@@ -82,6 +84,7 @@ class ArticlesServiceSpec extends Specification
 
     "have correct tags" in {
       articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
+      articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns List()
 
       val model = articlesService.get(1)
 

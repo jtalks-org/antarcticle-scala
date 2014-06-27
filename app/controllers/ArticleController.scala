@@ -27,7 +27,7 @@ trait ArticleController {
       "language" -> text,
       "sourceId" -> optional(number)
     )((id, title, content, tags, language, sourceId) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty), language, sourceId))
-      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language, article.sourceId)))
+      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString, article.sourceId)))
   )
 
   def allArticles() = listArticles(None)

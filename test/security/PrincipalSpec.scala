@@ -22,7 +22,7 @@ class PrincipalSpec extends Specification {
 
   // authorization objects
   val articleListModel = ArticleListModel(1, "", "", new java.util.Date(), user, Seq.empty, 1)
-  val articleDetailsModel = ArticleDetailsModel(1, "", "", new java.util.Date(), user, Seq.empty, Russian, 1)
+  val articleDetailsModel = ArticleDetailsModel(1, "", "", new java.util.Date(), user, Seq.empty, Russian, 1, List())
   val comment = Comment(1, user, 1, "", new java.sql.Timestamp(3423343443L), None)
 
   val allObjects = List(articleListModel, comment, articleDetailsModel)

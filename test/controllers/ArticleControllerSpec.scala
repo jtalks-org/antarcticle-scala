@@ -48,7 +48,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
   val userModel = new UserModel(1, "name")
   val articleId = 1
   val articleListModel = new ArticleListModel(articleId, "title", "description", now, userModel, Seq(), 1)
-  val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId)
+  val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId, List())
   implicit def principal = AnonymousPrincipal
 
   "list of all articles" should {

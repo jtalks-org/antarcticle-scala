@@ -1,6 +1,5 @@
 package services
 
-import models.ArticleModels.Language
 import org.joda.time.DateTime
 import java.sql.Timestamp
 import repositories.{TagsRepositoryComponent, UsersRepositoryComponent, ArticlesRepositoryComponent}
@@ -16,9 +15,7 @@ import security.Permissions._
 import security.Result._
 import models.database.ArticleToUpdate
 import models.{ArticlePage, Page}
-import scala.Some
 import models.ArticleModels._
-import models.ArticleModels.Language._
 import models.UserModels.UserModel
 import security.AuthenticatedUser
 import models.database.UserRecord
@@ -69,7 +66,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             tags <- tagsService.createTagsForArticle(id, article.tags)
             user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
             sourceId = if (newRecord.sourceId.isDefined) newRecord.sourceId else some(id)
-          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags, Translation(id, article.language) :: translations)
+          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags,
+              Translation(id, article.language) :: translations)
 
           if (result.isFailure) {
             // article should not be persisted, when tags creation failed
@@ -81,13 +79,13 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         }
       }
 
-    def toTranslation(id: Int, lang: String): Translation = Translation(id, Language.withName(lang))
-
     def getTranslations(id: Option[Int]): ValidationNel[String, List[Translation]] = withTransaction { implicit session =>
-
       id.cata(
-        some = some => articlesRepository.getTranslations(some).map{case (uid, lang) => Translation(uid, Language.withName(lang))}.successNel,
-        none = List().successNel)
+        some = some => articlesRepository.getTranslations(some).map{
+          case (uid, lang) => Translation(uid, Language.withName(lang))
+        }.successNel,
+        none = List().successNel
+      )
     }
 
     def validate(article: Article) = articleValidator.validate(article)
@@ -178,7 +176,8 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       ArticleToUpdate(article.title, article.content, updatedAt, article.description)
     }
 
-    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String], translations: List[Translation]) = {
+    private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord,
+                                     tags: Seq[String], translations: List[Translation]) = {
       ArticleDetailsModel(articleRecord.id.get, articleRecord.title, articleRecord.content, articleRecord.createdAt,
         UserModel(authorRecord.id.get, authorRecord.username), tags, articleRecord.language,
         articleRecord.sourceId.get, translations)

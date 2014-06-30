@@ -9,10 +9,11 @@ import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
 import repositories.{UsersRepositoryComponent, TagsRepositoryComponent, ArticlesRepositoryComponent}
 import org.mockito.Matchers
-import models.ArticleModels.{ArticleDetailsModel, Article, ArticleListModel}
+import models.ArticleModels.{Translation, ArticleDetailsModel, Article, ArticleListModel}
 import util.{TimeFridge, MockSession}
 import models.Page
 import org.specs2.specification.BeforeExample
+import scala.slick.jdbc.JdbcBackend
 import scalaz._
 import Scalaz._
 import validators.{TagValidator, Validator}
@@ -89,6 +90,19 @@ class ArticlesServiceSpec extends Specification
       val model = articlesService.get(1)
 
       model.map(_.tags).get must containTheSameElementsAs(dbRecord._3)
+    }
+
+    "have correct list of translations" in {
+      val translations = List((1, Russian.toString), (2, English.toString))
+      articlesRepository.get(anyInt)(Matchers.eq(session)) returns article
+      articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns translations
+
+      val model = articlesService.get(1)
+
+      val expectedTranslations = List(Translation(1, Russian), Translation(2, English)).some
+      model.map(_.translations) must beEqualTo(expectedTranslations)
+
+      there was one(articlesRepository).getTranslations(1)(session)
     }
   }
 
@@ -299,6 +313,18 @@ class ArticlesServiceSpec extends Specification
       articlesService.insert(article)
 
       there was noMoreCallsTo(articlesRepository, tagsService)
+    }
+
+    "not create the second translation with the same language" in {
+      articleValidator.validate(any[Article]) returns article.successNel
+      articlesRepository.getTranslations(1)(session) returns List((2, Russian.toString))
+
+      articlesService.insert(article.copy(sourceId = Some(1))) match {
+        case Authorized(Failure(error)) => ok
+        case _ => ko
+      }
+
+      there was no(articlesRepository).insert(any[ArticleRecord])(any[JdbcBackend#Session])
     }
 
     "rollback transaction when tags creation failed" in {

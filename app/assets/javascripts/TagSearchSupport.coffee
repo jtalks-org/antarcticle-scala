@@ -14,6 +14,7 @@ jQuery(=>
         tagClass: "tm-tag tm-tag-info"
         hiddenTagListName: "tags",
         tagsContainer: '.tag-container',
+        delimiters: [13, 44],  # comma, enter
         onlyTagList: true,
         tagList: tags
       });

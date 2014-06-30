@@ -5,6 +5,7 @@ jQuery(=>
     tagApi = input.tagsManager({
       tagClass: "tm-tag tm-tag-info"
       hiddenTagListName: "tags",
+      delimiters: [13, 44],  # comma, enter
       tagsContainer: '.tag-container'
     });
     input.typeahead({

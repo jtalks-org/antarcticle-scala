@@ -33,11 +33,11 @@
                 <i class="glyphicon glyphicon-info-sign"></i>
                 <label for="content" class="editor-hint">
                   Editor uses Markdown markup language. You can read reference
-                  <a href="@routes.HelpController.markdownHelp()" target="_blank">here</a>.
+                  <a href="@routes.HelpController.markdownHelp()" target="_blank" tabindex="-1">here</a>.
                 </label>
                 <div class="input-group pull-right language-picker">
                   <label for="language-button" class="language-label">Choose language:</label>
-                  <button id="language-button" class="btn btn-default btn-sm dropdown-toggle btn-primary" type="button" data-toggle="dropdown">
+                  <button id="language-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                     <span class="lang-label">@Language.Russian</span>&nbsp;&nbsp;<span class="caret"></span>
                     <input class="lang-input" name="language" type="hidden" value="@Language.Russian"/>
                   </button>
@@ -60,7 +60,7 @@
           <div class="tab-pane fade" id="preview"></div>
         </div>
         <div class="btn-toolbar pull-right clearfix">
-          <input class="btn btn-primary" type="submit" value="Create article" />
+          <input class="btn btn-primary" type="submit" value="Create article"/>
           <a class="btn btn-danger" href="@routes.ArticleController.allArticles()">Discard</a>
         </div>
         <div class="clearfix"></div>
@@ -76,5 +76,5 @@
   <script src="@routes.Assets.at("/public/javascripts", "bootbox.min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("/public/javascripts", "PreviewSupport.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("/public/javascripts", "TagEditorSupport.js")" type="text/javascript"></script>
-  <script src="@routes.Assets.at("/public/javascripts", "LanguageSupprt.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("/public/javascripts", "LanguageSupport.js")" type="text/javascript"></script>
 }

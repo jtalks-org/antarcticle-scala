@@ -3,7 +3,7 @@
   <div class="container"><div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
     <ul class="nav navbar-nav brand-container">
       <li>
-        <a href="@routes.ArticleController.allArticles()" class="navbar-brand">
+        <a href="@routes.ArticleController.allArticles()" class="navbar-brand" tabindex="-1">
           <nobr>
             <i id="application-icon" class="glyphicon glyphicon-book"></i>
             <span id="application-name-container" class="ellipsis-overflow">@properties.instanceName</span>
@@ -15,7 +15,7 @@
       case authenticatedUser: security.AuthenticatedUser => {
         <ul class="nav navbar-nav">
           <li class="dropdown">
-            <a id="notifications-link" href="@routes.NotificationsController.getNotifications()"
+            <a id="notifications-link" href="@routes.NotificationsController.getNotifications()" tabindex="-1"
             data-target="#" class="dropdown-toggle" data-toggle="dropdown" title="Recent notifications">
               <i class="glyphicon glyphicon-inbox"></i>
               <span class="badge notifications-badge"></span>
@@ -28,18 +28,18 @@
           @authenticatedUser.authority match {
             case Admin => {
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
                         Administration <b class="caret"></b>
                       </a>
                 <ul class="dropdown-menu">
                   <li>
-                    <a href="#" data-href="@routes.ApplicationPropertiesController.postChangedInstanceName()">
+                    <a href="#" tabindex="-1" data-href="@routes.ApplicationPropertiesController.postChangedInstanceName()">
                       <i class="glyphicon glyphicon-wrench"></i>
                       <span id="toggle-admin-mode">Your browser does not support admin mode</span>
                     </a>
                   </li>
                   <li>
-                    <a href="@routes.UserController.listUsers(None)">
+                    <a href="@routes.UserController.listUsers(None)" tabindex="-1">
                       <i class="glyphicon glyphicon-user"></i> Role management
                     </a>
                   </li>
@@ -49,22 +49,22 @@
             case _ => {}
           }
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
             @authenticatedUser.username <b class="caret"></b>
           </a>
           <ul class="dropdown-menu">
             <li>
-              <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)">
+              <a href="@routes.UserController.viewProfile(authenticatedUser.username, None)" tabindex="-1">
                 <i class="glyphicon glyphicon-file"></i> My articles
               </a>
             </li>
             <li>
-              <a href="@routes.HelpController.markdownHelp()">
+              <a href="@routes.HelpController.markdownHelp()" tabindex="-1">
                 <i class="glyphicon glyphicon-question-sign"></i> Online help
               </a>
             </li>
             <li>
-              <a href="@routes.AuthenticationController.logout">
+              <a href="@routes.AuthenticationController.logout" tabindex="-1">
                 <i class="glyphicon glyphicon-log-out"></i> Sign out
               </a>
             </li>
@@ -75,7 +75,7 @@
       case _ => {
         <ul class="nav navbar-nav navbar-right">
           <li>
-            <a href="@routes.AuthenticationController.showLoginPage">
+            <a href="@routes.AuthenticationController.showLoginPage" tabindex="-1">
               <i class="glyphicon glyphicon-log-in"></i> Sign in
             </a>
           </li>

@@ -11,25 +11,21 @@ trait UsersRepositoryComponent {
    * Database session should be provided by a caller via implicit parameter.
    */
   trait UsersRepository {
+    def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
-    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
+    def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
 
-    def findByUsername(username: String)(implicit session: JdbcBackend#Session): List[UserRecord]
-
-    def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+    def countFindUser(search: String)(implicit session: JdbcBackend#Session) : Int
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
     def update(user: UserRecord)(implicit session: JdbcBackend#Session)
 
-    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session)
+    def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
-
-    def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
-
-    def countFindUser(search: String)(implicit session: JdbcBackend#Session) : Int
   }
 }
 
@@ -70,7 +66,6 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   class SlickUsersRepository extends UsersRepository {
 
     val byUsernameCompiled = Compiled((username: Column[String]) => users.byUsername(username))
-    val byUsernameIgnoreCaseCompiled = Compiled((username: Column[String]) => users.byUsername(username, {_.toLowerCase}))
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val userSearchCount = Compiled((search: Column[String]) => users.stringFieldsMatch(search).length)
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
@@ -99,13 +94,6 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def insert(userToInsert: UserRecord)(implicit session: JdbcBackend#Session) =
       insertUserCompiled.insert(userToInsert)
-
-    def findByUsername(username: String)(implicit session: JdbcBackend#Session) =
-      byUsernameIgnoreCaseCompiled(username).list
-
-    def updatePassword(id:Int, password: String, salt: Option[String])(implicit session: JdbcBackend#Session) = {
-      for (s <- salt) yield forUpdateCompiled(id).update(password, s)
-    }
 
     def update(user: UserRecord)(implicit session: JdbcBackend#Session):Unit = {
       for (id <- user.id) yield byIdCompiled(id).update(user)

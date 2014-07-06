@@ -67,7 +67,7 @@ class PoulpeAuthenticationManagerSpec extends PlaySpecification {
   "authentication manager" should {
 
     "authenticate valid user" in new WithServer(getFakeAppWithResponse(Ok(successResponse)), port) {
-      var result = Await.result(poulpeAuthManager.authenticate("admin", "123"), Duration.create(10, "seconds"))
+      var result = poulpeAuthManager.authenticate("admin", "123")
 
       result.get.username must equalTo("admin")
       result.get.firstName must not be empty
@@ -75,13 +75,13 @@ class PoulpeAuthenticationManagerSpec extends PlaySpecification {
 
     "not perform authentication for invalid credentials" in
       new WithServer(getFakeAppWithResponse(NotFound(invalidCredentialsResponse)), port) {
-      var result = Await.result(poulpeAuthManager.authenticate("admin", "invalidPassword"), Duration.create(10, "seconds"))
+      var result = poulpeAuthManager.authenticate("admin", "invalidPassword")
 
       result must be(None)
     }
 
     "not authenticate disabled user" in new WithServer(getFakeAppWithResponse(Ok(disabledUserResponse)), port) {
-      var result = Await.result(poulpeAuthManager.authenticate("admin", "123"), Duration.create(10, "seconds"))
+      var result = poulpeAuthManager.authenticate("admin", "123")
 
       result must be(None)
     }

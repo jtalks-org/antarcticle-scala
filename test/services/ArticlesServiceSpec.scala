@@ -39,6 +39,8 @@ class ArticlesServiceSpec extends Specification
     val tagValidator: TagValidator = mock[TagValidator]
   }
 
+  def anySession = any[JdbcBackend#Session]
+
   import service._
 
   def before = {
@@ -365,6 +367,7 @@ class ArticlesServiceSpec extends Specification
     val articleId = 1
     val tags = dbRecord._3
     val article = Article(articleId.some, "", "", tags, Russian, articleId.some)
+    val translations = List((articleId, Russian.toString))
     implicit def getCurrentUser = {
       val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
       org.mockito.Mockito.doReturn(true)
@@ -375,10 +378,11 @@ class ArticlesServiceSpec extends Specification
 
     "update existing article" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
+      articlesRepository.getTranslations(articleId)(session) returns translations
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
-      articlesService.updateArticle(article)
+      articlesService.updateArticle(article) must beSuccessful
 
       there was one(articlesRepository).update(Matchers.eq(articleId), any[ArticleToUpdate])(Matchers.eq(session))
     }
@@ -386,17 +390,19 @@ class ArticlesServiceSpec extends Specification
     "update modification time" in {
       TimeFridge.withFrozenTime() { now =>
         articlesRepository.get(articleId)(session) returns dbRecord.some
+        articlesRepository.getTranslations(articleId)(session) returns translations
         articleValidator.validate(any[Article]) returns article.successNel
         tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
         articlesService.updateArticle(article)
 
-        there was one(articlesRepository).update(articleId, ArticleToUpdate("", "", now, ""))(session) //TODO: match only modification time
+        there was one(articlesRepository).update(articleId, ArticleToUpdate("", "", now, "", Russian.toString))(session) //TODO: match only modification time
       }
     }
 
     "update tags" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
+      articlesRepository.getTranslations(articleId)(session) returns translations
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(articleId, tags)(session) returns Seq.empty.successNel
 
@@ -407,23 +413,20 @@ class ArticlesServiceSpec extends Specification
 
     "return failure when tags validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
+      articlesRepository.getTranslations(articleId)(session) returns translations
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.updateTagsForArticle(articleId, tags)(session) returns "".failNel
 
-      articlesService.updateArticle(article) must beSuccessful.like {
-        case Authorized(Failure(_)) => ok
-        case _ => ko
-      }
+      articlesService.updateArticle(article) must beFailing
     }
 
     "return failure when article validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns "".failNel
 
-      articlesService.updateArticle(article) must beSuccessful.like {
-        case Authorized(Failure(_)) => ok
-        case _ => ko
-      }
+      articlesService.updateArticle(article) must beFailing
+
+      there was no(articlesRepository).update(any[Int], any[ArticleToUpdate])(anySession)
     }
 
     "return failure when article not found" in {
@@ -435,18 +438,19 @@ class ArticlesServiceSpec extends Specification
     "not update article when tags validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns article.successNel
+      articlesRepository.getTranslations(articleId)(session) returns translations
       tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns "".failNel
 
-      articlesService.updateArticle(article)
+      articlesService.updateArticle(article) must beFailing
 
-      there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
+      there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(anySession)
     }
 
     "not update article when article validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns "".failNel
 
-      articlesService.updateArticle(article)
+      articlesService.updateArticle(article) must beFailing
 
       there was no(articlesRepository).update(anyInt, any[ArticleToUpdate])(Matchers.eq(session))
     }

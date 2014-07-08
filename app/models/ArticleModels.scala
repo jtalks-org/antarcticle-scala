@@ -6,9 +6,29 @@ import scala.language.implicitConversions
 object ArticleModels {
 
   object Language extends Enumeration {
-    type Language = Value
-    val Arabic, Chinese, Dutch, English, French, German, Hindi, Italian, Japanese, Korean, Polish,
-    Portuguese, Russian, Spanish, Turkish, Ukrainian = Value
+    protected case class Val(title: String) extends super.Val
+    type Language = Val
+    val Arabic = Val("العربية")
+    val Chinese = Val("中文")
+    val Dutch = Val("Nederlands")
+    val English = Val("English")
+    val French = Val("Français")
+    val German = Val("Deutsch")
+    val Hindi = Val("हिंदी")
+    val Italian = Val("Italiano")
+    val Japanese = Val("日本語")
+    val Korean = Val("한국어")
+    val Polish = Val("Polski")
+    val Portuguese = Val("Português")
+    val Russian = Val("Русский")
+    val Spanish = Val("Español")
+    val Turkish = Val("Türkçe")
+    val Ukrainian = Val("Українська")
+
+    def languageIterator: Iterator[Language] = super.values.iterator.map(l => l.asInstanceOf[Language])
+
+    implicit def languageToString(lang: Language) = lang.toString()
+    implicit def parseLanguage(lang: String) = Language.withName(lang).asInstanceOf[Val]
   }
 
   import Language._
@@ -27,9 +47,6 @@ object ArticleModels {
   }
 
   case class Translation(id: Int, language: Language)
-
-  implicit def languageToString(lang: Language) = lang.toString
-  implicit def stringToLanguage(lang: String) = Language.withName(lang)
 
   implicit def detailsAsArticle(details: ArticleDetailsModel) =
     Article(Some(details.id), details.title, details.content, details.tags, details.language, Some(details.sourceId))

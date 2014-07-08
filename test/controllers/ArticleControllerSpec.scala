@@ -261,7 +261,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     val article = controller.articleForm.bindFromRequest()(validRequest).get
 
     "save an article if data is valid" in {
-      articlesService.updateArticle(article) returns Authorized(().successNel).successNel
+      articlesService.updateArticle(article) returns Authorized(()).successNel
 
       val page = controller.postArticleEdits()(validRequest)
 
@@ -278,16 +278,6 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
 
     "report error list on service operation error" in {
       articlesService.updateArticle(article) returns "bad request".failureNel
-
-      val page = controller.postArticleEdits()(validRequest)
-
-      status(page) must equalTo(400)
-      contentType(page) must beSome("text/html")
-    }
-
-    //TODO: get rid of this ugly nesting
-    "report error list on service operation error 2" in {
-      articlesService.updateArticle(article) returns Authorized("bad request".failureNel).successNel
 
       val page = controller.postArticleEdits()(validRequest)
 

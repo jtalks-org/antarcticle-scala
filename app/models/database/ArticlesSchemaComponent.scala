@@ -7,7 +7,7 @@ case class ArticleRecord(id: Option[Int], title: String, content: String,
                    authorId: Int, language: String, sourceId: Option[Int])
 
 case class ArticleToUpdate(title: String, content: String,
-                           updatedAt: Timestamp, description: String)
+                           updatedAt: Timestamp, description: String, language: String)
 
 trait ArticlesSchemaComponent  {
   this: Profile with UsersSchemaComponent =>

@@ -103,13 +103,8 @@ trait ArticleController {
       articlesService.updateArticle(article).fold(
         fail = errors,
         succ = {
-          case Authorized(result) =>
-            result.fold(
-              fail = errors,
-              succ = _ => Ok(routes.ArticleController.viewArticle(article.id.get).absoluteURL())
-            )
-          case NotAuthorized() =>
-            Unauthorized("Not authorized to update this article")
+          case Authorized(_) => Ok(routes.ArticleController.viewArticle(article.id.get).absoluteURL())
+          case NotAuthorized() => Unauthorized("Not authorized to update this article")
         }
       )
     }

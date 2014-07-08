@@ -156,7 +156,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
       val newContent = "new content"
       val upd = ArticleToUpdate(articleToBeUpdated.title,
-        newContent, articleToBeUpdated.createdAt, articleToBeUpdated.description)
+        newContent, articleToBeUpdated.createdAt, articleToBeUpdated.description, Russian.toString)
 
       //TODO: split assertions
       articlesRepository.update(updatedArticleId, upd) must beTrue
@@ -165,7 +165,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
     }
 
     "return false when updating not existing article" in withTestDb { implicit session =>
-      val upd = ArticleToUpdate("title", "content", DateTime.now, "desc")
+      val upd = ArticleToUpdate("title", "content", DateTime.now, "desc", Russian.toString)
 
       articlesRepository.update(2000, upd) must beFalse
     }

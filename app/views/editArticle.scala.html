@@ -1,5 +1,6 @@
 @(form: Form[ArticleModels.Article])(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 @import models.ArticleModels.Language
+@import models.ArticleModels.Language._
   @templates.main("Edit article") {
     <div class="row">
       <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12 center well2">
@@ -15,6 +16,7 @@
           <div class="tab-content">
             <div class="tab-pane fade in active" id="edit">
               <input type="hidden" name="id" value="@form("id").value">
+              <input type="hidden" name="sourceId" value="@form("sourceId").value">
               <div class="form-group input-group article-input">
                 <input name="title" class="form-control" placeholder="Article title" type="text" value="@form("title").value"/>
               </div>
@@ -27,12 +29,14 @@
                 <div class="input-group pull-right language-picker">
                   <label for="language-button" class="language-label">Choose language:</label>
                   <button id="language-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="lang-label">@Language.Russian</span>&nbsp;&nbsp;<span class="caret"></span>
-                    <input class="lang-input" name="language" type="hidden" value="@Language.Russian"/>
+                    <span class="lang-label">@Language.parseLanguage(form("language").value.get).title</span>
+                    &nbsp;&nbsp;
+                    <span class="caret"></span>
+                    <input class="lang-input" name="language" type="hidden" value="@form("language").value"/>
                   </button>
                   <ul class="dropdown-menu">
-                  @for(language <- Language.values.iterator) {
-                    <li><a class="language-item" href="#">@language</a></li>
+                  @for(language <- Language.languageIterator) {
+                    <li><a class="language-item" href="#" lang="@language">@language.title</a></li>
                   }
                   </ul>
                 </div>

@@ -1,9 +1,8 @@
 jQuery(=>
   $(document).ready(=>
     $('.language-item').on 'click', (e) ->
-      current = $(this).text()
-      $('#language-button .lang-label').text(current)
-      $('#language-button .lang-input').val(current)
+      $('#language-button .lang-label').text($(this).text())
+      $('#language-button .lang-input').val($(this).attr('lang'))
       e.preventDefault()
 
   )

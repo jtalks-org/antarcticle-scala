@@ -36,9 +36,9 @@
                 <span>Article available on:
                    @article.translations.map { translation =>
                      @if(translation.id == article.id) {
-                       @translation.language
+                       @translation.language.title
                      } else {
-                       <a href="@routes.ArticleController.viewArticle(translation.id).absoluteURL()">@translation.language</a>
+                       <a href="@routes.ArticleController.viewArticle(translation.id).absoluteURL()">@translation.language.title</a>
                      }
                    }
                 </span>

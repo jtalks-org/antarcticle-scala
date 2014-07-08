@@ -31,7 +31,7 @@ trait ArticlesServiceComponent {
     def getPageForUser(page: Int, userName: String, tag: Option[String] = None): ValidationNel[String, Page[ArticleListModel]]
     def validate(article: Article):  ValidationNel[String, Article]
     def insert(article: Article)(implicit principal: Principal): AuthorizationResult[ValidationNel[String, ArticleDetailsModel]]
-    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[ValidationNel[String, Unit]]]
+    def updateArticle(article: Article)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
     def removeArticle(id: Int)(implicit principal: Principal): ValidationNel[String, AuthorizationResult[Unit]]
   }
 }
@@ -82,7 +82,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def getTranslations(id: Option[Int]): ValidationNel[String, List[Translation]] = withTransaction { implicit session =>
       id.cata(
         some = some => articlesRepository.getTranslations(some).map{
-          case (uid, lang) => Translation(uid, Language.withName(lang))
+          case (uid, lang) => Translation(uid, lang)
         }.successNel,
         none = List().successNel
       )
@@ -91,21 +91,45 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def validate(article: Article) = articleValidator.validate(article)
 
     def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
-        //TODO: create NotFound Result to prevent nested ValidationNel?
-        article.id.flatMap(articlesRepository.get).map { case (article, _, _) => article }.cata(
-          some = persistentArticle => {
-            principal.doAuthorizedOrFail(Update, persistentArticle) { () =>
-              for {
-                _ <- articleValidator.validate(article)
-                _ <- tagsService.updateTagsForArticle(persistentArticle.id.get, article.tags)
-              } yield {
-                articlesRepository.update(persistentArticle.id.get, articleToUpdate(article, DateTime.now))
-                ()
-              }
-            }.successNel
-          },
-          none = "Article not found".failureNel
-        )
+
+      def validateArticleAndTranslation(persistedArticle: ArticleRecord): Validation[NonEmptyList[String], Unit] = {
+        for {
+          _ <- articleValidator.validate(article)
+          translations <- getTranslations(persistedArticle.sourceId)
+          result <- translations.find(t => t.id != article.id.get && t.language == article.language).cata(
+            some = some => "Article on selected language has been already created".failureNel,
+            none = ().successNel
+          )
+        } yield result
+      }
+
+      def getArticleFromRepository: Validation[NonEmptyList[String], ArticleRecord] = {
+        (for {
+          id <- article.id
+          (articleRecord, _, _) <- articlesRepository.get(id)
+        } yield articleRecord) match {
+          case Some(a) => a.successNel
+          case None => "Article not found".failureNel
+        }
+      }
+
+      getArticleFromRepository.flatMap{persistedArticle =>
+        principal.doAuthorizedOrFail(Update, persistedArticle){() =>
+          for {
+            _ <- validateArticleAndTranslation(persistedArticle)
+            _ <- tagsService.updateTagsForArticle(persistedArticle.id.get, article.tags)
+          } yield {
+            articlesRepository.update(persistedArticle.id.get, articleToUpdate(article, DateTime.now))
+            ()
+          }
+        } match {
+          case Authorized(result) => result.fold(
+            succ = success => Authorized(()).successNel,
+            fail = errors => errors.head.failNel
+          )
+          case NotAuthorized() => NotAuthorized().successNel
+        }
+      }
     }
 
     def removeArticle(id: Int)(implicit principal: Principal) = withTransaction { implicit session =>
@@ -173,7 +197,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
-      ArticleToUpdate(article.title, article.content, updatedAt, article.description)
+      ArticleToUpdate(article.title, article.content, updatedAt, article.description, article.language)
     }
 
     private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord,

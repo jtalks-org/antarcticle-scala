@@ -317,18 +317,6 @@ class ArticlesServiceSpec extends Specification
       there was noMoreCallsTo(articlesRepository, tagsService)
     }
 
-    "not create the second translation with the same language" in {
-      articleValidator.validate(any[Article]) returns article.successNel
-      articlesRepository.getTranslations(1)(session) returns List((2, Russian.toString))
-
-      articlesService.insert(article.copy(sourceId = Some(1))) match {
-        case Authorized(Failure(error)) => ok
-        case _ => ko
-      }
-
-      there was no(articlesRepository).insert(any[ArticleRecord])(any[JdbcBackend#Session])
-    }
-
     "rollback transaction when tags creation failed" in {
       articleValidator.validate(any[Article]) returns article.successNel
       tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns "".failNel

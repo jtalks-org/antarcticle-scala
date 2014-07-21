@@ -58,10 +58,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
           val result = for {
             _ <- articleValidator.validate(article)
             translations <- getTranslations(article.sourceId)
-            newRecord <- {
-              if (translations.find(t => t.language == article.language).isEmpty) createRecord.successNel
-              else "Article on selected language has been already created".failureNel
-            }
+            newRecord = createRecord
             id = articlesRepository.insert(newRecord)
             tags <- tagsService.createTagsForArticle(id, article.tags)
             user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
@@ -92,17 +89,6 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
     def updateArticle(article: Article)(implicit principal: Principal) = withTransaction { implicit session =>
 
-      def validateArticleAndTranslation(persistedArticle: ArticleRecord): Validation[NonEmptyList[String], Unit] = {
-        for {
-          _ <- articleValidator.validate(article)
-          translations <- getTranslations(persistedArticle.sourceId)
-          result <- translations.find(t => t.id != article.id.get && t.language == article.language).cata(
-            some = some => "Article on selected language has been already created".failureNel,
-            none = ().successNel
-          )
-        } yield result
-      }
-
       def getArticleFromRepository: Validation[NonEmptyList[String], ArticleRecord] = {
         (for {
           id <- article.id
@@ -116,7 +102,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
       getArticleFromRepository.flatMap{persistedArticle =>
         principal.doAuthorizedOrFail(Update, persistedArticle){() =>
           for {
-            _ <- validateArticleAndTranslation(persistedArticle)
+            _ <- articleValidator.validate(article)
             _ <- tagsService.updateTagsForArticle(persistedArticle.id.get, article.tags)
           } yield {
             articlesRepository.update(persistedArticle.id.get, articleToUpdate(article, DateTime.now))

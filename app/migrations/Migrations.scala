@@ -35,8 +35,8 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
   }
 
   /**
-   *  Non-null timestamps in MySQL by default are assigned with 'on update CURRENT_TIMESTAMP',
-   *  we obviously don't need it for 'created_at' fields
+   * Non-null timestamps in MySQL by default are assigned with 'on update CURRENT_TIMESTAMP',
+   * we obviously don't need it for 'created_at' fields
    */
   val removeDefaultOnUpdateConstraintFromTimestampField = new Migration {
     val version = 3
@@ -107,7 +107,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
   val addSaltColumnForUsers = new Migration {
     val version = 10
 
-    def run(implicit  session: JdbcBackend#Session): Unit = {
+    def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("alter table users add salt varchar(64)").execute()
       Q.updateNA("alter table users convert to character set utf8 collate utf8_bin").execute()
     }
@@ -152,6 +152,26 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("ALTER TABLE articles ADD (language varchar(30), source_id int)").execute()
       Q.updateNA("UPDATE articles SET source_id = id").execute()
       Q.updateNA(s"UPDATE articles SET language = '${Language.Russian}'").execute()
+    }
+  }
+
+  val mergeDuplicateUserRecords = new Migration {
+    val version: Int = 15
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.queryNA[String]("SELECT username FROM users GROUP BY username HAVING COUNT(*) > 1") foreach { login =>
+        val ids = Q.queryNA[String](s"SELECT id FROM users WHERE username='$login'").list()
+        val masterId = ids.head
+        println(s"Found ${ids.size} duplicate account records for user $login, merging...")
+        ids.tail.foreach(duplicateId => {
+          Q.updateNA(s"UPDATE articles SET author_id='$masterId' WHERE author_id='$duplicateId'").execute()
+          Q.updateNA(s"UPDATE comments SET user_id='$masterId' WHERE user_id='$duplicateId'").execute()
+          Q.updateNA(s"UPDATE notifications SET user_id='$masterId' WHERE user_id='$duplicateId'").execute()
+          Q.updateNA(s"DELETE FROM users WHERE id='$duplicateId'").execute()
+          println(s"Merged user id=$duplicateId into id=$masterId")
+        })
+        println(s"All duplicate records for user $login merged")
+      }
     }
   }
 }

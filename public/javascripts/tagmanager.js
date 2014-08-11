@@ -409,6 +409,7 @@
                         // push ASCII-based delimiters
                         if (privateMethods.keyInArray(e, opts.delimiterChars)) {
                             privateMethods.applyDelimiter.call($self, e);
+                            $(this).closest("form").submit();
                         }
                     });
 
@@ -423,6 +424,7 @@
                         // push key-based delimiters (includes <enter> by default)
                         if (privateMethods.keyInArray(e, opts.delimiterKeys)) {
                             privateMethods.applyDelimiter.call($self, e);
+                            $(this).closest("form").submit();
                         }
                         // submit the form on enter with empty field
                         if (e.which === 13 && fieldIsEmpty) {

@@ -5,5 +5,9 @@ jQuery(=>
       $('#language-button .lang-input').val($(this).attr('lang'))
       e.preventDefault()
 
+    $('.language-item').on 'keyup', (e) ->
+      if e.keyCode == 27
+        $('.language-picker').removeClass('open')
+      e.preventDefault()
   )
 )

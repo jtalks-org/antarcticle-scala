@@ -6,10 +6,12 @@
     <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
       <article id="@article.id" class="entry">
         <div class="main-content">
-          <header>
-            @templates.prettyDate(article.createdAt)
-            <h2>@article.title</h2>
-          </header>
+            <header>
+              @templates.prettyDate(article.createdAt)
+              <div class="article-header">
+                <h2>@article.title</h2>
+              </div>
+            </header>
           <div class="body">
             <div class="content clearfix">@Html(Markdown.toHtml(article.content))</div>
           </div>

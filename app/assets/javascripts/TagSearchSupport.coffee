@@ -15,12 +15,13 @@ jQuery(=>
         hiddenTagListName: "tags",
         tagsContainer: '.tag-container',
         delimiters: [13, 44],  # comma, enter
+        submitOnDelimiter: true,
         onlyTagList: true,
         tagList: tags
       });
       input.typeahead({
         limit: 10,
-        # todo: this should really be 'local' and use tags array, but for some weird reason it's not working
+        # todo: this should really be 'local' and use tags array, but for some weird reason it doesn't work
         prefetch: input.attr('data-url'),
       # filters autocomplete suggestions to exclude already selected tags
         suggestionFilter: (list) ->

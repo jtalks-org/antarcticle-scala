@@ -41,7 +41,8 @@
             validator: null,
             onlyTagList: false,
             tagList: null,
-            fillInputOnTagRemove: false
+            fillInputOnTagRemove: false,
+            submitOnDelimiter: false
         },
 
         publicMethods = {
@@ -134,7 +135,7 @@
 
                     newTagId = $self.data("tm_rndid") + '_' + tagId;
                     newTagRemoveId = $self.data("tm_rndid") + '_Remover_' + tagId;
-                    escaped = $("<span/>").text(tag).html();
+                    escaped = $("<span/>").text(tag.toLowerCase()).html();
 
                     html = '<span class="' + privateMethods.tagClasses.call($self) + '" id="' + newTagId + '">';
                     html+= '<span>' + escaped + '</span>';
@@ -409,7 +410,9 @@
                         // push ASCII-based delimiters
                         if (privateMethods.keyInArray(e, opts.delimiterChars)) {
                             privateMethods.applyDelimiter.call($self, e);
-                            $(this).closest("form").submit();
+                            if (opts.submitOnDelimiter) {
+                                $(this).closest("form").submit();
+                            }
                         }
                     });
 
@@ -424,7 +427,9 @@
                         // push key-based delimiters (includes <enter> by default)
                         if (privateMethods.keyInArray(e, opts.delimiterKeys)) {
                             privateMethods.applyDelimiter.call($self, e);
-                            $(this).closest("form").submit();
+                            if (opts.submitOnDelimiter) {
+                                $(this).closest("form").submit();
+                            }
                         }
                         // submit the form on enter with empty field
                         if (e.which === 13 && fieldIsEmpty) {

@@ -174,4 +174,23 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       }
     }
   }
+
+  val mergeDuplicateTags = new Migration {
+    val version: Int = 16
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.queryNA[String]("SELECT name FROM tags GROUP BY name HAVING COUNT(*) > 1") foreach { tag =>
+        val ids = Q.queryNA[String](s"SELECT id FROM tags WHERE name='$tag'").list()
+        val masterId = ids.head
+        println(s"Found ${ids.size} duplicates for tag '$tag', merging...")
+        ids.tail.foreach(duplicateId => {
+          Q.updateNA(s"UPDATE articles_tags SET tag_id='$masterId' WHERE tag_id='$duplicateId'").execute()
+          Q.updateNA(s"DELETE FROM tags WHERE id='$duplicateId'").execute()
+          println(s"Merged tag id=$duplicateId into id=$masterId")
+        })
+      }
+      Q.updateNA("ALTER IGNORE TABLE articles_tags ADD UNIQUE INDEX idx_name (tag_id, article_id)")
+      Q.updateNA(s"UPDATE tags SET name = lower(name)").execute()
+    }
+  }
 }

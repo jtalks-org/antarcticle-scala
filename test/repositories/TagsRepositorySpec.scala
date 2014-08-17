@@ -128,9 +128,9 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
         records must_== 4
     }
 
-    "omit duplicates when inserting tags" in withTestDb {
+    "omit duplicates when inserting tags, case insensitive" in withTestDb {
       implicit session =>
-        tagsRepository.insertTags(Seq("tag4", "tag4", "tag4"))
+        tagsRepository.insertTags(Seq("tag4", "tag4", "Tag4"))
 
         val records = tags.length.run
         records must_== 4

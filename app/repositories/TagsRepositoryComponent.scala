@@ -54,7 +54,7 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
       compiledByName(name).firstOption.map(r => Tag(r._1.get, r._2))
 
     override def insertTags(names: Seq[String])(implicit session: JdbcBackend#Session) =
-      compiledForInsert.insertAll(names.distinct: _*)
+      compiledForInsert.insertAll(names.map(_.toLowerCase).distinct: _*)
 
     override def insertArticleTags(articleTags: Seq[(Int, Int)])(implicit session: JdbcBackend#Session) =
       compiledArticleTagsForInsert.insertAll(articleTags.distinct: _*)

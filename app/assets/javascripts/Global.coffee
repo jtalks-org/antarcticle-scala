@@ -11,7 +11,17 @@ jQuery(=>
       $(this).css('margin-top', -fadeoutHeight)
     )
   )
+  loadBanners()
 )
+
+loadBanners = () ->
+  $('div[data-banner-href]').each(() ->
+    $.get($(this).attr('data-banner-href'), (data) =>
+      $(this).html(data)
+    ).fail((data) ->
+      showFailureNotification(Cannot load page banner))
+  )
+
 
 showSuccessNotification = (text) ->
   showNotification(text, $('.alert-success'))

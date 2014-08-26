@@ -17,6 +17,8 @@ trait ApplicationPropertiesServiceComponent {
     def getInstanceName(): String
 
     def changeInstanceName(newName: String)(implicit principal: Principal): AuthorizationResult[Unit]
+
+    def changeBannerId(id: String, value: String)(implicit principal: Principal): AuthorizationResult[Unit]
   }
 
 }
@@ -41,13 +43,21 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
     def changeInstanceName(newName: String)(implicit principal: Principal) = withTransaction {
       implicit session =>
         principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
-            propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
-              case Some(x) =>
-                propertiesRepository.updateProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
-              case None =>
-                propertiesRepository.createNewProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
-            }
+          propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
+            case Some(x) =>
+              propertiesRepository.updateProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
+            case None =>
+              propertiesRepository.createNewProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
+          }
         }
     }
+
+    def changeBannerId(id: String, value: String)(implicit principal: Principal) = {
+      principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
+        // todo
+      }
+    }
+
   }
+
 }

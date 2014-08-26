@@ -9,5 +9,9 @@ object ApplicationPropertyModels {
   /**
    * Values of application properties which are interesting only for main page template.
    */
-  case class MainTemplateProperties(instanceName: String)
+  case class MainTemplateProperties(instanceName: String,
+                                    topBannerCodePenId: Option[String] = None,
+                                    bottomBannerCodePenId: Option[String] = None) {
+  }
+
 }

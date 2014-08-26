@@ -1,6 +1,6 @@
 jQuery(=>
   $(document).ready(=>
-    # old browsers may not support local storage
+    # old browsers may have no support local storage
     if(typeof(Storage) != "undefined")
       if ($('#toggle-admin-mode').length > 0)
         if ("true" == sessionStorage.adminMode)
@@ -51,6 +51,7 @@ enterAdminMode = () ->
     exitAdminMode()
     e.preventDefault()
   )
+  enableBannerEditor()
 
 submitData = (newName) ->
   if !operationInProgress
@@ -62,8 +63,8 @@ submitData = (newName) ->
         type: "POST",
         url: $('#toggle-admin-mode').closest('a').attr('data-href'),
         contentType: 'application/json',
-        data: JSON.stringify({ instanceName: newName}),
-        statusCode:{
+        data: JSON.stringify({instanceName: newName}),
+        statusCode: {
           401: () ->
             showFailureNotification("Your session has ended. Please refresh the page.")
             $('#application-name-container').focus()
@@ -77,6 +78,25 @@ submitData = (newName) ->
         complete: () ->
           operationInProgress = false
       })
+
+enableBannerEditor = () ->
+  $('.banner-control').show()
+  $('.page-banner').addClass("banner-border")
+  $('button[data-banner-submit-href]').each(() ->
+    $(this).click(() =>
+      $.ajax({
+        type: "POST",
+        url: $(this).attr('data-banner-submit-href'),
+        contentType: 'application/json',
+        data: JSON.stringify({'codepenId': $(this).prevAll('input').val()}),
+        success: () ->
+          showSuccessNotification("Banner id has been updated")
+        error: (data) ->
+          showFailureNotification(data)
+      })
+    )
+  )
+
 
 exitAdminMode = () ->
   sessionStorage.adminMode = false
@@ -97,3 +117,8 @@ exitAdminMode = () ->
     enterAdminMode()
     e.preventDefault()
   )
+  disableBannerEditor()
+
+disableBannerEditor = () ->
+  $('.banner-control').hide()
+  $('.page-banner').removeClass("banner-border")

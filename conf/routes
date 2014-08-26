@@ -2,48 +2,49 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET           /                                  @controllers.ArticleController.allArticles()
+GET           /                                        @controllers.ArticleController.allArticles()
 # Authentication
-GET           /signin                            @controllers.AuthenticationController.showLoginPage
-POST          /signin                            @controllers.AuthenticationController.login
-GET           /signout                           @controllers.AuthenticationController.logout
+GET           /signin                                  @controllers.AuthenticationController.showLoginPage
+POST          /signin                                  @controllers.AuthenticationController.login
+GET           /signout                                 @controllers.AuthenticationController.logout
 # Articles
-GET           /articles                          @controllers.ArticleController.listArticles(tags: Option[String])
-GET           /articles/page/:page               @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
-GET           /articles/new                      @controllers.ArticleController.getNewArticlePage
-GET           /articles/translate/:id            @controllers.ArticleController.getTranslateArticlePage(id: Int)
-POST          /articles/preview                  @controllers.ArticleController.previewArticle
-POST          /articles/new                      @controllers.ArticleController.postNewArticle
-GET           /articles/:id                      @controllers.ArticleController.viewArticle(id: Int)
-GET           /articles/edit/:id                 @controllers.ArticleController.editArticle(id: Int)
-POST          /articles/edit                     @controllers.ArticleController.postArticleEdits
-DELETE        /articles/:id                      @controllers.ArticleController.removeArticle(id: Int)
+GET           /articles                                @controllers.ArticleController.listArticles(tags: Option[String])
+GET           /articles/page/:page                     @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
+GET           /articles/new                            @controllers.ArticleController.getNewArticlePage
+GET           /articles/translate/:id                  @controllers.ArticleController.getTranslateArticlePage(id: Int)
+POST          /articles/preview                        @controllers.ArticleController.previewArticle
+POST          /articles/new                            @controllers.ArticleController.postNewArticle
+GET           /articles/:id                            @controllers.ArticleController.viewArticle(id: Int)
+GET           /articles/edit/:id                       @controllers.ArticleController.editArticle(id: Int)
+POST          /articles/edit                           @controllers.ArticleController.postArticleEdits
+DELETE        /articles/:id                            @controllers.ArticleController.removeArticle(id: Int)
 # Comments
-POST          /articles/:id/comments/new         @controllers.CommentController.postNewComment(id:Int)
-DELETE        /articles/:id/comments/:commentId  @controllers.CommentController.removeComment(id:Int, commentId: Int)
-GET           /articles/:id/comments/:commentId  @controllers.CommentController.editComment(id:Int, commentId: Int)
-POST          /articles/:id/comments/:commentId  @controllers.CommentController.postCommentEdits(id:Int, commentId: Int)
+POST          /articles/:id/comments/new               @controllers.CommentController.postNewComment(id:Int)
+DELETE        /articles/:id/comments/:commentId        @controllers.CommentController.removeComment(id:Int, commentId: Int)
+GET           /articles/:id/comments/:commentId        @controllers.CommentController.editComment(id:Int, commentId: Int)
+POST          /articles/:id/comments/:commentId        @controllers.CommentController.postCommentEdits(id:Int, commentId: Int)
 # Users
-GET           /users/:name                       @controllers.UserController.viewProfile(name: String, tags: Option[String])
-GET           /users/:name/page/:page            @controllers.UserController.viewProfilePaged(name: String, page: Int, tags: Option[String])
-GET           /roles                             @controllers.UserController.listUsers(search: Option[String])
-GET           /roles/page/:page                  @controllers.UserController.listUsersPaged(search: Option[String], page: Int)
-POST          /roles/user/:id                    @controllers.UserController.postChangedUserRole(id: Int)
+GET           /users/:name                             @controllers.UserController.viewProfile(name: String, tags: Option[String])
+GET           /users/:name/page/:page                  @controllers.UserController.viewProfilePaged(name: String, page: Int, tags: Option[String])
+GET           /roles                                   @controllers.UserController.listUsers(search: Option[String])
+GET           /roles/page/:page                        @controllers.UserController.listUsersPaged(search: Option[String], page: Int)
+POST          /roles/user/:id                          @controllers.UserController.postChangedUserRole(id: Int)
 # Help pages
-GET           /help/markdown                     @controllers.HelpController.markdownHelp()
+GET           /help/markdown                           @controllers.HelpController.markdownHelp()
 # Notifications
-GET           /notifications                     @controllers.NotificationsController.getNotifications()
-GET           /notification/:id                  @controllers.NotificationsController.getNotification(id: Int)
-DELETE        /notification/:id                  @controllers.NotificationsController.dismissNotification(id: Int)
-DELETE        /notifications                     @controllers.NotificationsController.dismissAllNotifications()
+GET           /notifications                           @controllers.NotificationsController.getNotifications()
+GET           /notification/:id                        @controllers.NotificationsController.getNotification(id: Int)
+DELETE        /notification/:id                        @controllers.NotificationsController.dismissNotification(id: Int)
+DELETE        /notifications                           @controllers.NotificationsController.dismissAllNotifications()
 # Tags
-GET           /tags                              @controllers.TagsController.listTags()
+GET           /tags                                    @controllers.TagsController.listTags()
 # Administration
-POST           /administration/appname           @controllers.ApplicationPropertiesController.postChangedInstanceName()
+POST          /administration/appname                  @controllers.ApplicationPropertiesController.postChangedInstanceName()
+POST          /administration/banner/:id               @controllers.ApplicationPropertiesController.postBannerId(id: String)
 # Static resources: styles, scripts, images, fonts, etc
-GET           /stylesheets/:file                 controllers.Assets.at(path="/public/stylesheets", file)
-GET           /javascripts/:file                 controllers.Assets.at(path="/public/javascripts", file)
-GET           /images/:file                      controllers.Assets.at(path="/public/images", file)
-GET           /fonts/:file                       controllers.Assets.at(path="/public/fonts", file)
+GET           /stylesheets/:file                       controllers.Assets.at(path="/public/stylesheets", file)
+GET           /javascripts/:file                       controllers.Assets.at(path="/public/javascripts", file)
+GET           /images/:file                            controllers.Assets.at(path="/public/images", file)
+GET           /fonts/:file                             controllers.Assets.at(path="/public/fonts", file)
 
     

@@ -1,5 +1,6 @@
 package controllers
 
+import play.api.libs.json.JsError
 import play.api.mvc.{Controller, Action}
 import services.ApplicationPropertiesServiceComponent
 import security.Authentication
@@ -11,7 +12,7 @@ import security.Result.{NotAuthorized, Authorized}
  * default language and so on.
  */
 trait ApplicationPropertiesController {
-  this: Controller with ApplicationPropertiesServiceComponent with Authentication =>
+  this: Controller with ApplicationPropertiesServiceComponent with PropertiesProvider with Authentication =>
 
   def postChangedInstanceName() = Action(parse.json) {
     implicit request =>
@@ -21,6 +22,25 @@ trait ApplicationPropertiesController {
           propertiesService.changeInstanceName(x) match {
             case Authorized(created) => Ok("")
             case NotAuthorized() => Unauthorized("You are not authorized to perform this action")
+          }
+      }
+  }
+
+  def postBannerId(id: String)= Action(parse.json) {
+    implicit request =>
+      (request.body \ "codepenId").asOpt[String] match {
+        case None => BadRequest("")
+        case Some(value) =>
+          id match {
+            case "topBanner" => {
+              topBannerId = Option(value)
+              Ok("")
+            }
+            case "bottomBanner" => {
+              bottomBannerId = Option(value)
+              Ok("")
+            }
+            case _ => BadRequest("Malformed or incomplete request")
           }
       }
   }

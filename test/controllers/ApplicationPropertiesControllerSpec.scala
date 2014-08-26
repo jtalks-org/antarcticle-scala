@@ -16,6 +16,7 @@ import security.Result.{Authorized, NotAuthorized}
 class ApplicationPropertiesControllerSpec extends Specification with Mockito with AfterExample {
 
   object controller extends ApplicationPropertiesController
+  with PropertiesProvider
   with ApplicationPropertiesServiceComponent
   with FakeAuthentication {
     override val usersRepository = mock[UsersRepository]

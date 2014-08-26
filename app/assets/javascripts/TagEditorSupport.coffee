@@ -19,6 +19,12 @@ jQuery(=>
     }).on('typeahead:selected', (e, d) =>
       tagApi.tagsManager("pushTag", d.value)
     )
+
+    $('.article-submit').on('click', () =>
+      if (input.val())
+        tagApi.tagsManager("pushTag", input.val())
+    )
+
     # if we have something in the search field on page load - make tags from it
     tagApi.tagsManager("pushTag", tag) for tag in $('#tag_input').attr('value').split(',')
     $('.tt-hint').addClass('form-control');

@@ -4,10 +4,11 @@ import play.api.mvc.{Action, Controller}
 import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.{ArticleDetailsModel, Article}
+import models.ArticleModels.{ArticleDetailsModel, Article, Language}
 import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import scalaz._
+import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -27,7 +28,7 @@ trait ArticleController {
       "language" -> text,
       "sourceId" -> optional(number)
     )((id, title, content, tags, language, sourceId) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty), language, sourceId))
-      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString, article.sourceId)))
+      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString(), article.sourceId)))
   )
 
   def allArticles() = listArticles(None)
@@ -53,8 +54,12 @@ trait ArticleController {
   }
 
   def getTranslateArticlePage(articleId: Int) = withUser { user => implicit request =>
-    articlesService.get(articleId)
-    Ok(views.html.createArticle(articleForm, articlesService.get(articleId)))
+    articlesService.get(articleId) match {
+      case Some(article : ArticleDetailsModel) =>
+        val translation: Article = Article(None, "", "", article.tags, Language.Russian, Some(article.sourceId))
+        Ok(views.html.createArticle(articleForm.fill(translation), some(article)))
+      case _ => NotFound(views.html.errors.notFound())
+    }
   }
 
   def previewArticle = Action { implicit request =>

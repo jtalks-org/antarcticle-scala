@@ -11,12 +11,12 @@
     <link rel="stylesheet" media="screen" href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("/public/images", "favicon.png")">
     @if(properties.topBannerCodePenId.isDefined) {
-      <link rel="stylesheet" media="screen" href="http://codepen.io/@{
+      <link rel="stylesheet" media="screen" href="@{
         properties.topBannerCodePenId.get
       }.css">
     }
     @if(properties.bottomBannerCodePenId.isDefined) {
-      <link rel="stylesheet" media="screen" href="http://codepen.io/@{
+      <link rel="stylesheet" media="screen" href="@{
         properties.bottomBannerCodePenId.get
       }.css">
       }
@@ -42,7 +42,7 @@
               </span>
               <input type="text" class="form-control" placeholder="http://codepen.io/<username>/pen/<id>"
                 @if(properties.topBannerCodePenId.isDefined) {
-                  value="http://codepen.io/@{
+                  value="@{
                     properties.topBannerCodePenId.get
                   }"
                   }
@@ -55,7 +55,7 @@
             </div>
           </div>
           @if(properties.topBannerCodePenId.isDefined) {
-            <div data-banner-href="http://codepen.io/@{
+            <div data-banner-href="@{
               properties.topBannerCodePenId.get
             }.html"></div>
           }
@@ -71,7 +71,7 @@
               </span>
               <input type="text" class="form-control" placeholder="http://codepen.io/<username>/pen/<id>"
                 @if(properties.bottomBannerCodePenId.isDefined) {
-                  value="http://codepen.io/@{
+                  value="@{
                     properties.bottomBannerCodePenId.get
                   }"
                   }
@@ -84,7 +84,7 @@
             </div>
           </div>
           @if(properties.bottomBannerCodePenId.isDefined) {
-            <div data-banner-href="http://codepen.io/@{
+            <div data-banner-href="@{
               properties.bottomBannerCodePenId.get
             }.html"></div>
           }
@@ -110,12 +110,12 @@
     <script src="@routes.Assets.at("/public/javascripts", "AdminModeSupport.js")" type="text/javascript"></script>
     @customPageScripts
     @if(properties.topBannerCodePenId.isDefined) {
-      <script src="http://codepen.io/@{
+      <script src="@{
         properties.topBannerCodePenId.get
       }.js" type="text/javascript"></script>
     }
     @if(properties.bottomBannerCodePenId.isDefined) {
-      <script src="http://codepen.io/@{
+      <script src="@{
         properties.bottomBannerCodePenId.get
       }.js" type="text/javascript"></script>
     }

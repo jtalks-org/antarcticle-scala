@@ -10,12 +10,12 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public/stylesheets", "tag-manager.css")">
     <link rel="stylesheet" media="screen" href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("/public/images", "favicon.png")">
-    @if(properties.topBannerCodePenId.isDefined) {
+    @if(properties.hasTopPageBanner) {
       <link rel="stylesheet" media="screen" href="@{
         properties.topBannerCodePenId.get
       }.css">
     }
-    @if(properties.bottomBannerCodePenId.isDefined) {
+    @if(properties.hasBottomPageBanner) {
       <link rel="stylesheet" media="screen" href="@{
         properties.bottomBannerCodePenId.get
       }.css">
@@ -54,7 +54,7 @@
               </button>
             </div>
           </div>
-          @if(properties.topBannerCodePenId.isDefined) {
+          @if(properties.hasTopPageBanner) {
             <div data-banner-href="@{
               properties.topBannerCodePenId.get
             }.html"></div>
@@ -83,7 +83,7 @@
               </button>
             </div>
           </div>
-          @if(properties.bottomBannerCodePenId.isDefined) {
+          @if(properties.hasBottomPageBanner) {
             <div data-banner-href="@{
               properties.bottomBannerCodePenId.get
             }.html"></div>
@@ -109,12 +109,12 @@
     <script src="@routes.Assets.at("/public/javascripts", "NotificationsSupport.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("/public/javascripts", "AdminModeSupport.js")" type="text/javascript"></script>
     @customPageScripts
-    @if(properties.topBannerCodePenId.isDefined) {
+    @if(properties.hasTopPageBanner) {
       <script src="@{
         properties.topBannerCodePenId.get
       }.js" type="text/javascript"></script>
     }
-    @if(properties.bottomBannerCodePenId.isDefined) {
+    @if(properties.hasBottomPageBanner) {
       <script src="@{
         properties.bottomBannerCodePenId.get
       }.js" type="text/javascript"></script>

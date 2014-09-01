@@ -8,6 +8,8 @@ import security.Result.AuthorizationResult
 
 object ApplicationPropertyNames {
   val instanceNameProperty = "INSTANCE_NAME"
+  val topBannerURL = "topBanner"
+  val bottomBannerURL = "bottomBanner"
 }
 
 trait ApplicationPropertiesServiceComponent {
@@ -16,9 +18,9 @@ trait ApplicationPropertiesServiceComponent {
   trait ApplicationPropertiesService {
     def getInstanceName(): String
 
-    def changeInstanceName(newName: String)(implicit principal: Principal): AuthorizationResult[Unit]
+    def getBannerUrl(id: String): Option[String]
 
-    def changeBannerId(id: String, value: String)(implicit principal: Principal): AuthorizationResult[Unit]
+    def writeProperty(id: String, value: String)(implicit principal: Principal): AuthorizationResult[Unit]
   }
 
 }
@@ -30,7 +32,7 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
 
   class ApplicationPropertiesServiceImpl extends ApplicationPropertiesService {
 
-    def getInstanceName(): String = withSession {
+    def getInstanceName: String = withSession {
       implicit session =>
         // todo: bind default into property class itself
         val defaultValue = "ANTARCTICLE"
@@ -40,22 +42,24 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
         }
     }
 
-    def changeInstanceName(newName: String)(implicit principal: Principal) = withTransaction {
+    def getBannerUrl(id: String) = withTransaction {
       implicit session =>
-        principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
-          propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
-            case Some(x) =>
-              propertiesRepository.updateProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
-            case None =>
-              propertiesRepository.createNewProperty(ApplicationPropertyNames.instanceNameProperty, Some(newName))
-          }
+        propertiesRepository.getProperty(id) match {
+          case Some(x) => x.value
+          case None => None
         }
     }
 
-    def changeBannerId(id: String, value: String)(implicit principal: Principal) = {
-      principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
-        // todo
-      }
+    def writeProperty(id: String, value: String)(implicit principal: Principal) = withTransaction {
+      implicit session =>
+        principal.doAuthorizedOrFail(Manage, Entities.Property) { () =>
+          propertiesRepository.getProperty(id) match {
+            case Some(x) =>
+              propertiesRepository.updateProperty(id, Some(value))
+            case None =>
+              propertiesRepository.createNewProperty(id, Some(value))
+          }
+        }
     }
 
   }

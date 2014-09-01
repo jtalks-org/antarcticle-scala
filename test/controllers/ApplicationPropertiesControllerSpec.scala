@@ -3,7 +3,7 @@ package controllers
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.AfterExample
-import services.ApplicationPropertiesServiceComponent
+import services.{ApplicationPropertyNames, ApplicationPropertiesServiceComponent}
 import util.FakeAuthentication
 import play.api.test._
 import play.api.libs.json.Json
@@ -41,7 +41,7 @@ class ApplicationPropertiesControllerSpec extends Specification with Mockito wit
     val badRequest = new FakeRequest(Helpers.POST, "/", FakeHeaders(), Json.toJson(Map("value" -> "value")))
 
     "pass when incoming json is correct" in {
-      propertiesService.changeInstanceName(anyString)(any[Principal]) returns Authorized(Unit)
+      propertiesService.writeProperty(anyString, anyString)(any[Principal]) returns Authorized(Unit)
 
       val page = controller.postChangedInstanceName()(request)
 
@@ -55,7 +55,7 @@ class ApplicationPropertiesControllerSpec extends Specification with Mockito wit
     }
 
     "show error when user isn't admin" in {
-      propertiesService.changeInstanceName(anyString)(any[Principal]) returns NotAuthorized()
+      propertiesService.writeProperty(anyString, anyString)(any[Principal]) returns NotAuthorized()
 
       val page = controller.postChangedInstanceName()(request)
 

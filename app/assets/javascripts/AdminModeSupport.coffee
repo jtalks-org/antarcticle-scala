@@ -90,7 +90,7 @@ enableBannerEditor = () ->
         contentType: 'application/json',
         data: JSON.stringify({'codepenId': $(this).prevAll('input').val()}),
         success: () ->
-          showSuccessNotification("Banner id has been updated")
+          showSuccessNotification("Banner id has been updated, please refresh the page")
         error: (data) ->
           showFailureNotification(data)
       })

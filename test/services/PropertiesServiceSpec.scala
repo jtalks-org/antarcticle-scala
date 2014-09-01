@@ -66,7 +66,7 @@ class PropertiesServiceSpec extends Specification
       val newValue = "New Instance Name"
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns None
 
-      val result = propertiesService.changeInstanceName(newValue)(adminUser)
+      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
 
       there was one(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -81,7 +81,7 @@ class PropertiesServiceSpec extends Specification
       val existProperty = ApplicationProperty(None, propertyName, Some("value"), "value", time)
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(existProperty)
 
-      val result = propertiesService.changeInstanceName(newValue)(adminUser)
+      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
 
       there was one(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -94,7 +94,7 @@ class PropertiesServiceSpec extends Specification
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.changeInstanceName(newValue)(user)
+      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(user)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
@@ -108,7 +108,7 @@ class PropertiesServiceSpec extends Specification
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.changeInstanceName(newValue)(anonymousUser)
+      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(anonymousUser)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)

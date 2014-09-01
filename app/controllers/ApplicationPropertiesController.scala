@@ -1,8 +1,7 @@
 package controllers
 
-import play.api.libs.json.JsError
 import play.api.mvc.{Controller, Action}
-import services.ApplicationPropertiesServiceComponent
+import services.{ApplicationPropertyNames, ApplicationPropertiesServiceComponent}
 import security.Authentication
 import security.Result.{NotAuthorized, Authorized}
 
@@ -19,27 +18,25 @@ trait ApplicationPropertiesController {
       (request.body \ "instanceName").asOpt[String] match {
         case None => BadRequest("")
         case Some(x) =>
-          propertiesService.changeInstanceName(x) match {
+          propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, x) match {
             case Authorized(created) => Ok("")
             case NotAuthorized() => Unauthorized("You are not authorized to perform this action")
           }
       }
   }
 
-  def postBannerId(id: String)= Action(parse.json) {
+  def postBannerId(id: String) = Action(parse.json) {
     implicit request =>
       (request.body \ "codepenId").asOpt[String] match {
         case None => BadRequest("")
         case Some(value) =>
           id match {
-            case "topBanner" => {
-              topBannerId = Option(value)
-              Ok("")
-            }
-            case "bottomBanner" => {
-              bottomBannerId = Option(value)
-              Ok("")
-            }
+            case _ if id.equals(ApplicationPropertyNames.topBannerURL) ||
+              id.equals(ApplicationPropertyNames.bottomBannerURL) =>
+              propertiesService.writeProperty(id, value) match {
+                case Authorized(created) => Ok("")
+                case NotAuthorized() => Unauthorized("You are not authorized to perform this action")
+              }
             case _ => BadRequest("Malformed or incomplete request")
           }
       }

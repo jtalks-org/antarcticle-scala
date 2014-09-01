@@ -20,7 +20,7 @@ jQuery(=>
       tagApi.tagsManager("pushTag", d.value)
     )
 
-    $('.article-submit').on('click', () =>
+    $('.accept-uncommited-tags').on('click', () =>
       if (input.val())
         tagApi.tagsManager("pushTag", input.val())
     )

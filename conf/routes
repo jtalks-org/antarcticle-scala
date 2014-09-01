@@ -31,6 +31,7 @@ GET           /roles/page/:page                        @controllers.UserControll
 POST          /roles/user/:id                          @controllers.UserController.postChangedUserRole(id: Int)
 # Help pages
 GET           /help/markdown                           @controllers.HelpController.markdownHelp()
+GET           /help/administration                     @controllers.HelpController.adminHelp()
 # Notifications
 GET           /notifications                           @controllers.NotificationsController.getNotifications()
 GET           /notification/:id                        @controllers.NotificationsController.getNotification(id: Int)

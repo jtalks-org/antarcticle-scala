@@ -13,8 +13,8 @@ object ApplicationPropertyModels {
                                     topBannerCodePenId: Option[String] = None,
                                     bottomBannerCodePenId: Option[String] = None) {
 
-    def hasTopPageBanner = topBannerCodePenId.isDefined && topBannerCodePenId.get.startsWith("http://codepen.io/")
-    def hasBottomPageBanner = bottomBannerCodePenId.isDefined && bottomBannerCodePenId.get.startsWith("http://codepen.io/")
+    def hasTopPageBanner = topBannerCodePenId.isDefined && topBannerCodePenId.get.startsWith("http://admin.io/")
+    def hasBottomPageBanner = bottomBannerCodePenId.isDefined && bottomBannerCodePenId.get.startsWith("http://admin.io/")
   }
 
 }

@@ -1,0 +1,44 @@
+@()(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
+@import views.helpers.Markdown
+@templates.main("Markdown syntax reference") {
+
+    <div class="row">
+        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
+            <article class="entry">
+                <div class="main-content">
+                    <header>
+                        <div class="help-icon">
+                            <img src="@routes.Assets.at("/public/images", "help_black.png")"/>
+                        </div>
+                        <div class="article-header">
+                            <h2>Admin mode reference</h2>
+                        </div>
+                    </header>
+                    <div class="body">
+                        <div class="content clearfix">
+                            <h3>Customizing page contents</h3>
+
+                            <p>Admin mode allows you to add self-made content on the top and bottom page areas. Use this feature to provide your
+                            own banners, web-counters, site logos or custom site enhancements.
+
+                            <p>Antarcticle uses <a href="https://www.codepen.io">codepen.io</a> as an external, feature rich custom content editor.
+
+                            <p>To customize your Antarticle instance follow these simple steps:
+
+                            <p> 1. Go to <a href="https://codepen.io/signup">signup page</a> and choose a free plan
+
+                            <p><img src="@routes.Assets.at("/public/images","help_admin_signup.png")">
+
+                            <p> 2. Create a <a href="https://codepen.io/signup">new Pen</a>
+
+                            <p><img src="@routes.Assets.at("/public/images","help_admin_newpen.png")">
+
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+
+} {
+}

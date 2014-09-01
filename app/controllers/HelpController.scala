@@ -13,4 +13,8 @@ trait HelpController {
   def markdownHelp() = Action {
     implicit request => Ok(views.html.help.markdown())
   }
+
+  def adminHelp() = Action {
+    implicit request => Ok(views.html.help.admin())
+  }
 }

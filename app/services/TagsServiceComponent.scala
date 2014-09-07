@@ -27,7 +27,7 @@ trait TagsServiceComponentImpl extends TagsServiceComponent {
   class TagsServiceImpl extends TagsService {
 
     override def createTagsForArticle(articleId: Int, tags: Seq[String])(implicit s: JdbcBackend#Session) = {
-      val trimmedTags = tags.map(_.trim)
+      val trimmedTags = tags.map(_.trim.toLowerCase)
       validateTags(trimmedTags).map { _ =>
         val existingTags = tagsRepository.getByNames(trimmedTags)
         val existingTagsNames = existingTags.map(_.name)

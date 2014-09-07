@@ -64,7 +64,7 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
 
     override def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       (for {
-        tag <- tags if tag.name inSet names
+        tag <- tags if tag.name inSet names.map(_.toLowerCase)
       } yield tag).list().map(tag => Tag(tag._1.get, tag._2))
     }
   }

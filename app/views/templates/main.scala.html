@@ -38,9 +38,10 @@
           <div class="banner-control" style="display : none">
             <div class="input-group">
               <span class="input-group-addon">
-                <i class="glyphicon glyphicon-bookmark"></i> Codepen URL for this banner:
+                <i class="glyphicon glyphicon-bookmark"></i>
+                <a href="@routes.HelpController.adminHelp()">Codepen URL</a> for this banner:
               </span>
-              <input type="text" class="form-control" placeholder="http://admin.io/<username>/pen/<id>"
+              <input type="text" class="form-control" placeholder="http://codepen.io/<username>/pen/<id>"
                 @if(properties.topBannerCodePenId.isDefined) {
                   value="@{
                     properties.topBannerCodePenId.get
@@ -67,9 +68,10 @@
           <div class="banner-control" style="display : none">
             <div class="input-group">
               <span class="input-group-addon">
-                <i class="glyphicon glyphicon-bookmark"></i> Codepen URL for this banner:
+                <i class="glyphicon glyphicon-bookmark"></i>
+                <a href="@routes.HelpController.adminHelp()">Codepen URL</a> for this banner:
               </span>
-              <input type="text" class="form-control" placeholder="http://admin.io/<username>/pen/<id>"
+              <input type="text" class="form-control" placeholder="http://codepen.io/<username>/pen/<id>"
                 @if(properties.bottomBannerCodePenId.isDefined) {
                   value="@{
                     properties.bottomBannerCodePenId.get

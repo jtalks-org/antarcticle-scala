@@ -84,16 +84,20 @@ enableBannerEditor = () ->
   $('.page-banner').addClass("banner-border")
   $('button[data-banner-submit-href]').each(() ->
     $(this).click(() =>
-      $.ajax({
-        type: "POST",
-        url: $(this).attr('data-banner-submit-href'),
-        contentType: 'application/json',
-        data: JSON.stringify({'codepenId': $(this).prevAll('input').val()}),
-        success: () ->
-          showSuccessNotification("Banner id has been updated, please refresh the page")
-        error: (data) ->
-          showFailureNotification(data)
-      })
+      content = $(this).prevAll('input').val().trim()
+      if (content.indexOf("http://codepen.io/") == 0 || content == "")
+        $.ajax({
+          type: "POST",
+          url: $(this).attr('data-banner-submit-href'),
+          contentType: 'application/json',
+          data: JSON.stringify({'codepenId': content}),
+          success: () ->
+            showSuccessNotification("Banner id has been updated, please refresh the page")
+          error: (data) ->
+            showFailureNotification(data)
+        })
+      else
+        showFailureNotification("This id does not look like a correct Codepen URL")
     )
   )
 

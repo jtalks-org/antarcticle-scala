@@ -2,43 +2,57 @@
 @import views.helpers.Markdown
 @templates.main("Markdown syntax reference") {
 
-    <div class="row">
-        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
-            <article class="entry">
-                <div class="main-content">
-                    <header>
-                        <div class="help-icon">
-                            <img src="@routes.Assets.at("/public/images", "help_black.png")"/>
-                        </div>
-                        <div class="article-header">
-                            <h2>Admin mode reference</h2>
-                        </div>
-                    </header>
-                    <div class="body">
-                        <div class="content clearfix">
-                            <h3>Customizing page contents</h3>
+  <div class="row">
+    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
+      <article class="entry">
+        <div class="main-content">
+          <header>
+            <div class="help-icon">
+              <img src="@routes.Assets.at("/public/images", "help_black.png")"/>
+            </div>
+            <div class="article-header">
+              <h2>Admin mode reference</h2>
+            </div>
+          </header>
+          <div class="body">
+            <div class="content clearfix">
+              <h3>Customizing page contents</h3>
 
-                            <p>Admin mode allows you to add self-made content on the top and bottom page areas. Use this feature to provide your
-                            own banners, web-counters, site logos or custom site enhancements.
+              <p>
+                Admin mode allows you to add self-made content on the top and bottom page areas. Use this feature to provide your
+                own banners, web-counters, site logos or custom site enhancements.
 
-                            <p>Antarcticle uses <a href="https://www.codepen.io">codepen.io</a> as an external, feature rich custom content editor.
+              <p>Antarcticle uses <a href="https://www.codepen.io">codepen.io</a>
+                as an external, feature rich custom content editor.
 
-                            <p>To customize your Antarticle instance follow these simple steps:
+              <p>To customize your Antarticle instance follow these simple steps:
 
-                            <p> 1. Go to <a href="https://codepen.io/signup">signup page</a> and choose a free plan
+              <p> 1. Go to <a href="https://codepen.io/signup">signup page</a> and choose a free plan
 
-                            <p><img src="@routes.Assets.at("/public/images","help_admin_signup.png")">
+              <p><img src="@routes.Assets.at("/public/images", "help_admin_signup.png")">
 
-                            <p> 2. Create a <a href="https://codepen.io/signup">new Pen</a>
+              <p> 2. Create a <a href="https://codepen.io/signup">new Pen</a>
 
-                            <p><img src="@routes.Assets.at("/public/images","help_admin_newpen.png")">
+              <p><img src="@routes.Assets.at("/public/images", "help_admin_newpen.png")">
 
-                        </div>
-                    </div>
-                </div>
-            </article>
+              <p> 3. Compose any content you like. With embedded preview you can see rendered result as you type
+
+              <p><img src="@routes.Assets.at("/public/images", "help_admin_content.png")">
+
+              <p> 4. Now press [Save]. Your pen is being assigned a unique URL. Use this URL in Antarcticle
+
+              <p><img src="@routes.Assets.at("/public/images", "help_admin_saved.png")">
+
+              <p> 5. Use URL from step [4] to embed your content into Antarcticle. From now on every change made to this Pen on codepen.io will be applied to Antarcticle automatically
+
+              <p><img src="@routes.Assets.at("/public/images", "help_admin_done.png")">
+
+            </div>
+          </div>
         </div>
+      </article>
     </div>
+  </div>
 
 } {
 }

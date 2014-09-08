@@ -34,9 +34,9 @@ War file may be deployed to any servlet container or application server on your 
 
 ##Configuration
 
-The following sections describe Antarcticle configuration properties. They can be set either in  **conf/application.conf** application configuration file or via JNDI, if you're running Antarcticle in JNDI-aware environment. The later way is preferable for Tomcat or other servlet container.
+The following sections describe Antarcticle configuration properties. They can be set either in  **conf/application.conf** application configuration file or via JNDI, if you're running Antarcticle in JNDI-aware environment. The later way is preferable for Tomcat or other servlet container. Properties' names are different for JNDI and file configurations.
 
-**Application.conf** is a simple key-value property file, **#** symbol used for comments. It may be edited either before build procedure in source or after WAR deployment. All changes in this file require application restart.
+**application.conf** is a simple key-value property file, **#** symbol used for comments. It may be edited either before build procedure in source or after WAR deployment. All changes in this file require application restart.
 
 ###Database
 
@@ -53,10 +53,19 @@ When creating database in MySQL you need to use utf_bin collation like this:
 
 To configure database connection use the following properties:
 
+application.conf:
+
     db.default.driver=com.mysql.jdbc.Driver
     db.default.url="jdbc:mysql://localhost:3306/antarcticle?characterEncoding=UTF-8"
     db.default.user=root
     db.default.password=root
+
+JNDI properties:
+
+    <Environment name="ANTARCTICLE_DB_DRIVER" value="com.mysql.jdbc.Driver" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_DB_URL" value="jdbc:mysql://localhost:3306/antarcticle?characterEncoding=UTF-8" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_DB_USER" value="root" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_DB_PASSWORD" value="root" type="java.lang.String"/>
 
 Where driver can be selected from the [available drivers](http://slick.typesafe.com/doc/2.0.0/api/#scala.slick.driver.JdbcDriver), URL is represented in default JDBC notation and _antarcticle_ stands for a database name. Don't forget to actualy create this database before launching Antarcticle application. On the first launch application will create all necessary tables and data on it's own.
 
@@ -68,13 +77,26 @@ Authentication is performed via [JTalks Poulpe](https://github.com/jtalks-org/po
 
 To setup antarcticle to use Poulpe ensure the following properties are set:
 
+application.conf:
 
     security.authentication.useFake=false
     security.authentication.poulpe.url="http://mydomain.com/poulpeContext"
+    
+JNDI properties:
+
+    <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" value="false" type="java.lang.Boolean"/>
+    <Environment name="ANTARCTICLE_POULPE_URL" value="http://mydomain.com/poulpeContext" type="java.lang.String"/>  
 
 To configure fake authentication manager (contains only admin/admin user) set properties as follows:
 
+application.conf:
+
     security.authentication.useFake=true
+
+JNDI properties:
+
+    <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" value="true" type="java.lang.Boolean"/>
+
 
 ###Examples
 
@@ -84,22 +106,22 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
 <?xml version='1.0' encoding='utf-8'?>
 <Context>
     <WatchedResource>WEB-INF/web.xml</WatchedResource>
-    <Environment name="db.default.driver" 
+    <Environment name="ANTARCTICLE_DB_DRIVER" 
          value="com.mysql.jdbc.Driver"
          type="java.lang.String"/>
-    <Environment name="db.default.url" 
+    <Environment name="ANTARCTICLE_DB_URL" 
          value="jdbc:mysql://localhost:3306/antarcticle?characterEncoding=UTF-8"
          type="java.lang.String"/>
-    <Environment name="db.default.user" 
+    <Environment name="ANTARCTICLE_DB_USER" 
          value="root"
          type="java.lang.String"/>
-    <Environment name="db.default.password" 
+    <Environment name="ANTARCTICLE_DB_PASSWORD" 
          value="root"
          type="java.lang.String"/>
-    <Environment name="security.authentication.useFake" 
+    <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" 
          value="false"
          type="java.lang.Boolean"/>
-    <Environment name="security.authentication.poulpe.url" 
+    <Environment name="ANTARCTICLE_POULPE_URL" 
          value="http://mydomain.com/poulpeContext"
          type="java.lang.String"/>    
 </Context>

@@ -77,10 +77,10 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     )
 
     notifications ++= Seq(
-      Notification(Some(1), 2, 2, 2, "Be careful, it's JTalks, baby", "Don't deny it, you met it.", time),
-      Notification(Some(2), 2, 2, 2, "Again and again", "Don't deny it, you met it.", time),
-      Notification(Some(3), 1, 2, 2, "You can delete this notification.", "But be careful, it's JTalks, baby.", time),
-      Notification(Some(4), 3, 2, 2, "Have you checked a content of your notification?", "Bullshit, do it now.", time)
+      Notification(Some(1), 2, 2, Some(2), "Be careful, it's JTalks, baby", "Don't deny it, you met it.", time),
+      Notification(Some(2), 2, 2, Some(2), "Again and again", "Don't deny it, you met it.", time),
+      Notification(Some(3), 1, 2, Some(2), "You can delete this notification.", "But be careful, it's JTalks, baby.", time),
+      Notification(Some(4), 3, 2, Some(2), "Have you checked a content of your notification?", "Bullshit, do it now.", time)
     )
 
     properties ++= Seq(

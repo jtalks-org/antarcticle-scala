@@ -25,8 +25,8 @@ trait NotificationsController {
         fail = nel => Forbidden(""),
         succ =  {
           case Some(notification : Notification) =>
-            Found(routes.ArticleController.viewArticle(
-              notification.articleId).absoluteURL() + "#" + notification.commentId
+            Found(routes.ArticleController.viewArticle(notification.articleId)
+              .absoluteURL() + (if (notification.commentId == None) "" else "#" + notification.commentId)
             )
           case None => NotFound(views.html.errors.notFound())
         }

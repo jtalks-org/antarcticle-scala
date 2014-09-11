@@ -193,4 +193,14 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA(s"UPDATE tags SET name = lower(name)").execute()
     }
   }
+
+  val commentsFKForNotifications = new Migration {
+    val version: Int = 17
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute()
+      Q.updateNA("ALTER TABLE notifications CHANGE COLUMN comment_id comment_id INT(11) NULL").execute()
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute()
+    }
+  }
 }

@@ -31,8 +31,8 @@ class NotificationServiceSpec extends  Specification
 
   val time = new Timestamp(System.currentTimeMillis)
 
-  val firstNotification = Notification(None, 1, 2, 1, "", "", time)
-  val secondNotification = Notification(None, 1, 2, 1, "", "", time)
+  val firstNotification = Notification(None, 1, 2, Some(1), "", "", time)
+  val secondNotification = Notification(None, 1, 2, Some(1), "", "", time)
   val currentUserId = 1
   val authenticatedUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
   val anonymousUser = AnonymousPrincipal

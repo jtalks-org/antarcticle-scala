@@ -37,7 +37,7 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
   val authenticatedUser = new AuthenticatedUser(currentUserId, "user", Authorities.User)
 
   val time = new Timestamp(System.currentTimeMillis)
-  val notification = Notification(Some(1), 1, 2, 1, "", "", time)
+  val notification = Notification(Some(1), 1, 2, Some(1), "", "", time)
 
 
   "get notifications" should {

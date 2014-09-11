@@ -30,7 +30,9 @@ class ArticlesServiceSpec extends Specification
 
   object service extends ArticlesServiceComponentImpl
   with ArticlesRepositoryComponent
-  with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent with MockSessionProvider {
+  with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent with MockSessionProvider
+  with NotificationsServiceComponent {
+    override val notificationsService = mock[NotificationsService]
     override val articlesRepository = mock[ArticlesRepository]
     override val tagsService = mock[TagsService]
     override val articleValidator = mock[Validator[Article]]
@@ -44,6 +46,7 @@ class ArticlesServiceSpec extends Specification
   import service._
 
   def before = {
+    org.mockito.Mockito.reset(notificationsService)
     org.mockito.Mockito.reset(tagsService)
     org.mockito.Mockito.reset(articlesRepository)
     org.mockito.Mockito.reset(articleValidator)
@@ -280,6 +283,22 @@ class ArticlesServiceSpec extends Specification
           articlesService.insert(article)
 
           there was one(articlesRepository).insert(record)(session)
+      }
+    }
+
+    "insert new translation should send notification to author" in {
+      TimeFridge.withFrozenTime() { dt =>
+        val article = Article(None, "", "", List(), Russian, Some(1))
+        articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
+        articleValidator.validate(any[Article]) returns article.successNel
+        tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+        usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
+        articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns List()
+
+        articlesService.insert(article)
+
+        there was one(notificationsService)
+          .createNotificationForArticleTranslation(any[ArticleRecord])(any[AuthenticatedUser], Matchers.eq(session))
       }
     }
 

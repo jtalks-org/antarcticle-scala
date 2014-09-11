@@ -27,7 +27,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
     "return all notification content" in withTestDb{ implicit session =>
       val userId = 3
       val expectedArticleId = 2
-      val expectedCommentId = 2
+      val expectedCommentId = Some(2)
       val expectedTitle = "Have you checked a content of your notification?"
       val expectedContent = "Bullshit, do it now."
 
@@ -67,7 +67,7 @@ class NotificationsRepositorySpec extends Specification with NoTimeConversions {
     "return it by id" in withTestDb { implicit session =>
       val notificationId = 1
       val expectedArticleId = 2
-      val expectedCommentId = 2
+      val expectedCommentId = Some(2)
       val expectedTitle = "Be careful, it's JTalks, baby"
       val expectedContent = "Don't deny it, you met it."
 

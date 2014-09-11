@@ -37,7 +37,8 @@ trait ArticlesServiceComponent {
 }
 
 trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
-  this: ArticlesRepositoryComponent with TagsServiceComponent with UsersRepositoryComponent with TagsRepositoryComponent
+  this: ArticlesRepositoryComponent with TagsServiceComponent with UsersRepositoryComponent
+    with TagsRepositoryComponent with NotificationsServiceComponent
     with SessionProvider =>
 
   val articlesService = new ArticlesServiceImpl
@@ -70,6 +71,11 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
             // article should not be persisted, when tags creation failed
             // reason: tags creation requires article id which is auto-increment column
             session.rollback()
+          } else if (result.isSuccess && createRecord.sourceId.isDefined) {
+            val id = result match {
+              case (v: Success[NonEmptyList[String], ArticleDetailsModel]) => v.a.id
+            }
+            notificationsService.createNotificationForArticleTranslation(createRecord.copy(id = Some(id)))
           }
 
           result

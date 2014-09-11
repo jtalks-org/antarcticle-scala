@@ -3,10 +3,10 @@ package services
 import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import scala.slick.jdbc.JdbcBackend
 import security.{Principal, AuthenticatedUser}
-import models.database.CommentRecord
-import models.database.Notification
+import models.database.{ArticleRecord, CommentRecord, Notification}
 import scalaz._
 import Scalaz._
+import models.ArticleModels.ArticleDetailsModel
 
 
 /**
@@ -16,6 +16,8 @@ trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
 
   trait NotificationsService {
+    def createNotificationForArticleTranslation(translation: ArticleRecord)(implicit principal: Principal, session: JdbcBackend#Session)
+
     def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session)
 
     def getNotificationsForCurrentUser(implicit principal: Principal): Seq[Notification]
@@ -36,6 +38,16 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
   class NotificationsServiceImpl extends NotificationsService {
 
+    def createNotificationForArticleTranslation(translation: ArticleRecord)(implicit principal: Principal, session: JdbcBackend#Session) {
+      principal match {
+        case user: AuthenticatedUser =>
+          val article = articlesRepository.get(translation.sourceId.get).get._1
+          if (translation.authorId != article.authorId)
+            notificationsRepository.insertNotification(
+              new Notification(None, article.authorId, translation.id.get, None, translation.title,
+                translation.content.take(150), translation.createdAt))
+      }
+    }
 
     def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session) {
       principal match {
@@ -43,7 +55,7 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
           val article = articlesRepository.get(cr.articleId).get._1
           if (cr.userId != article.authorId)
             notificationsRepository.insertNotification(
-              new Notification(None, article.authorId, cr.articleId, cr.id.get, article.title,
+              new Notification(None, article.authorId, cr.articleId, cr.id, article.title,
                 cr.content.take(150), cr.createdAt))
       }
     }

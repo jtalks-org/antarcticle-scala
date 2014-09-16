@@ -4,7 +4,7 @@ import com.github.play2war.plugin._
 
 name := "antarcticle-scala"
 
-version := "2.4"
+version := "2.5"
 
 scalaVersion := "2.10.3"
 
@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   // 1.3.174 has problem fixed in trunk:
   // https://code.google.com/p/h2database/source/detail?r=5363
   "com.h2database" % "h2" % "1.3.173",
-  "org.mockito" % "mockito-all" % "1.9.5",
+  "org.mockito" % "mockito-all" % "1.9.5" % "test",
   // markdown support
   "org.pegdown" % "pegdown" % "1.4.2",
   // scalaz magic

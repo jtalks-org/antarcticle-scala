@@ -1,12 +1,13 @@
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AnyContent, Action, Controller}
 import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
 import models.ArticleModels.{ArticleDetailsModel, Article, Language}
 import security.{AuthenticatedUser, Authentication}
 import security.Result._
+import utils.RFC822
 import scalaz._
 import Scalaz._
 
@@ -125,12 +126,44 @@ trait ArticleController {
   }
 
   def removeArticle(id: Int) = Action { implicit request =>
-      articlesService.removeArticle(id).fold(
-        fail = errors,
-        succ =  {
-          case Authorized(_) => Ok(routes.ArticleController.allArticles().absoluteURL())
-          case NotAuthorized() => Unauthorized("Not authorized to remove this article")
-        }
-      )
+    articlesService.removeArticle(id).fold(
+      fail = errors,
+      succ =  {
+        case Authorized(_) => Ok(routes.ArticleController.allArticles().absoluteURL())
+        case NotAuthorized() => Unauthorized("Not authorized to remove this article")
+      }
+    )
+  }
+
+  def fullRssFeed():Action[AnyContent] = rssFeed(None)
+
+  def userRssFeed(user: String):Action[AnyContent] = rssFeed(Some(user))
+
+  def rssFeed(user: Option[String]) = Action { implicit request =>
+    articlesService.getPage(1, None).fold(
+      fail => NotFound(views.html.errors.notFound()),
+      succ = articlesPage => {
+        Ok(
+          <rss version="2.0">
+            <channel>
+              <title>articles.javatalks.ru</title>
+              <description>JavaTalks Articles</description>
+              <link>{routes.ArticleController.allArticles().absoluteURL()}</link>
+              {
+                for (article <- articlesPage.list) yield {
+                  <item>
+                    <title>{article.title}</title>
+                    <link>{routes.ArticleController.viewArticle(article.id).absoluteURL()}</link>
+                    <description>{article.description}</description>
+                    <pubDate>{RFC822(article.createdAt)}</pubDate>
+                    <author>{article.author.username}</author>
+                  </item>
+                }
+              }
+            </channel>
+          </rss>
+        )
+      }
+    )
   }
 }

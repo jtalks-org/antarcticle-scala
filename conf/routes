@@ -9,6 +9,8 @@ POST          /signin                                  @controllers.Authenticati
 GET           /signout                                 @controllers.AuthenticationController.logout
 # Articles
 GET           /articles                                @controllers.ArticleController.listArticles(tags: Option[String])
+GET           /articles/rss                            @controllers.ArticleController.fullRssFeed()
+GET           /articles/rss/:user                      @controllers.ArticleController.userRssFeed(user: String)
 GET           /articles/page/:page                     @controllers.ArticleController.listArticlesPaged(tags: Option[String], page: Int)
 GET           /articles/new                            @controllers.ArticleController.getNewArticlePage
 GET           /articles/translate/:id                  @controllers.ArticleController.getTranslateArticlePage(id: Int)

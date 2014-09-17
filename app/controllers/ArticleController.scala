@@ -162,7 +162,7 @@ trait ArticleController {
               }
             </channel>
           </rss>
-        )
+        ).as("application/rss+xml;charset=UTF-8")
       }
     )
   }

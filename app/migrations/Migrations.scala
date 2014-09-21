@@ -195,7 +195,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
   }
 
   val commentsFKForNotifications = new Migration {
-    val version: Int = 17
+    val version: Int = 18
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute()

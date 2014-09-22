@@ -4,6 +4,9 @@
     <div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
       <header class="user-profile-header clearfix">
         <div class="pull-left">
+          <a href="@routes.ArticleController.fullRssFeed()">
+            <img src="@routes.Assets.at("/public/images", "rss.png")" width="21px"/>
+          </a>
           <h2 class="username"><i class="glyphicon glyphicon-user"></i>
             @userDetails.username
           </h2>
@@ -12,9 +15,6 @@
             (@userDetails.firstName @userDetails.lastName)
           }
           </h3>
-        <a href="@routes.ArticleController.fullRssFeed()">
-            <img src="@routes.Assets.at("/public/images", "rss.png")"/>
-        </a>
         </div>
         <div class="pull-right">
           <ul class="user-stats">

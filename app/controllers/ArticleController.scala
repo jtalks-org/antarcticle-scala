@@ -1,10 +1,11 @@
 package controllers
 
+import models.Page
 import play.api.mvc.{AnyContent, Action, Controller}
 import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.{ArticleDetailsModel, Article, Language}
+import models.ArticleModels.{ArticleListModel, ArticleDetailsModel, Article, Language}
 import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import utils.RFC822
@@ -140,14 +141,17 @@ trait ArticleController {
   def userRssFeed(user: String):Action[AnyContent] = rssFeed(Some(user))
 
   def rssFeed(user: Option[String]) = Action { implicit request =>
-    articlesService.getPage(1, None).fold(
+    user.cata(
+      some = username => articlesService.getPageForUser(1, username),
+      none = articlesService.getPage(1)
+    ).fold(
       fail => NotFound(views.html.errors.notFound()),
       succ = articlesPage => {
         Ok(
           <rss version="2.0">
             <channel>
-              <title>articles.javatalks.ru</title>
-              <description>JavaTalks Articles</description>
+              <title>articles.javatalks.ru{user.cata(username => s" [$username]", "")}</title>
+              <description>JavaTalks Articles{user.cata(username => s" by $username", "")}</description>
               <link>{routes.ArticleController.allArticles().absoluteURL()}</link>
               {
                 for (article <- articlesPage.list) yield {

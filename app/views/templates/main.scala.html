@@ -10,6 +10,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public/stylesheets", "tag-manager.css")">
     <link rel="stylesheet" media="screen" href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("/public/images", "favicon.png")">
+    <link rel="alternate" type="application/rss+xml" title="RSS subscribtion to @properties.instanceName" href="@routes.ArticleController.fullRssFeed()"/>
     @if(properties.hasTopPageBanner) {
       <link rel="stylesheet" media="screen" href="@{
         properties.topBannerCodePenId.get

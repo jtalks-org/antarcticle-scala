@@ -1,9 +1,11 @@
 package services
 
+import utils.Implicits._
+import org.joda.time.DateTime
 import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import scala.slick.jdbc.JdbcBackend
 import security.{Principal, AuthenticatedUser}
-import models.database.{ArticleRecord, CommentRecord, Notification}
+import models.database.{CommentRecord, Notification}
 import scalaz._
 import Scalaz._
 import models.ArticleModels.ArticleDetailsModel
@@ -16,7 +18,7 @@ trait NotificationsServiceComponent {
   val notificationsService: NotificationsService
 
   trait NotificationsService {
-    def createNotificationForArticleTranslation(translation: ArticleRecord)(implicit principal: Principal, session: JdbcBackend#Session)
+    def createNotificationForArticleTranslation(translation: ArticleDetailsModel)(implicit principal: Principal, session: JdbcBackend#Session)
 
     def createNotification(cr: CommentRecord)(implicit principal: Principal, session: JdbcBackend#Session)
 
@@ -38,14 +40,17 @@ trait NotificationsServiceComponentImpl extends NotificationsServiceComponent {
 
   class NotificationsServiceImpl extends NotificationsService {
 
-    def createNotificationForArticleTranslation(translation: ArticleRecord)(implicit principal: Principal, session: JdbcBackend#Session) {
+    def createNotificationForArticleTranslation(translation: ArticleDetailsModel)(implicit principal: Principal, session: JdbcBackend#Session) {
       principal match {
         case user: AuthenticatedUser =>
-          val article = articlesRepository.get(translation.sourceId.get).get._1
-          if (translation.authorId != article.authorId)
-            notificationsRepository.insertNotification(
-              new Notification(None, article.authorId, translation.id.get, None, translation.title,
-                translation.content.take(150), translation.createdAt))
+          for {
+            (article,_,_) <- articlesRepository.get(translation.sourceId)
+            notification <- if (translation.author.id != article.authorId) {
+              Some(new Notification(None, article.authorId, translation.id, None, translation.title,
+                translation.content.take(150), DateTime.now)
+              )
+            } else None
+          } yield notificationsRepository.insertNotification(notification)
       }
     }
 

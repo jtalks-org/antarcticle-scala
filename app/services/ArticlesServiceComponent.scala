@@ -50,34 +50,28 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
     def insert(article: Article)(implicit principal: Principal) =
       principal.doAuthorizedOrFail(Create, Entities.Article) { () =>
         withTransaction { implicit session =>
-          def createRecord = {
-            val creationTime = DateTime.now
+
+          lazy val newRecord = {
             val currentUserId = principal.asInstanceOf[AuthenticatedUser].userId
-            articleToInsert(article, creationTime, currentUserId)
+            articleToInsert(article, DateTime.now, currentUserId)
           }
+
+          lazy val user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
 
           val result = for {
             _ <- articleValidator.validate(article)
             translations <- getTranslations(article.sourceId)
-            newRecord = createRecord
             id = articlesRepository.insert(newRecord)
             tags <- tagsService.createTagsForArticle(id, article.tags)
-            user = usersRepository.getByUsername(principal.asInstanceOf[AuthenticatedUser].username).get
-            sourceId = if (newRecord.sourceId.isDefined) newRecord.sourceId else some(id)
-          } yield recordToDetailsModel(newRecord.copy(id = Some(id), sourceId = sourceId), user, tags,
-              Translation(id, article.language) :: translations)
+          } yield recordToDetailsModel(newRecord.copy(id = some(id), sourceId = some(article.sourceId.getOrElse(id))),
+              user, tags, Translation(id, article.language) :: translations)
 
+          result.map(notificationsService.createNotificationForArticleTranslation)
           if (result.isFailure) {
             // article should not be persisted, when tags creation failed
             // reason: tags creation requires article id which is auto-increment column
             session.rollback()
-          } else if (result.isSuccess && createRecord.sourceId.isDefined) {
-            val id = result match {
-              case (v: Success[NonEmptyList[String], ArticleDetailsModel]) => v.a.id
-            }
-            notificationsService.createNotificationForArticleTranslation(createRecord.copy(id = Some(id)))
           }
-
           result
         }
       }

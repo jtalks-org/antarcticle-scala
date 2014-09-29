@@ -298,7 +298,7 @@ class ArticlesServiceSpec extends Specification
         articlesService.insert(article)
 
         there was one(notificationsService)
-          .createNotificationForArticleTranslation(any[ArticleRecord])(any[AuthenticatedUser], Matchers.eq(session))
+          .createNotificationForArticleTranslation(any[ArticleDetailsModel])(any[AuthenticatedUser], Matchers.eq(session))
       }
     }
 

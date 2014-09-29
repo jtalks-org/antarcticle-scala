@@ -1,15 +1,13 @@
 @(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 <nav class="navbar navbar-inverse nav">
   <div class="container"><div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
-    <ul class="nav navbar-nav">
-      <li>
-        <a href="@routes.ArticleController.fullRssFeed()">
-          <img src="@routes.Assets.at("/public/images", "rss.png")" width="21px"/>
-        </a>
-      </li>
-    </ul>
     <ul class="nav navbar-nav brand-container">
       <li>
+        <a href="@routes.ArticleController.fullRssFeed()" class="navbar-brand">
+          <span>
+            <i class="fa fa-rss-square"></i>
+          </span>
+        </a>
         <a href="@routes.ArticleController.allArticles()" class="navbar-brand" tabindex="-1">
           <span>
             <span id="application-name-container" class="ellipsis-overflow">@properties.instanceName</span>

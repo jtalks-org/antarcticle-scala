@@ -6,6 +6,8 @@ GET           /                                        @controllers.ArticleContr
 # Authentication
 GET           /signin                                  @controllers.AuthenticationController.showLoginPage
 POST          /signin                                  @controllers.AuthenticationController.login
+GET           /signup                                  @controllers.AuthenticationController.showRegistrationPage
+POST          /signup                                  @controllers.AuthenticationController.register
 GET           /signout                                 @controllers.AuthenticationController.logout
 # Articles
 GET           /articles                                @controllers.ArticleController.listArticles(tags: Option[String])

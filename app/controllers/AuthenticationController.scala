@@ -1,13 +1,11 @@
 package controllers
 
-import play.api.mvc._
-import security.{Authentication, SecurityServiceComponent}
+import conf.Constants._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.mvc._
+import security.{Authentication, SecurityServiceComponent}
 import views.html
-import conf.Constants._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.Some
 
 /**
  *  Handles sign in and sign out user actions.
@@ -22,6 +20,14 @@ trait AuthenticationController {
       "login" -> text,
       "password" -> text,
       "referer" -> text
+    )
+  )
+
+  val registerForm = Form(
+    tuple(
+      "login" -> text,
+      "password" -> text,
+      "email" -> text
     )
   )
 
@@ -50,5 +56,14 @@ trait AuthenticationController {
     Redirect(controllers.routes.ArticleController.allArticles())
       .withNewSession
       .discardingCookies(DiscardingCookie(rememberMeCookie))
+  }
+
+  def showRegistrationPage = Action { implicit request =>
+    Ok(html.signup(registerForm))
+  }
+
+  def register() = Action { implicit request =>
+    val (username, password, email) = registerForm.bindFromRequest.get
+    BadRequest(views.html.templates.formErrors(List("Registration is not allowed")))
   }
 }

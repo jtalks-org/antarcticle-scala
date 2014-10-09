@@ -22,17 +22,14 @@ trait SecurityComponent extends SecurityServiceComponentImpl with Authentication
 
     def poulpeAndLocalDatabase = {
       val poulpeUrl = propertiesProvider.get[String](Keys.PoulpeUrl)
-        .getOrElse(throw new RuntimeException("Poulpe URL not found. Check your configuration file."))
-      Logger.warn(s"Using Poulpe authentication manager with Poulpe at $poulpeUrl")
+      poulpeUrl match {
+        case Some(url) => Logger.warn(s"Using Poulpe authentication manager with Poulpe at $url")
+        case None => Logger.warn("Using local database authentication manager")
+      }
       new CompositeAuthenticationManager(
-        new PoulpeAuthenticationManager(poulpeUrl),
+        poulpeUrl.map(url => new PoulpeAuthenticationManager(url)),
         new LocalDatabaseAuthenticationManager(this, this)
       )
-    }
-
-    def localDatabaseOnly = {
-      Logger.warn("Using local database authentication manager")
-      new LocalDatabaseAuthenticationManager(this, this)
     }
 
     propertiesProvider.get[Boolean](Keys.UseFakeAuthentication).cata(

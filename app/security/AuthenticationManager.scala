@@ -9,6 +9,7 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import security.UserInfoImplicitConversions._
+import scala.util.Try
 import scalaz._
 import Scalaz._
 import play.api.libs.ws.WS
@@ -69,15 +70,21 @@ class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provide
   }
 }
 
-class CompositeAuthenticationManager(poulpeAuthManager: PoulpeAuthenticationManager,
+class CompositeAuthenticationManager(poulpeAuthManager: Option[PoulpeAuthenticationManager],
                                      localAuthManager: LocalDatabaseAuthenticationManager)
   extends AuthenticationManager {
-  override def authenticate(username: String, password: String) = try {
-    poulpeAuthManager.authenticate(username, password)
-  } catch {
-    case e: Exception => {
-      Logger.error("Error while asking Poulpe to authenticate user", e)
-      localAuthManager.authenticate(username, password)
+  override def authenticate(username: String, password: String) = {
+    Try {
+      poulpeAuthManager.cata(
+        none = none[UserInfo],
+        some = manager => manager.authenticate(username, password))
+    } match {
+      case scala.util.Success(userInfo) =>
+        if (userInfo.isDefined) userInfo else localAuthManager.authenticate(username, password)
+      case scala.util.Failure(e) => {
+        Logger.error("Error while asking Poulpe to authenticate user", e)
+        localAuthManager.authenticate(username, password)
+      }
     }
   }
 }

@@ -1,12 +1,13 @@
 package controllers
 
+import conf.PropertiesProviderComponent
 import services.{ApplicationPropertiesServiceComponent, NotificationsServiceComponent}
 import security.{Principal, Authorities}
 import java.sql.Timestamp
 
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
-import util.FakeAuthentication
+import util.{FakePropertiesProvider, FakeAuthentication}
 import org.specs2.specification.AfterExample
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -21,7 +22,8 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
     with NotificationsServiceComponent
     with ApplicationPropertiesServiceComponent
     with FakeAuthentication
-    with PropertiesProvider {
+    with PropertiesProvider
+    with FakePropertiesProvider {
     override val notificationsService = mock[NotificationsService]
     override val usersRepository = mock[UsersRepository]
     override val propertiesService = mock[ApplicationPropertiesService]

@@ -11,7 +11,8 @@ object ApplicationPropertyModels {
    */
   case class MainTemplateProperties(instanceName: String,
                                     topBannerCodePenId: Option[String] = None,
-                                    bottomBannerCodePenId: Option[String] = None) {
+                                    bottomBannerCodePenId: Option[String] = None,
+                                    signUpAvailable: Boolean = false ) {
 
     def hasTopPageBanner = topBannerCodePenId.isDefined && topBannerCodePenId.get.startsWith("http://codepen.io/")
     def hasBottomPageBanner = bottomBannerCodePenId.isDefined && bottomBannerCodePenId.get.startsWith("http://codepen.io/")

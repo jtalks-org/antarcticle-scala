@@ -1,9 +1,10 @@
 package controllers
 
+import conf.PropertiesProviderComponent
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import org.specs2.specification.AfterExample
-import util.FakeAuthentication
+import util.{FakePropertiesProvider, FakeAuthentication}
 import play.api.test._
 import play.api.test.Helpers._
 import scalaz._
@@ -23,7 +24,8 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
                      with SecurityServiceComponent
                      with ApplicationPropertiesServiceComponent
                      with FakeAuthentication
-                     with PropertiesProvider {
+                     with PropertiesProvider
+                     with FakePropertiesProvider {
     override val securityService = mock[SecurityService]
     override val usersRepository = mock[UsersRepository]
     override val propertiesService = mock[ApplicationPropertiesService]

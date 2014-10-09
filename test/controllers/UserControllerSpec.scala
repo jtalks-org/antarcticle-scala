@@ -1,23 +1,21 @@
 package controllers
 
-import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
-import org.specs2.specification.AfterExample
-import services.{ApplicationPropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
-import util.FakeAuthentication
-import play.api.test._
-import play.api.test.Helpers._
-import models.{UserPage, ArticlePage}
-import security._
-import scalaz._
-import Scalaz._
-import security.AuthenticatedUser
-import models.database.UserRecord
 import models.ArticleModels.ArticleListModel
-import scala.Some
-import security.Authorities.Admin
-import play.api.libs.json.Json
+import models.database.UserRecord
+import models.{ArticlePage, UserPage}
 import org.mockito.Matchers
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.specification.AfterExample
+import play.api.libs.json.Json
+import play.api.test.Helpers._
+import play.api.test._
+import security.Authorities.Admin
+import security.{AuthenticatedUser, _}
+import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, UsersServiceComponent}
+import util.{FakeAuthentication, FakePropertiesProvider}
+
+import scalaz.Scalaz._
 
 class UserControllerSpec extends Specification with Mockito with AfterExample {
 
@@ -26,6 +24,7 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
                       with UsersServiceComponent
                       with ApplicationPropertiesServiceComponent
                       with PropertiesProvider
+                      with FakePropertiesProvider
                       with FakeAuthentication
                        {
     override val articlesService = mock[ArticlesService]

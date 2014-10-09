@@ -79,10 +79,15 @@
       }
       case _ => {
         <ul class="nav navbar-nav navbar-right">
-          <li>
+          <li id="login-links">
             <a href="@routes.AuthenticationController.showLoginPage" tabindex="-1">
               <i class="glyphicon glyphicon-log-in"></i> Sign in
             </a>
+            @if(properties.signUpAvailable) {
+              <a href="@routes.AuthenticationController.showLoginPage" tabindex="-1">
+                <i class="glyphicon glyphicon-edit"></i> Sign Up
+              </a>
+            }
           </li>
         </ul>
       }

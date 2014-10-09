@@ -1,6 +1,7 @@
 package controllers
 
 import conf.Constants._
+import models.UserModels.User
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
@@ -26,8 +27,8 @@ trait AuthenticationController {
   val registerForm = Form(
     tuple(
       "login" -> text,
-      "password" -> text,
-      "email" -> text
+      "email" -> text,
+      "password" -> text
     )
   )
 
@@ -63,7 +64,10 @@ trait AuthenticationController {
   }
 
   def register() = Action { implicit request =>
-    val (username, password, email) = registerForm.bindFromRequest.get
-    BadRequest(views.html.templates.formErrors(List("Registration is not allowed")))
+    val (username, email, password) = registerForm.bindFromRequest.get
+    securityService.signUpUser(User(username, email, password)).fold(
+      fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
+      succ = result => BadRequest(views.html.templates.formErrors(List("Registration is not allowed")))
+    )
   }
 }

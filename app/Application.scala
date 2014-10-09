@@ -6,7 +6,7 @@ import repositories._
 import models.database._
 import conf.ConfigurationComponent
 import play.api.mvc.Controller
-import validators.{ArticleValidator, TagValidator}
+import validators.{UserValidator, ArticleValidator, TagValidator}
 
 object Application
   extends ConfigurationComponent
@@ -19,6 +19,7 @@ object Application
   with PropertiesProvider {
 
   override val migrationsContainer = new Migrations(profile)
+  override val userValidator = new UserValidator
 
   lazy val instanceName = propertiesService.getInstanceName()
 

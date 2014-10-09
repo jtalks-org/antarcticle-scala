@@ -10,6 +10,7 @@ import org.specs2.specification.BeforeExample
 import org.specs2.mock.Mockito
 import org.specs2.scalaz.ValidationMatchers
 import utils.SecurityUtil
+import validators.UserValidator
 import scalaz._
 import Scalaz._
 import org.specs2.time.NoTimeConversions
@@ -24,6 +25,7 @@ class SecurityServiceSpec extends Specification
   with FakeSessionProvider {
     override val usersRepository = mock[UsersRepository]
     override val authenticationManager = mock[AuthenticationManager]
+    override val userValidator = mock[UserValidator]
   }
 
   import service._

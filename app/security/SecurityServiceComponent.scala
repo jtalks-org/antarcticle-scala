@@ -1,7 +1,9 @@
 package security
 
+import models.UserModels.User
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
+import validators.UserValidator
 import scalaz._
 import Scalaz._
 import scala.slick.jdbc.JdbcBackend
@@ -20,6 +22,7 @@ trait SecurityServiceComponent {
      * @return new remember me token for user if success
      */
     def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
+    def signUpUser(user: User): ValidationNel[String, Unit]
   }
 
 }
@@ -29,6 +32,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
   val securityService = new SecurityServiceImpl
   val authenticationManager: AuthenticationManager
+  val userValidator: UserValidator
 
   class SecurityServiceImpl extends SecurityService {
 
@@ -74,6 +78,10 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         usersRepository.updateRememberToken(userId, token)
         token
       }
+
+    override def signUpUser(user: User): ValidationNel[String, Unit] = {
+      for (_ <- userValidator.validate(user)) yield ()
+    }
   }
 
 }

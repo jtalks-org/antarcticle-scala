@@ -126,6 +126,21 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
          type="java.lang.String"/>    
 </Context>
 ```
+
+##Logging
+For logging logback library is used. Sample of logging config logger.xml could be found in project/conf folder.
+
+In order to use custom logger.xml file on Tomcat you need to logger.file java system property like this:
+
+On Windows:
+    
+    set JAVA_OPTS=-Dlogger.file=c:/logger.xml
+    
+On Unix:
+    
+    export JAVA_OPTS=-Dlogger.file=/opt/prod/logger.xml
+    
+
 ##Development
 
 It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).

@@ -129,6 +129,7 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
 
 ##Logging
 For logging logback library is used. Sample of logging config logger.xml could be found in project/conf folder.
+By default logback writes logs to $USER_HOME/logs/application.log file and STDOUT with DEBUG log level 
 
 In order to use custom logger.xml file on Tomcat you need to logger.file java system property like this:
 

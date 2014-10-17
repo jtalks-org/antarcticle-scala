@@ -67,7 +67,7 @@ trait AuthenticationController {
     val (username, email, password) = registerForm.bindFromRequest.get
     securityService.signUpUser(User(username, email, password)).fold(
       fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-      succ = result => BadRequest(views.html.templates.formErrors(List("Registration is not allowed")))
+      succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
     )
   }
 }

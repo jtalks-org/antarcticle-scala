@@ -13,6 +13,8 @@ trait UsersRepositoryComponent {
   trait UsersRepository {
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
+    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session): List[UserRecord]
@@ -98,5 +100,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     def update(user: UserRecord)(implicit session: JdbcBackend#Session):Unit = {
       for (id <- user.id) yield byIdCompiled(id).update(user)
     }
+
+    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord] = None
   }
 }

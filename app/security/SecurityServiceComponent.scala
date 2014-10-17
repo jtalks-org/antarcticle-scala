@@ -22,7 +22,7 @@ trait SecurityServiceComponent {
      * @return new remember me token for user if success
      */
     def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
-    def signUpUser(user: User): ValidationNel[String, Unit]
+    def signUpUser(user: User): ValidationNel[String, UserRecord]
   }
 
 }
@@ -79,8 +79,32 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         token
       }
 
-    override def signUpUser(user: User): ValidationNel[String, Unit] = {
-      for (_ <- userValidator.validate(user)) yield ()
+    override def signUpUser(user: User): ValidationNel[String, UserRecord] = withSession {
+      implicit s: JdbcBackend#Session =>
+
+      def validateUnique(user: User) = {
+        for {
+          _ <- usersRepository.getByUsername(user.username).cata(
+            existingUser => s"User with the username ${user.username} already exists".failNel,
+            ().successNel
+          )
+          _ <- usersRepository.getByEmail(user.email).cata(
+            existingUser => s"User with the email ${user.email} already exists".failNel,
+            ().successNel
+          )
+        } yield ()
+      }
+
+      val result = for {
+        _ <- userValidator.validate(user)
+        _ <- validateUnique(user)
+        salt = some(SecurityUtil.generateSalt)
+        encodedPassword = SecurityUtil.encodePassword(user.password, salt)
+        userRecord = UserRecord(None, user.username, encodedPassword, salt = salt)
+//        userId = usersRepository.insert(userRecord)
+        userId = 1 //disable insertion as there is no anti-bot protection
+      } yield userRecord.copy(id = some(userId))
+      result
     }
   }
 

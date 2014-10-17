@@ -203,4 +203,17 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute()
     }
   }
+
+  val addEmailToUsers = new Migration {
+    val version: Int = 19
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN email varchar(100)").execute()
+      Q.updateNA("UPDATE users set email='NA'").execute()
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN email email varchar(100) NOT NULL").execute()
+      Q.updateNA("ALTER TABLE users ADD COLUMN active INT(1)").execute()
+      Q.updateNA("UPDATE users set active=1").execute()
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN active active INT(1) NOT NULL").execute()
+    }
+  }
 }

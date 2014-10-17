@@ -47,12 +47,13 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           usersRepository.getByUsername(username.trim).cata(
             some = user => {
               val record = user.copy(password = encodedPassword, salt = salt,
-                firstName = info.firstName, lastName = info.lastName)
+                firstName = info.firstName, lastName = info.lastName, active = user.active)
               usersRepository.update(record)
               record
             },
             none = {
-              val record = UserRecord(None, username.trim, encodedPassword, false, salt, info.firstName, info.lastName)
+              val record = UserRecord(None, username.trim, encodedPassword, "NA", false, salt, info.firstName,
+                info.lastName, active = true)
               record.copy(id = some(usersRepository.insert(record)))
             }
           )
@@ -82,7 +83,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
     override def signUpUser(user: User): ValidationNel[String, UserRecord] = withSession {
       implicit s: JdbcBackend#Session =>
 
-      def validateUnique(user: User) = {
+      def validateUniqueness(user: User) = {
         for {
           _ <- usersRepository.getByUsername(user.username).cata(
             existingUser => s"User with the username ${user.username} already exists".failNel,
@@ -97,10 +98,10 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
       val result = for {
         _ <- userValidator.validate(user)
-        _ <- validateUnique(user)
+        _ <- validateUniqueness(user)
         salt = some(SecurityUtil.generateSalt)
         encodedPassword = SecurityUtil.encodePassword(user.password, salt)
-        userRecord = UserRecord(None, user.username, encodedPassword, salt = salt)
+        userRecord = UserRecord(None, user.username, encodedPassword, user.email, salt = salt)
 //        userId = usersRepository.insert(userRecord)
         userId = 1 //disable insertion as there is no anti-bot protection
       } yield userRecord.copy(id = some(userId))

@@ -1,7 +1,8 @@
 package models.database
 
-case class UserRecord(id: Option[Int], username: String, password: String, admin: Boolean = false, salt:Option[String] = None,
-                firstName: Option[String] = None, lastName: Option[String] = None, rememberToken: Option[String] = None)
+case class UserRecord(id: Option[Int], username: String, password: String, email: String, admin: Boolean = false,
+                      salt:Option[String] = None, firstName: Option[String] = None, lastName: Option[String] = None,
+                      rememberToken: Option[String] = None, active: Boolean = false)
 
 trait UsersSchemaComponent {
   this: Profile =>
@@ -16,6 +17,8 @@ trait UsersSchemaComponent {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username", O.NotNull)
     def password = column[String]("password", O.NotNull)
+    def email = column[String]("email", O.NotNull)
+    def active = column[Boolean]("active", O.NotNull)
     def salt = column[String]("salt", O.Nullable)
     def admin = column[Boolean]("admin", O.NotNull)
     def firstName = column[String]("first_name", O.Nullable)
@@ -23,7 +26,7 @@ trait UsersSchemaComponent {
     def rememberToken = column[String]("remember_token", O.Nullable)
 
     // projections
-    def * = (id.?, username, password, admin, salt.?, firstName.?, lastName.?, rememberToken.?) <> (UserRecord.tupled, UserRecord.unapply)
+    def * = (id.?, username, password, email, admin, salt.?, firstName.?, lastName.?, rememberToken.?, active) <> (UserRecord.tupled, UserRecord.unapply)
   }
 
   val users = TableQuery[Users]

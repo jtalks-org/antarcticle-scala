@@ -57,7 +57,7 @@ class ArticlesServiceSpec extends Specification
 
   val dbRecord = {
     val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1, Russian, 1.some)
-    val user = UserRecord(1.some, "", "")
+    val user = UserRecord(1.some, "", "", "")
     val tags = List("tag1", "tag2")
     (article, user, tags)
   }
@@ -270,7 +270,7 @@ class ArticlesServiceSpec extends Specification
       usr
     }
     val article = Article(None, "", "", List(), Russian, None)
-    val userRecord = UserRecord(1.some, "user", "password").some
+    val userRecord = UserRecord(1.some, "user", "password", "mail01@mail.zzz").some
 
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>

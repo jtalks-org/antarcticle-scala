@@ -48,10 +48,10 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
     tags.map(_.name) ++= Seq("tag1", "tag2", "tag3")
 
     users ++= Seq(
-      UserRecord(None, "user1", "password1"),
-      UserRecord(None, "user2", "password2"),
-      UserRecord(None, "user3", "password3"),
-      UserRecord(None, "doesn't have notifications", "password3")
+      UserRecord(None, "user1", "password1", "mail01@mail.zzz"),
+      UserRecord(None, "user2", "password2", "mail02@mail.zzz"),
+      UserRecord(None, "user3", "password3", "mail03@mail.zzz"),
+      UserRecord(None, "doesn't have notifications", "password3", "mail04@mail.zzz")
     )
 
     articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId, a.language, a.sourceId)) ++= Seq(

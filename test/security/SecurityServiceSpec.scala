@@ -43,10 +43,11 @@ class SecurityServiceSpec extends Specification
       val password = "rerfev"
       val salt = Some("fakeSalt")
       val encodedPassword: String = SecurityUtil.encodePassword(password, salt)
+      val email = "mail01@mail.zzz"
       val userInfo = UserInfo(username, password, "fn".some, "ln".some)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
-      val userFromDb = UserRecord(Some(1), username, encodedPassword, false, salt)
-      val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, false, salt)
+      val userFromDb = UserRecord(Some(1), username, encodedPassword, email, false, salt)
+      val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, email, false, salt)
       val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
 
       def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
@@ -76,7 +77,7 @@ class SecurityServiceSpec extends Specification
 
           doTest
 
-          val expectedRecord = UserRecord(None, username, encodedPassword, false, salt, "fn".some, "ln".some)
+          val expectedRecord = UserRecord(None, username, encodedPassword, "NA", false, salt, "fn".some, "ln".some, active = true)
           there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
         }
 
@@ -97,7 +98,7 @@ class SecurityServiceSpec extends Specification
           doTest
 
           there was no(usersRepository).insert(any[UserRecord])(anySession)
-          val expectedRecord = UserRecord(Some(1), username, encodedPassword, false, salt, "fn".some, "ln".some)
+          val expectedRecord = UserRecord(Some(1), username, encodedPassword, email, false, salt, "fn".some, "ln".some)
           there was one(usersRepository).update(beMostlyEqualTo(expectedRecord))(anySession)
         }
 

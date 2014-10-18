@@ -43,7 +43,8 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
 
   val username = "user"
   val password = "password"
-  val user = new UserRecord(Some(1), username, password, true)
+  val email = "mail@mail.zzz"
+  val user = new UserRecord(Some(1), username, password, email, true)
   implicit def principal = {
     val usr = mock[AuthenticatedUser]
     usr.userId returns 1

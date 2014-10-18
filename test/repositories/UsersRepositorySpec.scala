@@ -14,8 +14,8 @@ class UsersRepositorySpec extends Specification {
 
     override def fixtures(implicit session: JdbcBackend#Session): Unit = {
       users ++= Seq(
-        UserRecord(None, "user1", "password1", false, Some("fn"), Some("ln"), None),
-        UserRecord(None, "user2", "password2", false, None, None, None)
+        UserRecord(None, "user1", "password1", "mail01@mail.zzz", false, Some("fn"), Some("ln"), None),
+        UserRecord(None, "user2", "password2", "mail02@mail.zzz", false, None, None, None)
       )
     }
   }
@@ -68,7 +68,7 @@ class UsersRepositorySpec extends Specification {
   }
 
   "user insertion" should {
-    val toInsert = UserRecord(None, "user_to_insert", "password_to_insert")
+    val toInsert = UserRecord(None, "user_to_insert", "password_to_insert", "mailtoinset@mail.zzz")
 
     "create new user record" in withTestDb { implicit session =>
       val oldCount = users.length.run

@@ -1,18 +1,17 @@
 package security
 
-import org.specs2.mutable.Specification
-import repositories.UsersRepositoryComponent
-import org.specs2.mock.Mockito
-import util.FakeSessionProvider
-import org.specs2.specification.AfterExample
-import play.api.mvc._
 import conf.Constants
-import scala.slick.jdbc.JdbcBackend
-import org.mockito.Matchers
-import play.api.test.FakeRequest
-import scala.Some
 import models.database.UserRecord
-import play.api.mvc.Cookie
+import org.mockito.Matchers
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.specification.AfterExample
+import play.api.mvc.{Cookie, _}
+import play.api.test.FakeRequest
+import repositories.UsersRepositoryComponent
+import util.FakeSessionProvider
+
+import scala.slick.jdbc.JdbcBackend
 
 class AuthenticationSpec extends Specification with Mockito with AfterExample {
 
@@ -39,7 +38,7 @@ class AuthenticationSpec extends Specification with Mockito with AfterExample {
     }
 
     "return user if request has a valid cookie for user" in {
-      val userRecord = Some(UserRecord(Some(1), "testUserName", "testpassword", false))
+      val userRecord = Some(UserRecord(Some(1), "testUserName", "testpassword", "mail01@mail.zzz", false))
       val tokenCookie = Cookie(Constants.rememberMeCookie, "user", Some(1000), "/", None, false, false)
       usersRepository.getByRememberToken(Matchers.eq("user"))(any[JdbcBackend#Session]) returns userRecord
 
@@ -51,7 +50,7 @@ class AuthenticationSpec extends Specification with Mockito with AfterExample {
 
     "return admin if request has a valid cookie for admin" in {
       val adminCookie = Cookie(Constants.rememberMeCookie, "admin", Some(1000), "/", None, false, false)
-      val adminRecord = Some(UserRecord(Some(2), "testUserName", "testPassword", true))
+      val adminRecord = Some(UserRecord(Some(2), "testUserName", "testPassword", "mail01@mail.zzz", true))
       usersRepository.getByRememberToken(Matchers.eq("admin"))(any[JdbcBackend#Session]) returns adminRecord
 
       val user = auth.currentPrincipal(FakeRequest().withCookies(adminCookie))

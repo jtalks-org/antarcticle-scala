@@ -102,8 +102,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         salt = some(SecurityUtil.generateSalt)
         encodedPassword = SecurityUtil.encodePassword(user.password, salt)
         userRecord = UserRecord(None, user.username, encodedPassword, user.email, salt = salt)
-//        userId = usersRepository.insert(userRecord)
-        userId = 1 //disable insertion as there is no anti-bot protection
+        userId = usersRepository.insert(userRecord)
       } yield userRecord.copy(id = some(userId))
       result
     }

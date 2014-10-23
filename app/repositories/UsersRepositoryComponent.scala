@@ -74,6 +74,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val updateUserRoleCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.admin))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
     val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
+    val byEmailCompiled = Compiled((email: Column[String]) => users.filter(_.email === email))
     val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
@@ -101,6 +102,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       for (id <- user.id) yield byIdCompiled(id).update(user)
     }
 
-    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord] = None
+    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord] =
+      byEmailCompiled(email).firstOption
   }
 }

@@ -1,12 +1,11 @@
-import org.specs2.matcher.ExpectedParsedResult.toExpectedParsedResult
-import play.Project._
 import com.github.play2war.plugin._
+import play.Project._
 
 name := "antarcticle-scala"
 
 version := "2.6"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.5-RC1"
 
 libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "2.0.2",
@@ -66,3 +65,9 @@ publishArtifact in (Compile, packageDoc) := false
 
 // disable publishing the main sources jar
 publishArtifact in (Compile, packageSrc) := false
+
+instrumentSettings
+
+ScoverageKeys.excludedPackages in ScoverageCompile := "<empty>"
+
+ScoverageKeys.highlighting := true

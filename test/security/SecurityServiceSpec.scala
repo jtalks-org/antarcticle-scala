@@ -50,7 +50,7 @@ class SecurityServiceSpec extends Specification
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, email, false, salt)
       val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
 
-      def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd"))
+      def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd", uid = "uid"))
 
       "return remember me token and authenticated user" in {
         authenticationManager.authenticate(username, password) returns userInfo.some

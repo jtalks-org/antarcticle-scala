@@ -1,9 +1,11 @@
 package migrations
 
 import models.ArticleModels.Language
+import play.api.Logger
+import utils.SecurityUtil
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery => Q}
 
 /**
  * This class contains all database schema migrations, which are applied to the database
@@ -214,6 +216,23 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("ALTER TABLE users ADD COLUMN active INT(1)").execute()
       Q.updateNA("UPDATE users set active=1").execute()
       Q.updateNA("ALTER TABLE users CHANGE COLUMN active active INT(1) NOT NULL").execute()
+    }
+  }
+
+  val addUserUid = new Migration {
+    val version = 20
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN uid varchar(100)").execute()
+      val users = Q.query[Unit, (String, String)]("SELECT id, username FROM users").apply().list()
+      for {
+        (id, username) <- users
+        uid = SecurityUtil.generateUid
+        } yield {
+          Logger.info("Updating user with username " + username)
+          Q.updateNA(s"UPDATE users set uid = '$uid' WHERE id = $id").execute()
+      }
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN uid uid varchar(100) NOT NULL").execute()
     }
   }
 }

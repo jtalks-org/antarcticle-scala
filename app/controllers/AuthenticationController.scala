@@ -70,4 +70,8 @@ trait AuthenticationController {
       succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
     )
   }
+
+  def activate(uid: String) = Action { implicit request =>
+    Ok("Activation is not allowed")
+  }
 }

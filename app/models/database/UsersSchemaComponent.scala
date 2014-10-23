@@ -1,8 +1,10 @@
 package models.database
 
+import utils.SecurityUtil
+
 case class UserRecord(id: Option[Int], username: String, password: String, email: String, admin: Boolean = false,
                       salt:Option[String] = None, firstName: Option[String] = None, lastName: Option[String] = None,
-                      rememberToken: Option[String] = None, active: Boolean = false)
+                      rememberToken: Option[String] = None, active: Boolean = false, uid: String = SecurityUtil.generateUid)
 
 trait UsersSchemaComponent {
   this: Profile =>
@@ -24,9 +26,10 @@ trait UsersSchemaComponent {
     def firstName = column[String]("first_name", O.Nullable)
     def lastName = column[String]("last_name", O.Nullable)
     def rememberToken = column[String]("remember_token", O.Nullable)
+    def uid = column[String]("uid", O.NotNull)
 
     // projections
-    def * = (id.?, username, password, email, admin, salt.?, firstName.?, lastName.?, rememberToken.?, active) <> (UserRecord.tupled, UserRecord.unapply)
+    def * = (id.?, username, password, email, admin, salt.?, firstName.?, lastName.?, rememberToken.?, active, uid) <> (UserRecord.tupled, UserRecord.unapply)
   }
 
   val users = TableQuery[Users]

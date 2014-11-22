@@ -146,6 +146,8 @@ On Unix:
 
 It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).
 
+To get unit test coverage report run ```sbt clean scoverage:test```
+
 ###Necessary software
 - IDE or text editor on your choice
 - GIT client

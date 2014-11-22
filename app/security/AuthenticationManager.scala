@@ -24,7 +24,7 @@ private[security] trait AuthenticationManager {
 class FakeAuthenticationManager extends AuthenticationManager {
   override def authenticate(username: String, password: String) = {
     (username, password) match {
-      case ("admin", "admin") => UserInfo("admin", password, "firstName".some, "lastName".some).some
+      case ("admin", "admin") => UserInfo("admin", password, "firstName".some, "lastName".some, true).some
       case _ => none[UserInfo]
     }
   }
@@ -45,7 +45,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
         firstName = (xmlResponseBody \\ "firstName").headOption.map(_.text)
         lastName = (xmlResponseBody \\ "lastName").headOption.map(_.text)
         password = (xmlResponseBody \\ "password").headOption.map(_.text)
-      } yield UserInfo(returnedUsername, "todo", firstName, lastName)
+      } yield UserInfo(returnedUsername, "todo", firstName, lastName, true)
     }, 10.seconds)
   }
 

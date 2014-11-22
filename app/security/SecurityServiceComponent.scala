@@ -36,8 +36,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
   class SecurityServiceImpl extends SecurityService {
 
-    val failedSignIn: ValidationNel[String, Nothing] = "Invalid username or password".failNel
-
     def signInUser(username: String, password: String) = {
 
       def createOrUpdateUser(info: UserInfo): UserRecord = withSession {
@@ -59,16 +57,16 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           )
       }
 
-      (for {
-        user <- authenticationManager.authenticate(username.trim, password)
+      for {
+        user <- authenticationManager.authenticate(username.trim, password).cata(
+          some = info => if (info.active) info.successNel else s"User ${info.username} is not active".failNel,
+          none = "Invalid username or password".failNel
+        )
         userRecord = createOrUpdateUser(user)
         authority = if (userRecord.admin) Authorities.Admin else Authorities.User
         authenticatedUser = AuthenticatedUser(userRecord.id.get, userRecord.username, authority)
         token = issueRememberMeTokenTo(authenticatedUser.userId)
-      } yield (token, authenticatedUser)).cata(
-          some = _.successNel,
-          none = failedSignIn
-        )
+      } yield (token, authenticatedUser)
     }
 
 

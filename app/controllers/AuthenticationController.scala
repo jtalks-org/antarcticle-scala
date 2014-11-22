@@ -37,9 +37,11 @@ trait AuthenticationController {
   }
 
 
-  def getReferer(implicit request: Request[AnyContent]) : String =
-    request.session.get(REFERER).getOrElse(routes.ArticleController.allArticles().absoluteURL())
-
+  def getReferer(implicit request: Request[AnyContent]) : String = {
+    request.session.get(REFERER).filter(
+      referer => referer != routes.AuthenticationController.showRegistrationPage.url
+    ).getOrElse(routes.ArticleController.allArticles().absoluteURL())
+  }
 
   def login = Action { implicit request =>
     val (username, password, referer) = loginForm.bindFromRequest.get

@@ -44,7 +44,7 @@ class SecurityServiceSpec extends Specification
       val salt = Some("fakeSalt")
       val encodedPassword: String = SecurityUtil.encodePassword(password, salt)
       val email = "mail01@mail.zzz"
-      val userInfo = UserInfo(username, password, "fn".some, "ln".some)
+      val userInfo = UserInfo(username, password, "fn".some, "ln".some, true)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
       val userFromDb = UserRecord(Some(1), username, encodedPassword, email, false, salt)
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, email, false, salt)

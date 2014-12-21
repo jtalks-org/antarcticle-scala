@@ -21,8 +21,7 @@ trait Authentication {
     def getUserByToken(token: String) = withSession(usersRepository.getByRememberToken(token)(_))
 
     for {
-      tokenCookie <- request.cookies.get(Constants.rememberMeCookie)
-      token = tokenCookie.value
+      token <- request.cookies.get(Constants.rememberMeCookie).map(_.value)
       user <- getUserByToken(token)
       userId <- user.id
     } yield  {

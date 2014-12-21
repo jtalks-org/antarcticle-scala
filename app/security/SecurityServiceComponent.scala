@@ -23,6 +23,7 @@ trait SecurityServiceComponent {
      */
     def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
     def signUpUser(user: User): ValidationNel[String, UserRecord]
+    def activateUser(uid: String): ValidationNel[String, UserRecord]
   }
 
 }
@@ -103,6 +104,22 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         userId = usersRepository.insert(userRecord)
       } yield userRecord.copy(id = some(userId))
       result
+    }
+
+    def activateUser(uid: String): ValidationNel[String, UserRecord] = withSession {
+      implicit s: JdbcBackend#Session =>
+      usersRepository.getByUID(uid: String).cata(
+        user => {
+          if (!user.active) {
+            val activatedUser = user.copy(rememberToken = Some(SecurityUtil.generateRememberMeToken), active = true)
+            usersRepository.update(activatedUser)
+            activatedUser.successNel
+          } else {
+            "User is already activated".failNel
+          }
+        },
+        none = "There is no user with such uid".failNel
+      )
     }
   }
 

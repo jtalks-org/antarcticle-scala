@@ -5,6 +5,8 @@ import models.UserModels.User
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
+import scalaz._
+import Scalaz._
 import security.{Authentication, SecurityServiceComponent}
 import views.html
 
@@ -74,6 +76,13 @@ trait AuthenticationController {
   }
 
   def activate(uid: String) = Action { implicit request =>
-    Ok("Activation is not allowed")
+    val mainPage = Redirect(controllers.routes.ArticleController.allArticles())
+    val activatedUser = securityService.activateUser(uid)
+    val cookie = activatedUser.fold(
+      fail => none[Cookie],
+      succ = user => {
+        user.rememberToken.map(token => Cookie(rememberMeCookie, token, some(rememberMeExpirationTime), httpOnly = true))
+      })
+    cookie.cata(mainPage.withCookies(_), mainPage)
   }
 }

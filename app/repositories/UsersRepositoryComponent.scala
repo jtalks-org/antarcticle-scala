@@ -11,6 +11,8 @@ trait UsersRepositoryComponent {
    * Database session should be provided by a caller via implicit parameter.
    */
   trait UsersRepository {
+    def getByUID(uid: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
     def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
@@ -68,6 +70,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   class SlickUsersRepository extends UsersRepository {
 
     val byUsernameCompiled = Compiled((username: Column[String]) => users.byUsername(username))
+    val byUserUIDCompiled = Compiled((uid: Column[String]) => users.filter(_.uid === uid))
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val userSearchCount = Compiled((search: Column[String]) => users.stringFieldsMatch(search).length)
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
@@ -76,6 +79,8 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
     val byEmailCompiled = Compiled((email: Column[String]) => users.filter(_.email === email))
     val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
+
+    def getByUID(uid: String)(implicit session: JdbcBackend#Session) = byUserUIDCompiled(uid).firstOption
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
       byTokenCompiled(token).firstOption

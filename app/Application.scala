@@ -16,7 +16,8 @@ object Application
   with SecurityComponent
   with Services
   with Controllers
-  with PropertiesProvider {
+  with PropertiesProvider
+  with MailServiceComponentImpl{
 
   override val migrationsContainer = new Migrations(profile)
   override val userValidator = new UserValidator

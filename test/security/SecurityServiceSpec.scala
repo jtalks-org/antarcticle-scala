@@ -26,6 +26,7 @@ class SecurityServiceSpec extends Specification
     override val usersRepository = mock[UsersRepository]
     override val authenticationManager = mock[AuthenticationManager]
     override val userValidator = mock[UserValidator]
+    override val mailService = mock[MailService]
   }
 
   import service._

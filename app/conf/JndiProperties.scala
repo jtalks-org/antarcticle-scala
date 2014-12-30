@@ -32,6 +32,12 @@ class JndiPropertiesProvider extends PropertiesProvider{
     case DbPassword => "ANTARCTICLE_DB_PASSWORD"
     case PoulpeUrl  => "ANTARCTICLE_POULPE_URL"
     case UseFakeAuthentication => "ANTARCTICLE_USE_FAKE_AUTHENTICATION"
+    case MailSmtpHost => "ANTARCTICLE_SMTP_HOST"
+    case MailSmtpPort => "ANTARCTICLE_SMTP_PORT"
+    case MailSmtpFrom => "ANTARCTICLE_SMTP_USER"
+    case MailSmtpPassword => "ANTARCTICLE_SMTP_PASSWORD"
+    case MailSmtpAuth => "ANTARCTICLE_SMTP_AUTH"
+    case MailSmtpSsl => "ANTARCTICLE_SMTP_SSL"
     case k => throw new RuntimeException(s"Key $k can't be translated to JNDI property key")
   }
 }
@@ -60,6 +66,13 @@ class TypesafeConfigPropertiesProvider(config: Config) extends PropertiesProvide
     case DbPassword => "db.default.password"
     case PoulpeUrl  => "security.authentication.poulpe.url"
     case UseFakeAuthentication => "security.authentication.useFake"
+    case MailSmtpHost => "mail.smtp.host"
+    case MailSmtpPort => "mail.smtp.port"
+    case MailSmtpFrom => "mail.smtp.user"
+    case MailSmtpPassword => "mail.smtp.password"
+    case MailSmtpAuth => "mail.smtp.auth"
+    case MailSmtpSsl => "mail.smtp.ssl"
+
     case k => throw new RuntimeException(s"Key $k can't be translated to Typesafe config key")
   }
 }

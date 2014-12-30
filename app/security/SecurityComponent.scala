@@ -1,17 +1,16 @@
 package security
 
+import conf.{Keys, PropertiesProviderComponent}
+import play.api.Logger
 import play.api.mvc.Controller
 import repositories.UsersRepositoryComponent
 import services.SessionProvider
-import conf.PropertiesProviderComponent
-import play.api.Logger
-import conf.Keys
-import scalaz._
-import Scalaz._
+
+import scalaz.Scalaz._
 
 trait SecurityComponent extends SecurityServiceComponentImpl with Authentication {
   this: Controller with UsersRepositoryComponent
-    with SessionProvider with PropertiesProviderComponent=>
+    with SessionProvider with PropertiesProviderComponent =>
 
   override val authenticationManager = {
 

@@ -1,14 +1,15 @@
 package security
 
 import models.UserModels.User
-import repositories.UsersRepositoryComponent
-import services.SessionProvider
-import validators.UserValidator
-import scalaz._
-import Scalaz._
-import scala.slick.jdbc.JdbcBackend
 import models.database.UserRecord
+import repositories.UsersRepositoryComponent
+import services.{MailServiceComponent, SessionProvider}
 import utils.SecurityUtil
+import validators.UserValidator
+
+import scala.slick.jdbc.JdbcBackend
+import scalaz.Scalaz._
+import scalaz._
 
 /**
  * Performs user authentication duty by login and password provided.
@@ -22,14 +23,14 @@ trait SecurityServiceComponent {
      * @return new remember me token for user if success
      */
     def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
-    def signUpUser(user: User): ValidationNel[String, UserRecord]
+    def signUpUser(user: User, host: String): ValidationNel[String, UserRecord]
     def activateUser(uid: String): ValidationNel[String, UserRecord]
   }
 
 }
 
-trait SecurityServiceComponentImpl extends SecurityServiceComponent {
-  this: UsersRepositoryComponent with SessionProvider =>
+trait SecurityServiceComponentImpl extends SecurityServiceComponent with MailServiceComponent {
+  this: UsersRepositoryComponent with SessionProvider  =>
 
   val securityService = new SecurityServiceImpl
   val authenticationManager: AuthenticationManager
@@ -79,7 +80,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         token
       }
 
-    override def signUpUser(user: User): ValidationNel[String, UserRecord] = withSession {
+    def signUpUser(user: User, host: String): ValidationNel[String, UserRecord] = withSession {
       implicit s: JdbcBackend#Session =>
 
       def validateUniqueness(user: User) = {
@@ -95,16 +96,28 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         } yield ()
       }
 
+      def sendActivationLink(user: UserRecord) = {
+        val url = "http://" + host + "/activate/" + user.uid
+        val message = s"""<p>Dear ${user.username}!</p>
+          |<p>This mail is to confirm your registration at Antarticle.<br/>
+          |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
+          |Best regards,<br/><br/>
+          |Antarticle.</p>""".stripMargin
+        mailService.sendEmail(user.email, "Antarcticle account activation", message)
+      }
+
       val result = for {
         _ <- userValidator.validate(user)
         _ <- validateUniqueness(user)
         salt = some(SecurityUtil.generateSalt)
         encodedPassword = SecurityUtil.encodePassword(user.password, salt)
         userRecord = UserRecord(None, user.username, encodedPassword, user.email, salt = salt)
+        _ = sendActivationLink(userRecord)
         userId = usersRepository.insert(userRecord)
       } yield userRecord.copy(id = some(userId))
       result
     }
+
 
     def activateUser(uid: String): ValidationNel[String, UserRecord] = withSession {
       implicit s: JdbcBackend#Session =>

@@ -69,14 +69,14 @@ trait AuthenticationController {
 
   def register() = Action { implicit request =>
     val (username, email, password) = registerForm.bindFromRequest.get
-    securityService.signUpUser(User(username, email, password)).fold(
+    securityService.signUpUser(User(username, email, password), request.host).fold(
       fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
       succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
     )
   }
 
   def activate(uid: String) = Action { implicit request =>
-    val mainPage = Redirect(controllers.routes.ArticleController.allArticles())
+    val mainPage = Redirect(routes.ArticleController.allArticles())
     val activatedUser = securityService.activateUser(uid)
     val cookie = activatedUser.fold(
       fail => none[Cookie],

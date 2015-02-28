@@ -12,10 +12,11 @@ trait PropertiesProvider {
     val instanceName = propertiesService.getInstanceName()
     val topBannerUrl = propertiesService.getBannerUrl(ApplicationPropertyNames.topBannerURL)
     val bottomBannerUrl = propertiesService.getBannerUrl(ApplicationPropertyNames.bottomBannerURL)
+    val poulpeUrl: Option[String] = propertiesProvider.get[String](Keys.PoulpeUrl)
     MainTemplateProperties(instanceName,
       if(topBannerUrl == null) None else topBannerUrl,
       if(bottomBannerUrl == null) None else bottomBannerUrl,
-      propertiesProvider.get[String](Keys.PoulpeUrl).isEmpty
+      poulpeUrl.isEmpty || poulpeUrl.get.isEmpty
     )
   }
 

@@ -124,6 +124,24 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
     <Environment name="ANTARCTICLE_POULPE_URL" 
          value="http://mydomain.com/poulpeContext"
          type="java.lang.String"/>    
+    <Environment name="ANTARCTICLE_SMTP_HOST" 
+         value="smtp.mail.ru"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PORT" 
+         value="465"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_USER" 
+         value="your_username"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PASSWORD" 
+         value="your_password"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_AUTH" 
+         value="true"
+         type="java.lang.Boolean"/>
+    <Environment name="ANTARCTICLE_SMTP_SSL" 
+         value="true"
+         type="java.lang.String"/>
 </Context>
 ```
 

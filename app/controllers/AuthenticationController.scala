@@ -69,7 +69,11 @@ trait AuthenticationController {
 
   def register() = Action { implicit request =>
     val (username, email, password) = registerForm.bindFromRequest.get
-    securityService.signUpUser(User(username, email, password), request.host).fold(
+    val activationUrl = request.path.indexOf("/signup") match {
+      case i if i < 0 => request.host
+      case i => request.host + request.path.slice(0, i)
+    }
+    securityService.signUpUser(User(username, email, password), activationUrl).fold(
       fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
       succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
     )

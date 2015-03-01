@@ -2,11 +2,13 @@ package security
 
 import models.UserModels.User
 import models.database.UserRecord
+import play.api.Logger
 import repositories.UsersRepositoryComponent
 import services.{MailServiceComponent, SessionProvider}
 import utils.SecurityUtil
 import validators.UserValidator
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.slick.jdbc.JdbcBackend
 import scalaz.Scalaz._
 import scalaz._
@@ -97,13 +99,21 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent with MailSer
       }
 
       def sendActivationLink(user: UserRecord) = {
+        import ExecutionContext.Implicits.global
         val url = "http://" + host + "/activate/" + user.uid
         val message = s"""<p>Dear ${user.username}!</p>
           |<p>This mail is to confirm your registration at Antarticle.<br/>
           |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
           |Best regards,<br/><br/>
           |Antarticle.</p>""".stripMargin
-        mailService.sendEmail(user.email, "Antarcticle account activation", message)
+        val mailFuture = Future(mailService.sendEmail(user.email, "Antarcticle account activation", message))
+        mailFuture.onSuccess {
+          case _ => Logger.info(s"Activation link was sent to user ${user.username}")
+        }
+        mailFuture.onFailure {
+          case error => Logger.warn(s"Problme with sending activation link to user ${user.username}", error)
+        }
+
       }
 
       val result = for {

@@ -70,8 +70,8 @@ class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provide
   }
 }
 
-class CompositeAuthenticationManager(poulpeAuthManager: Option[PoulpeAuthenticationManager],
-                                     localAuthManager: LocalDatabaseAuthenticationManager)
+class CompositeAuthenticationManager(poulpeAuthManager: Option[AuthenticationManager],
+                                     localAuthManager: AuthenticationManager)
   extends AuthenticationManager {
   override def authenticate(username: String, password: String) = {
     Try {

@@ -13,5 +13,6 @@ object Keys {
   case object MailSmtpHost extends ConfigurationKey
   case object MailSmtpPort extends ConfigurationKey
   case object MailSmtpFrom extends ConfigurationKey
+  case object MailSmtpUser extends ConfigurationKey
   case object MailSmtpPassword extends ConfigurationKey
 }

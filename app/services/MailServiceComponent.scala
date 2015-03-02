@@ -23,8 +23,6 @@ trait MailServiceComponentImpl extends MailServiceComponent {
 
   class MailServiceImpl extends MailService {
 
-    val from = propertiesProvider.get[String](Keys.MailSmtpFrom).getOrElse("jtalks@inbox.ru")
-
     val session = {
       val properties = new Properties()
       val host = propertiesProvider.get[String](Keys.MailSmtpHost).getOrElse("smtp.mail.ru")
@@ -43,10 +41,11 @@ trait MailServiceComponentImpl extends MailServiceComponent {
         }
       }
 
-      val password = propertiesProvider.get[String](Keys.MailSmtpPassword).getOrElse("javatalks")
       Session.getInstance(properties, new Authenticator {
         override def getPasswordAuthentication: PasswordAuthentication = {
-          new PasswordAuthentication(from, password)
+          val username = propertiesProvider.get[String](Keys.MailSmtpUser).getOrElse("jtalks@inbox.ru")
+          val password = propertiesProvider.get[String](Keys.MailSmtpPassword).getOrElse("javatalks")
+          new PasswordAuthentication(username, password)
         }
       })
     }
@@ -56,6 +55,7 @@ trait MailServiceComponentImpl extends MailServiceComponent {
       message.addHeader("Content-type", "text/HTML; charset=UTF-8")
       message.addHeader("format", "flowed")
       message.addHeader("Content-Transfer-Encoding", "8bit")
+      val from = propertiesProvider.get[String](Keys.MailSmtpFrom).getOrElse("jtalks@inbox.ru")
       message.setFrom(new InternetAddress(from))
       message.addRecipients(Message.RecipientType.TO, to)
       message.setSubject(subject)

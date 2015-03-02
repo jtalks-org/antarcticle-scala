@@ -130,6 +130,9 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
     <Environment name="ANTARCTICLE_SMTP_PORT" 
          value="465"
          type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_FROM" 
+         value="your_from"
+         type="java.lang.String"/>     
     <Environment name="ANTARCTICLE_SMTP_USER" 
          value="your_username"
          type="java.lang.String"/>

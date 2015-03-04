@@ -1,32 +1,35 @@
 package security
 
-import org.specs2.mutable.Specification
-import util.FakeSessionProvider
-import repositories.UsersRepositoryComponent
-import util.FakeSessionProvider.FakeSessionValue
-import org.mockito.Matchers
 import models.database.UserRecord
-import org.specs2.specification.BeforeExample
+import org.mockito.Matchers
+import org.mockito.Matchers.{eq => mockEq}
+import org.specs2.matcher.Matcher
 import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
 import org.specs2.scalaz.ValidationMatchers
+import org.specs2.specification.BeforeExample
+import org.specs2.time.NoTimeConversions
+import repositories.UsersRepositoryComponent
+import services.{MailServiceComponent, ApplicationPropertiesServiceComponent}
+import util.FakeSessionProvider
+import util.FakeSessionProvider.FakeSessionValue
 import utils.SecurityUtil
 import validators.UserValidator
-import scalaz._
-import Scalaz._
-import org.specs2.time.NoTimeConversions
+
 import scala.slick.jdbc.JdbcBackend
-import org.specs2.matcher.Matcher
-import org.mockito.Matchers.{eq => mockEq}
+import scalaz.Scalaz._
 
 class SecurityServiceSpec extends Specification
     with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
 
   object service extends SecurityServiceComponentImpl with UsersRepositoryComponent
-  with FakeSessionProvider {
+  with FakeSessionProvider with SecurityServiceComponent with ApplicationPropertiesServiceComponent with MailServiceComponent {
     override val usersRepository = mock[UsersRepository]
     override val authenticationManager = mock[AuthenticationManager]
     override val userValidator = mock[UserValidator]
     override val mailService = mock[MailService]
+    override val propertiesService = mock[ApplicationPropertiesService]
+
   }
 
   import service._

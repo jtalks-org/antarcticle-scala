@@ -4,11 +4,11 @@ import models.UserModels.User
 import models.database.UserRecord
 import play.api.Logger
 import repositories.UsersRepositoryComponent
-import services.{MailServiceComponent, SessionProvider}
+import services.{ApplicationPropertiesServiceComponent, MailServiceComponent, SessionProvider}
 import utils.SecurityUtil
 import validators.UserValidator
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.slick.jdbc.JdbcBackend
 import scalaz.Scalaz._
 import scalaz._
@@ -31,8 +31,11 @@ trait SecurityServiceComponent {
 
 }
 
-trait SecurityServiceComponentImpl extends SecurityServiceComponent with MailServiceComponent {
-  this: UsersRepositoryComponent with SessionProvider  =>
+trait SecurityServiceComponentImpl extends SecurityServiceComponent {
+  this: UsersRepositoryComponent
+    with SessionProvider
+    with ApplicationPropertiesServiceComponent
+    with MailServiceComponent =>
 
   val securityService = new SecurityServiceImpl
   val authenticationManager: AuthenticationManager
@@ -99,14 +102,16 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent with MailSer
       }
 
       def sendActivationLink(user: UserRecord) = {
-        import ExecutionContext.Implicits.global
+        import scala.concurrent.ExecutionContext.Implicits.global
         val url = "http://" + host + "/activate/" + user.uid
         val message = s"""<p>Dear ${user.username}!</p>
-          |<p>This mail is to confirm your registration at Antarticle.<br/>
+          |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName()}.<br/>
           |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
           |Best regards,<br/><br/>
           |Antarticle.</p>""".stripMargin
-        val mailFuture = Future(mailService.sendEmail(user.email, "Antarcticle account activation", message))
+        val mailFuture = Future(
+          mailService.sendEmail(user.email, s"Account activation at ${propertiesService.getInstanceName()}", message)
+        )
         mailFuture.onSuccess {
           case _ => Logger.info(s"Activation link was sent to user ${user.username}")
         }

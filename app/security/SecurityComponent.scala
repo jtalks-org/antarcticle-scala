@@ -4,11 +4,11 @@ import conf.{Keys, PropertiesProviderComponent}
 import play.api.Logger
 import play.api.mvc.Controller
 import repositories.UsersRepositoryComponent
-import services.SessionProvider
+import services.{MailServiceComponent, ApplicationPropertiesServiceComponent, SessionProvider}
 
 trait SecurityComponent extends SecurityServiceComponentImpl with Authentication {
-  this: Controller with UsersRepositoryComponent
-    with SessionProvider with PropertiesProviderComponent =>
+  this: Controller with UsersRepositoryComponent with ApplicationPropertiesServiceComponent
+    with SessionProvider with PropertiesProviderComponent with MailServiceComponent =>
 
   override val authenticationManager = {
 

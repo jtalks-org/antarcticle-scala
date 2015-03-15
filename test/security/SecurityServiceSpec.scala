@@ -1,5 +1,7 @@
 package security
 
+import java.sql.Timestamp
+
 import models.database.UserRecord
 import org.mockito.Matchers
 import org.mockito.Matchers.{eq => mockEq}
@@ -53,8 +55,14 @@ class SecurityServiceSpec extends Specification
       val userFromDb = UserRecord(Some(1), username, encodedPassword, email, false, salt)
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, email, false, salt)
       val usernameIgnoreCase: Matcher[String]  = (_: String).equalsIgnoreCase(username)
+      val fakeCreatedAt = new Timestamp(System.currentTimeMillis())
 
-      def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(salt = "salt".some, password = "pwd", uid = "uid"))
+      def beMostlyEqualTo = (be_==(_:UserRecord)) ^^^ ((_:UserRecord).copy(
+        salt = "salt".some,
+        password = "pwd",
+        uid = "uid",
+        createdAt = fakeCreatedAt
+      ))
 
       "return remember me token and authenticated user" in {
         authenticationManager.authenticate(username, password) returns userInfo.some
@@ -81,7 +89,8 @@ class SecurityServiceSpec extends Specification
 
           doTest
 
-          val expectedRecord = UserRecord(None, username, encodedPassword, "NA", false, salt, "fn".some, "ln".some, active = true)
+          val expectedRecord = UserRecord(None, username, encodedPassword, "NA", false, salt, "fn".some,
+            "ln".some, active = true, createdAt = fakeCreatedAt)
           there was one(usersRepository).insert(beMostlyEqualTo(expectedRecord))(anySession)
         }
 

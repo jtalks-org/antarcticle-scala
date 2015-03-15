@@ -32,8 +32,8 @@ class UserValidator extends Validator[User] {
     }
 
     def checkEmail = {
-      if (!user.email.matches(EMAIL_FORMAT) || user.email.trim.isEmpty)
-        s"Email ${user.email} is not valid email address".failNel
+      if (user.email.trim.isEmpty || !user.email.matches(EMAIL_FORMAT))
+        "An email format should be like mail@mail.ru".failNel
       else if (user.email.trim.length >= EMAIL_MAX_LENGTH)
         s"Email field should not contain more than $EMAIL_MAX_LENGTH symbols.".failNel
       else

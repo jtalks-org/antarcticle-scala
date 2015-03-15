@@ -1,5 +1,7 @@
 package repositories
 
+import java.sql.Timestamp
+
 import models.database._
 import scala.slick.jdbc.JdbcBackend
 
@@ -30,6 +32,8 @@ trait UsersRepositoryComponent {
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
+
+    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session):Unit
   }
 }
 
@@ -79,6 +83,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
     val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
     val byEmailCompiled = Compiled((email: Column[String]) => users.filter(_.email === email))
     val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
+    val inactiveUsersCompiled = (created: Column[Timestamp]) => users.filter(u => !u.active && u.createdAt < created).deleteInvoker
 
     def getByUID(uid: String)(implicit session: JdbcBackend#Session) = byUserUIDCompiled(uid).firstOption
 
@@ -109,5 +114,9 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord] =
       byEmailCompiled(email).firstOption
+
+    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session):Unit = {
+      inactiveUsersCompiled(time).delete
+    }
   }
 }

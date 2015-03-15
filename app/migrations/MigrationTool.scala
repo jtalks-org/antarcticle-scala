@@ -50,7 +50,7 @@ trait MigrationTool {
       case xs =>
         val currentVersion = getCurrentVersion
         val notPerformedMigrations = migrations.filter(_.version > currentVersion)
-        if (!notPerformedMigrations.isEmpty) {
+        if (notPerformedMigrations.nonEmpty) {
           val newVersion = notPerformedMigrations.last.version
           Logger.info(s"Migrating database from version $currentVersion to $newVersion")
           notPerformedMigrations.foreach(_.run)

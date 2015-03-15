@@ -64,24 +64,33 @@ trait AuthenticationController {
   }
 
   def showRegistrationPage = Action { implicit request =>
-    Ok(html.signup(registerForm))
+    if (mainPageProperties.signUpAvailable) {
+      Ok(html.signup(registerForm))
+    } else {
+      NotFound(views.html.errors.notFound())
+    }
   }
 
   def register() = Action { implicit request =>
-    val (username, email, password) = registerForm.bindFromRequest.get
-    val activationUrl = request.path.indexOf("/signup") match {
-      case i if i < 0 => request.host
-      case i => request.host + request.path.slice(0, i)
+    if (mainPageProperties.signUpAvailable) {
+      val (username, email, password) = registerForm.bindFromRequest.get
+      val activationUrl = request.path.indexOf("/signup") match {
+        case i if i < 0 => request.host
+        case i => request.host + request.path.slice(0, i)
+      }
+      securityService.signUpUser(User(username, email, password), activationUrl).fold(
+        fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
+        succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
+      )
+    } else {
+      NotFound(views.html.errors.notFound())
     }
-    securityService.signUpUser(User(username, email, password), activationUrl).fold(
-      fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-      succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
-    )
+
   }
 
   def activate(uid: String) = Action { implicit request =>
     val mainPage = Redirect(routes.ArticleController.allArticles())
-    val activatedUser = securityService.activateUser(uid)
+    val activatedUser = if (mainPageProperties.signUpAvailable) securityService.activateUser(uid) else "".failNel
     val cookie = activatedUser.fold(
       fail => none[Cookie],
       succ = user => {

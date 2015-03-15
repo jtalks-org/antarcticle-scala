@@ -1,12 +1,13 @@
+import conf.ConfigurationComponent
 import controllers._
-import migrations.{Migrations, MigrationTool}
+import jobs.Scheduler
+import migrations.{MigrationTool, Migrations}
+import models.database._
+import play.api.mvc.Controller
+import repositories._
 import security._
 import services._
-import repositories._
-import models.database._
-import conf.ConfigurationComponent
-import play.api.mvc.Controller
-import validators.{UserValidator, ArticleValidator, TagValidator}
+import validators.{ArticleValidator, TagValidator, UserValidator}
 
 object Application
   extends ConfigurationComponent
@@ -17,7 +18,8 @@ object Application
   with Services
   with Controllers
   with PropertiesProvider
-  with MailServiceComponentImpl{
+  with MailServiceComponentImpl
+  with Scheduler {
 
   override val migrationsContainer = new Migrations(profile)
   override val userValidator = new UserValidator
@@ -27,6 +29,7 @@ object Application
   withSession { implicit session =>
     migrate
   }
+  runJobs()
 }
 
 trait Controllers

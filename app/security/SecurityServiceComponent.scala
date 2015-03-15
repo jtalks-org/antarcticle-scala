@@ -88,18 +88,20 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
     def signUpUser(user: User, host: String): ValidationNel[String, UserRecord] = withSession {
       implicit s: JdbcBackend#Session =>
 
-      def validateUniqueness(user: User) = {
-        for {
-          _ <- usersRepository.getByUsername(user.username).cata(
+        def validateUser(user : User):ValidationNel[String, User] = {
+          def checkUsernameUnique = usersRepository.getByUsername(user.username).cata(
             existingUser => s"User with the username ${user.username} already exists".failNel,
             ().successNel
           )
-          _ <- usersRepository.getByEmail(user.email).cata(
+          def checkEmailUnique = usersRepository.getByEmail(user.email).cata(
             existingUser => s"User with the email ${user.email} already exists".failNel,
             ().successNel
           )
-        } yield ()
-      }
+          (userValidator.validate(user) |@| checkUsernameUnique |@| checkEmailUnique) {
+            case _ => user
+          }
+        }
+
 
       def sendActivationLink(user: UserRecord) = {
         import scala.concurrent.ExecutionContext.Implicits.global
@@ -122,8 +124,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
       }
 
       val result = for {
-        _ <- userValidator.validate(user)
-        _ <- validateUniqueness(user)
+        _ <- validateUser(user)
         salt = some(SecurityUtil.generateSalt)
         encodedPassword = SecurityUtil.encodePassword(user.password, salt)
         userRecord = UserRecord(None, user.username, encodedPassword, user.email, salt = salt)

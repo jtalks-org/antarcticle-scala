@@ -235,4 +235,15 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("ALTER TABLE users CHANGE COLUMN uid uid varchar(100) NOT NULL").execute()
     }
   }
+
+  val addUserCreatedAt = new Migration {
+    val version = 21
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN createdAt timestamp").execute()
+      Q.updateNA("UPDATE users set createdAt = CURRENT_TIMESTAMP").execute()
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN createdAt createdAt timestamp NOT NULL").execute()
+    }
+
+  }
 }

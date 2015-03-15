@@ -1,12 +1,13 @@
-import controllers.filters.{KeepReferrerFilter, CsrfFilter}
-import controllers.PropertiesProvider
-import models.ApplicationPropertyModels.MainTemplateProperties
-import play.api.Logger
+import controllers.filters.{CsrfFilter, KeepReferrerFilter}
+import play.api
 import play.api.mvc.Results._
-import play.api.mvc.{SimpleResult, WithFilters, RequestHeader}
+import play.api.mvc.{RequestHeader, SimpleResult, WithFilters}
+import play.api.{GlobalSettings, Logger}
+import play.libs.Akka
+
 import scala.concurrent.Future
 
-object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) {
+object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSettings  {
 
   /*
    * Get controller instances as Application instance, because all controllers
@@ -63,4 +64,16 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) {
     Logger.error(s"No suitable handler found for URL: ${request.uri}")
     Future.successful(NotFound(views.html.errors.notFound()))
   }
+
+
+  override def onStart(app : api.Application) = {
+    Logger.debug("Application has started")
+  }
+
+  override def onStop(app : api.Application) = {
+    Logger.info("Shitting down akka system")
+    Akka.system.shutdown()
+  }
+
+
 }

@@ -9,7 +9,9 @@ object UserValidator {
   val USERNAME_MAX_LENGTH = 25
   val PASSWORD_MAX_LENGTH = 50
   val EMAIL_MAX_LENGTH = 50
-  val EMAIL_FORMAT = """(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b"""
+  val EMAIL_FORMAT = "^[a-zA-Z0-9_'+*/^&=?~{}\\-](\\.?[a-zA-Z0-9_'+*/^&=?~{}\\-])" +
+  "*\\@((\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(\\:\\d{1,3})?)|(((([a-zA-Z0-9][a-zA-Z0-9\\-]" +
+  "+[a-zA-Z0-9])|([a-zA-Z0-9]{1,2}))[\\.]{1})+([a-zA-Z]{2,6})))$"
 }
 
 class UserValidator extends Validator[User] {

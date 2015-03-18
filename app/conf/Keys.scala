@@ -8,6 +8,7 @@ object Keys {
   case object DbPassword extends ConfigurationKey
   case object PoulpeUrl extends ConfigurationKey
   case object UseFakeAuthentication extends ConfigurationKey
+  case object DeleteInacticveUsers extends ConfigurationKey
   case object MailSmtpAuth extends ConfigurationKey
   case object MailSmtpSsl extends ConfigurationKey
   case object MailSmtpHost extends ConfigurationKey

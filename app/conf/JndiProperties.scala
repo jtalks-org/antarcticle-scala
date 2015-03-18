@@ -39,6 +39,7 @@ class JndiPropertiesProvider extends PropertiesProvider{
     case MailSmtpPassword => "ANTARCTICLE_SMTP_PASSWORD"
     case MailSmtpAuth => "ANTARCTICLE_SMTP_AUTH"
     case MailSmtpSsl => "ANTARCTICLE_SMTP_SSL"
+    case DeleteInacticveUsers => "ANTARCTICLE_DELETE_INACTIVE_USERS"
     case k => throw new RuntimeException(s"Key $k can't be translated to JNDI property key")
   }
 }
@@ -74,6 +75,7 @@ class TypesafeConfigPropertiesProvider(config: Config) extends PropertiesProvide
     case MailSmtpPassword => "mail.smtp.password"
     case MailSmtpAuth => "mail.smtp.auth"
     case MailSmtpSsl => "mail.smtp.ssl"
+    case DeleteInacticveUsers => "security.delete.inactive.users"
 
     case k => throw new RuntimeException(s"Key $k can't be translated to Typesafe config key")
   }

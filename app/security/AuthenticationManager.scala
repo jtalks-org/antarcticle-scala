@@ -79,12 +79,10 @@ class CompositeAuthenticationManager(poulpeAuthManager: Option[AuthenticationMan
         none = none[UserInfo],
         some = manager => manager.authenticate(username, password))
     } match {
-      case scala.util.Success(userInfo) =>
-        if (userInfo.isDefined) userInfo else localAuthManager.authenticate(username, password)
-      case scala.util.Failure(e) => {
+      case scala.util.Success(userInfo) => userInfo
+      case scala.util.Failure(e) =>
         Logger.error("Error while asking Poulpe to authenticate user", e)
         localAuthManager.authenticate(username, password)
-      }
     }
   }
 }

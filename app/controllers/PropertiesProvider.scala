@@ -13,10 +13,11 @@ trait PropertiesProvider {
     val topBannerUrl = propertiesService.getBannerUrl(ApplicationPropertyNames.topBannerURL)
     val bottomBannerUrl = propertiesService.getBannerUrl(ApplicationPropertyNames.bottomBannerURL)
     val poulpeUrl: Option[String] = propertiesProvider.get[String](Keys.PoulpeUrl)
+    val fakePoulpe: Boolean = propertiesProvider.get[Boolean](Keys.UseFakeAuthentication).getOrElse(false)
     MainTemplateProperties(instanceName,
       if(topBannerUrl == null) None else topBannerUrl,
       if(bottomBannerUrl == null) None else bottomBannerUrl,
-      poulpeUrl.isEmpty || poulpeUrl.get.isEmpty
+      signUpAvailable = !fakePoulpe && (poulpeUrl.isEmpty || poulpeUrl.get.isEmpty)
     )
   }
 

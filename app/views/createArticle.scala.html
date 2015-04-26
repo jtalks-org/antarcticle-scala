@@ -19,7 +19,7 @@
         <li><a id="preview-tab" data-href="@routes.ArticleController.previewArticle()" href="#preview" data-toggle="tab">Preview</a></li>
       </ul>
 
-      <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle">
+      <form class="default-form" method="POST" action="@routes.ArticleController.postNewArticle()">
         @if(sourceArticle.isDefined) {
           <input type="hidden" name="sourceId" value="@sourceArticle.get.sourceId"/>
         }
@@ -37,15 +37,13 @@
                 </label>
                 <div class="input-group pull-right language-picker">
                   <label for="language-button" class="language-label">Choose language:</label>
-                  <button id="language-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="lang-label">@Language.Russian.title</span>&nbsp;&nbsp;<span class="caret"></span>
-                    <input class="lang-input" name="language" type="hidden" value="@Language.Russian"/>
-                  </button>
-                  <ul class="dropdown-menu">
-                    @for(language <- Language.languageIterator) {
-                      <li><a class="language-item" href="#" data-lang="@language">@language.title</a></li>
-                    }
-                  </ul>
+                  <select id="language-button" name="language">
+                  @for(language <- Language.languageIterator) {
+                    <option value="@language" @if(language == Language.Russian) {
+                      selected="selected"
+                      }>@language.title</option>
+                  }
+                  </select>
                 </div>
               </div>
               <textarea id="content" name="content" class="form-control article-input"

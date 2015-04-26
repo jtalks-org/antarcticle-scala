@@ -1,3 +1,4 @@
+import controllers.IndexController
 import controllers.filters.{CsrfFilter, KeepReferrerFilter}
 import play.api
 import play.api.mvc.Results._
@@ -20,6 +21,9 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSet
       case e: ClassCastException =>
         Logger.error(s"Controller ${controllerClass.getName} not mixed in into Application object")
         throw e
+      case e: Error =>
+        Logger.error("Could not initialize application", e)
+        FailedApplication.asInstanceOf[A]
     }
   }
 

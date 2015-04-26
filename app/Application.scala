@@ -9,6 +9,8 @@ import security._
 import services._
 import validators.{ArticleValidator, TagValidator, UserValidator}
 
+object FailedApplication extends IndexController with Controller
+
 object Application
   extends ConfigurationComponent
   with Schema

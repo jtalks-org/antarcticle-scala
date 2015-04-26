@@ -5,7 +5,7 @@ import play.api.mvc.{AnyContent, Action, Controller}
 import services.{CommentsServiceComponent, ArticlesServiceComponent}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.{ArticleListModel, ArticleDetailsModel, Article, Language}
+import models.ArticleModels.{ArticleDetailsModel, Article, Language}
 import security.{AuthenticatedUser, Authentication}
 import security.Result._
 import utils.RFC822
@@ -15,7 +15,7 @@ import Scalaz._
 /**
  * Serves web-based operations on articles
  */
-trait ArticleController {
+trait ArticleController extends IndexController {
   this: Controller with ArticlesServiceComponent with CommentsServiceComponent with PropertiesProvider with Authentication =>
 
   /**
@@ -32,6 +32,8 @@ trait ArticleController {
     )((id, title, content, tags, language, sourceId) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty), language, sourceId))
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString(), article.sourceId)))
   )
+
+  override def index() = allArticles()
 
   def allArticles() = listArticles(None)
 

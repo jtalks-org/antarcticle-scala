@@ -6,6 +6,6 @@ trait IndexController {
   this: Controller =>
 
   def index() = Action {
-    Ok(views.html.errors.internalError())
+    InternalServerError(views.html.errors.internalError())
   }
 }

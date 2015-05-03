@@ -1,22 +1,18 @@
 package controllers
 
-import conf.PropertiesProviderComponent
-import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
-import org.specs2.specification.AfterExample
-import util.{FakePropertiesProvider, FakeAuthentication}
-import play.api.test._
-import play.api.test.Helpers._
-import scalaz._
-import Scalaz._
-import security.SecurityServiceComponent
-import scala.concurrent.Future
 import conf.Constants._
-import security.AuthenticatedUser
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.specification.AfterExample
 import play.api.mvc.Cookie
-import scala.Some
-import org.mockito.Matchers
+import play.api.test.Helpers._
+import play.api.test._
+import security.{AuthenticatedUser, SecurityServiceComponent}
 import services.ApplicationPropertiesServiceComponent
+import util.{FakeAuthentication, FakePropertiesProvider}
+
+import scala.concurrent.Future
+import scalaz.Scalaz._
 
 class AuthenticationControllerSpec extends Specification with Mockito with AfterExample {
 
@@ -59,7 +55,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
       .withFormUrlEncodedBody(("login", username),("password", password), ("referer", referer))
 
     "perform authentication with valid credentials" in {
-      securityService.signInUser(username, password) returns (rememberMeToken, user).successNel
+      securityService.signInUser(username, password) returns Future.successful((rememberMeToken, user).successNel)
 
       val page = controller.login(request)
 
@@ -71,7 +67,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     }
 
     "return an error if credentials are invalid" in {
-      securityService.signInUser(username, password) returns "Invalid credentials".failureNel
+      securityService.signInUser(username, password) returns Future.successful("Invalid credentials".failureNel)
 
       val page = controller.login(request)
 

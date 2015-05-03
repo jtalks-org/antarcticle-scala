@@ -9,6 +9,8 @@ import scalaz._
 import Scalaz._
 import security.{Authentication, SecurityServiceComponent}
 import views.html
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.async.Async.{async, await}
 
 /**
  *  Handles sign in and sign out user actions.
@@ -41,20 +43,20 @@ trait AuthenticationController {
 
   def getReferer(implicit request: Request[AnyContent]) : String = {
     request.session.get(REFERER).filter(
-      referer => referer != routes.AuthenticationController.showRegistrationPage.url
+      referer => referer != routes.AuthenticationController.showRegistrationPage().url
     ).getOrElse(routes.ArticleController.allArticles().absoluteURL())
   }
 
-  def login = Action { implicit request =>
+  def login = Action.async { implicit request =>
     val (username, password, referer) = loginForm.bindFromRequest.get
-    securityService.signInUser(username, password).fold(
+    securityService.signInUser(username, password).map {_.fold(
       fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
       succ = { case (token, authUser) =>
         Ok(referer)
           // http only to prevent session hijacking with XSS
           .withCookies(Cookie(rememberMeCookie, token, Some(rememberMeExpirationTime), httpOnly = true))
       }
-    )
+    )}
   }
 
   def logout = Action {
@@ -64,38 +66,30 @@ trait AuthenticationController {
   }
 
   def showRegistrationPage = Action { implicit request =>
-    if (mainPageProperties.signUpAvailable) {
-      Ok(html.signup(registerForm))
-    } else {
-      NotFound(views.html.errors.notFound())
-    }
+    Ok(html.signup(registerForm))
   }
 
-  def register() = Action { implicit request =>
-    if (mainPageProperties.signUpAvailable) {
-      val (username, email, password) = registerForm.bindFromRequest.get
-      val activationUrl = request.path.indexOf("/signup") match {
-        case i if i < 0 => request.host
-        case i => request.host + request.path.slice(0, i)
-      }
-      securityService.signUpUser(User(username, email, password), activationUrl).fold(
+  def register() = Action.async { implicit request =>
+    val (username, email, password) = registerForm.bindFromRequest.get
+    val activationUrl = request.path.indexOf("/signup") match {
+      case i if i < 0 => request.host
+      case i => request.host + request.path.slice(0, i)
+    }
+    securityService.signUpUser(User(username, email, password), activationUrl).map {
+      _.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-        succ = user => Ok(routes.ArticleController.allArticles().absoluteURL())
+        succ = uid => Ok(routes.ArticleController.allArticles().absoluteURL())
       )
-    } else {
-      NotFound(views.html.errors.notFound())
     }
-
   }
 
-  def activate(uid: String) = Action { implicit request =>
+  def activate(uid: String) = Action.async { implicit request =>
     val mainPage = Redirect(routes.ArticleController.allArticles())
-    val activatedUser = if (mainPageProperties.signUpAvailable) securityService.activateUser(uid) else "".failNel
-    val cookie = activatedUser.fold(
-      fail => none[Cookie],
-      succ = user => {
-        user.rememberToken.map(token => Cookie(rememberMeCookie, token, some(rememberMeExpirationTime), httpOnly = true))
-      })
-    cookie.cata(mainPage.withCookies(_), mainPage)
+    async {
+      val cookie = await(securityService.activateUser(uid)).toOption map {
+        token => Cookie(rememberMeCookie, token, some(rememberMeExpirationTime), httpOnly = true)
+      }
+      cookie.cata(mainPage.withCookies(_), mainPage)
+    }
   }
 }

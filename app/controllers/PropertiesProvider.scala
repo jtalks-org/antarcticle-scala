@@ -16,8 +16,7 @@ trait PropertiesProvider {
     val fakePoulpe: Boolean = propertiesProvider.get[Boolean](Keys.UseFakeAuthentication).getOrElse(false)
     MainTemplateProperties(instanceName,
       if(topBannerUrl == null) None else topBannerUrl,
-      if(bottomBannerUrl == null) None else bottomBannerUrl,
-      signUpAvailable = !fakePoulpe && (poulpeUrl.isEmpty || poulpeUrl.get.isEmpty)
+      if(bottomBannerUrl == null) None else bottomBannerUrl
     )
   }
 

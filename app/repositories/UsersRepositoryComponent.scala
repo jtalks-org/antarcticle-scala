@@ -27,13 +27,13 @@ trait UsersRepositoryComponent {
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
-    def update(user: UserRecord)(implicit session: JdbcBackend#Session)
+    def update(user: UserRecord)(implicit session: JdbcBackend#Session): Unit
 
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
 
-    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session):Unit
+    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session): Unit
   }
 }
 

@@ -8,6 +8,7 @@ import services.{ApplicationPropertiesServiceComponent, MailServiceComponent, Se
 import utils.SecurityUtil
 import validators.UserValidator
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.slick.jdbc.JdbcBackend
 import scalaz.Scalaz._
@@ -24,11 +25,10 @@ trait SecurityServiceComponent {
     /*
      * @return new remember me token for user if success
      */
-    def signInUser(username: String, password: String): ValidationNel[String, (String, AuthenticatedUser)]
-    def signUpUser(user: User, host: String): ValidationNel[String, UserRecord]
-    def activateUser(uid: String): ValidationNel[String, UserRecord]
+    def signInUser(username: String, password: String): Future[ValidationNel[String, (String, AuthenticatedUser)]]
+    def signUpUser(user: User, host: String): Future[ValidationNel[String, String]]
+    def activateUser(uid: String): Future[ValidationNel[String, String]]
   }
-
 }
 
 trait SecurityServiceComponentImpl extends SecurityServiceComponent {
@@ -43,7 +43,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
   class SecurityServiceImpl extends SecurityService {
 
-    def signInUser(username: String, password: String) = {
+    override def signInUser(username: String, password: String) = {
 
       def createOrUpdateUser(info: UserInfo): UserRecord = withSession {
         implicit s: JdbcBackend#Session =>
@@ -64,19 +64,19 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           )
       }
 
-      for {
-        user <- authenticationManager.authenticate(username.trim, password).cata(
-          some = info => if (info.active) info.successNel else s"User ${info.username} is not active".failNel,
-          none = "Invalid username or password".failNel
-        )
-        userRecord = createOrUpdateUser(user)
-        authority = if (userRecord.admin) Authorities.Admin else Authorities.User
-        authenticatedUser = AuthenticatedUser(userRecord.id.get, userRecord.username, authority)
-        token = issueRememberMeTokenTo(authenticatedUser.userId)
-      } yield (token, authenticatedUser)
+      authenticationManager.authenticate(username.trim, password) map {result =>
+        for {
+          user <- result.cata(
+            some = info => if (info.active) info.successNel else s"User ${info.username} is not active".failNel,
+            none = "Invalid username or password".failNel
+          )
+          userRecord = createOrUpdateUser(user)
+          authority = if (userRecord.admin) Authorities.Admin else Authorities.User
+          authenticatedUser = AuthenticatedUser(userRecord.id.get, userRecord.username, authority)
+          token = issueRememberMeTokenTo(authenticatedUser.userId)
+        } yield (token, authenticatedUser)
+      }
     }
-
-
 
     private def issueRememberMeTokenTo(userId: Int) =
       withSession { implicit session: JdbcBackend#Session =>
@@ -85,70 +85,64 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         token
       }
 
-    def signUpUser(user: User, host: String): ValidationNel[String, UserRecord] = withSession {
+    override def signUpUser(user: User, host: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
 
-        def validateUser(user : User):ValidationNel[String, User] = {
-          def checkUsernameUnique = usersRepository.getByUsername(user.username).cata(
-            existingUser => s"User with the username ${user.username} already exists".failNel,
-            ().successNel
+        def sendActivationLink(userUid: String) = {
+          import scala.concurrent.ExecutionContext.Implicits.global
+          val url = s"http://$host/activate/$userUid"
+          val message = s"""<p>Dear ${user.username}!</p>
+            |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName()}.<br/>
+            |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
+            |Best regards,<br/><br/>
+            |Antarticle.</p>""".stripMargin
+          val mailFuture = Future(
+            mailService.sendEmail(user.email, s"Account activation at ${propertiesService.getInstanceName()}", message)
           )
-          def checkEmailUnique = usersRepository.getByEmail(user.email).cata(
-            existingUser => s"User with the email ${user.email} already exists".failNel,
-            ().successNel
-          )
-          (userValidator.validate(user) |@| checkUsernameUnique |@| checkEmailUnique) {
-            case _ => user
+          mailFuture.onSuccess {
+            case _ => Logger.info(s"Activation link was sent to user ${user.username}")
+          }
+          mailFuture.onFailure {
+            case error => Logger.warn(s"Problem with sending activation link to user ${user.username}", error)
           }
         }
 
-
-      def sendActivationLink(user: UserRecord) = {
-        import scala.concurrent.ExecutionContext.Implicits.global
-        val url = "http://" + host + "/activate/" + user.uid
-        val message = s"""<p>Dear ${user.username}!</p>
-          |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName()}.<br/>
-          |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
-          |Best regards,<br/><br/>
-          |Antarticle.</p>""".stripMargin
-        val mailFuture = Future(
-          mailService.sendEmail(user.email, s"Account activation at ${propertiesService.getInstanceName()}", message)
-        )
-        mailFuture.onSuccess {
-          case _ => Logger.info(s"Activation link was sent to user ${user.username}")
+        def createUserRecord(uid: String): UserRecord = {
+          val salt = some(SecurityUtil.generateSalt)
+          val encodedPassword = SecurityUtil.encodePassword(user.password, salt)
+          UserRecord(None, user.username, encodedPassword, user.email, salt = salt, uid = uid)
         }
-        mailFuture.onFailure {
-          case error => Logger.warn(s"Problme with sending activation link to user ${user.username}", error)
-        }
-
-      }
-
-      val result = for {
-        _ <- validateUser(user)
-        salt = some(SecurityUtil.generateSalt)
-        encodedPassword = SecurityUtil.encodePassword(user.password, salt)
-        userRecord = UserRecord(None, user.username, encodedPassword, user.email, salt = salt)
-        _ = sendActivationLink(userRecord)
-        userId = usersRepository.insert(userRecord)
-      } yield userRecord.copy(id = some(userId))
-      result
+                      
+        for {
+          _ <- Future.successful(userValidator.validate(user))
+          uid <- authenticationManager.register(UserInfo(user.username, SecurityUtil.md5(user.password), user.email))
+        } yield uid.map { uuid => {
+          val record = createUserRecord(uuid)
+          usersRepository.insert(record)
+          sendActivationLink(record.uid)
+          record.uid
+        }}
     }
 
-
-    def activateUser(uid: String): ValidationNel[String, UserRecord] = withSession {
+    override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
-      usersRepository.getByUID(uid: String).cata(
-        user => {
-          if (!user.active) {
-            val activatedUser = user.copy(rememberToken = Some(SecurityUtil.generateRememberMeToken), active = true)
-            usersRepository.update(activatedUser)
-            activatedUser.successNel
-          } else {
-            "User is already activated".failNel
-          }
-        },
-        none = "There is no user with such uid".failNel
-      )
+        authenticationManager.activate(uid). map { _ =>
+          for {
+            user <- usersRepository.getByUID(uid).toSuccess(NonEmptyList("User not found"))
+            token = SecurityUtil.generateRememberMeToken
+            _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))
+          } yield token
+        }
+
+//        for {
+//          _ <- authenticationManager.activate(uid)
+//          t = for {
+//            user <- usersRepository.getByUID(uid).toSuccess(NonEmptyList("User not found"))
+//            token = SecurityUtil.generateRememberMeToken
+//            _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))
+//          } yield token
+//
+//        } yield t
     }
   }
 

@@ -5,19 +5,20 @@ import java.sql.Timestamp
 import models.database.UserRecord
 import org.mockito.Matchers
 import org.mockito.Matchers.{eq => mockEq}
-import org.specs2.matcher.Matcher
+import org.specs2.matcher.{MatchResult, Matcher}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.scalaz.ValidationMatchers
 import org.specs2.specification.BeforeExample
 import org.specs2.time.NoTimeConversions
 import repositories.UsersRepositoryComponent
-import services.{MailServiceComponent, ApplicationPropertiesServiceComponent}
+import services.{ApplicationPropertiesServiceComponent, MailServiceComponent}
 import util.FakeSessionProvider
 import util.FakeSessionProvider.FakeSessionValue
 import utils.SecurityUtil
 import validators.UserValidator
 
+import scala.concurrent.Future
 import scala.slick.jdbc.JdbcBackend
 import scalaz.Scalaz._
 
@@ -50,7 +51,7 @@ class SecurityServiceSpec extends Specification
       val salt = Some("fakeSalt")
       val encodedPassword: String = SecurityUtil.encodePassword(password, salt)
       val email = "mail01@mail.zzz"
-      val userInfo = UserInfo(username, password, "fn".some, "ln".some, true)
+      val userInfo = UserInfo(username, password, email, "fn".some, "ln".some, true)
       val authUser = AuthenticatedUser(1, username, Authorities.User)
       val userFromDb = UserRecord(Some(1), username, encodedPassword, email, false, salt)
       val userFromDb2 =  UserRecord(Some(2), username.toUpperCase, encodedPassword, email, false, salt)
@@ -65,26 +66,28 @@ class SecurityServiceSpec extends Specification
       ))
 
       "return remember me token and authenticated user" in {
-        authenticationManager.authenticate(username, password) returns userInfo.some
+        authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns Some(userFromDb)
 
-        securityService.signInUser(username, password) must beSuccessful
+        securityService.signInUser(username, password) must beSuccessful.await
       }
 
       "authenticated admin should have Admin authority" in {
-        authenticationManager.authenticate(username, password) returns userInfo.some
+        authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns Some(userFromDb.copy(admin=true))
 
-        securityService.signInUser(username, password) must beSuccessful.like {
-          case (_, user:AuthenticatedUser) if user.authority == Authorities.Admin => ok
+        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+          case (_, user) if user.authority == Authorities.Admin => ok
         }
+
+        securityService.signInUser(username, password) must beSuccessful.like(expected).await
       }
 
 
       "create new user when not exists" in {
 
         def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
-          authenticationManager.authenticate(usernameIgnoreCase, ===(password)) returns userInfo.some
+          authenticationManager.authenticate(usernameIgnoreCase, ===(password)) returns Future.successful(userInfo.some)
           usersRepository.getByUsername(usernameIgnoreCase)(anySession) returns None
 
           doTest
@@ -96,7 +99,7 @@ class SecurityServiceSpec extends Specification
 
         "and username has a correct case" in {
           withMockedAuthenticationManagerAndTokenProvider {
-            securityService.signInUser(username, password) must beSuccessful
+            securityService.signInUser(username, password) must beSuccessful.await
 
             there was one (authenticationManager).authenticate(===(username), ===(password))
           }
@@ -106,7 +109,7 @@ class SecurityServiceSpec extends Specification
        "update user when password does not match" in {
 
         def withMockedAuthenticationManagerAndTokenProvider[T](doTest: => T) = {
-          authenticationManager.authenticate(username, password) returns userInfo.some
+          authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
 
           doTest
 
@@ -119,47 +122,51 @@ class SecurityServiceSpec extends Specification
         "and one user exists with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider{
             usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userWithEmptyPassword.some
-            securityService.signInUser(username, password) must beSuccessful
+            securityService.signInUser(username, password) must beSuccessful.await
           }
         }
 
         "and several users exist with case-insensitive username" in {
           withMockedAuthenticationManagerAndTokenProvider {
             usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns userWithEmptyPassword.some
-            securityService.signInUser(username, password) must beSuccessful
+            securityService.signInUser(username, password) must beSuccessful.await
           }
         }
 
       }
 
       "created user should have User authority" in {
-        authenticationManager.authenticate(username, password) returns userInfo.some
+        authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
 
-        securityService.signInUser(username, password) must beSuccessful.like {
-          case (_, user:AuthenticatedUser) if user.authority == Authorities.User => ok
+        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+          case (_, user) if user.authority == Authorities.User => ok
         }
+
+        securityService.signInUser(username, password) must beSuccessful.like(expected).await
       }
 
       "issue remember me token to authenticated user" in {
         val userId = 1
-        authenticationManager.authenticate(username, password) returns userInfo.some
+        authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(username)(FakeSessionValue) returns None
         usersRepository.insert(any[UserRecord])(Matchers.eq(FakeSessionValue)) returns userId
         usersRepository.updateRememberToken(mockEq(userId), anyString)(mockEq(FakeSessionValue)) returns true
 
-        securityService.signInUser(username, password) must beSuccessful
+        securityService.signInUser(username, password) must beSuccessful.await
 
         there was one(usersRepository).updateRememberToken(mockEq(userId), anyString)(mockEq(FakeSessionValue))
       }
 
       "trim username" in {
-        authenticationManager.authenticate(username, password) returns userInfo.some
+        authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(username)(FakeSessionValue) returns Some(userFromDb)
 
-        securityService.signInUser(' ' + username + ' ', password) must beSuccessful.like {
-          case (_, user:AuthenticatedUser) if user.username == username => ok
+        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+          case (_, user) if user.username == username => ok
         }
+
+        securityService.signInUser(' ' + username + ' ', password) must beSuccessful.like(expected).await
 
         there was one(usersRepository).getByUsername(===(username))(anySession)
       }
@@ -168,10 +175,10 @@ class SecurityServiceSpec extends Specification
 
     "fail" in {
       "return validation error" in {
-        authenticationManager.authenticate(anyString, anyString) returns None
+        authenticationManager.authenticate(anyString, anyString) returns Future.successful(None)
         usersRepository.getByUsername(anyString)(anySession) returns None
 
-        securityService.signInUser("", "") must beFailing
+        securityService.signInUser("", "") must beFailing.await
       }
     }
   }

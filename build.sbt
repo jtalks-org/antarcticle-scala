@@ -5,7 +5,7 @@ name := "antarcticle-scala"
 
 version := "2.7"
 
-scalaVersion := "2.10.5-RC1"
+scalaVersion := "2.10.5"
 
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-async" % "0.9.3",
@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.3.173",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
   // markdown support
-  "org.pegdown" % "pegdown" % "1.4.2",
+  "org.pegdown" % "pegdown" % "1.5.0",
   // scalaz magic
   "org.scalaz" %% "scalaz-core" % "7.0.5",
   "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",

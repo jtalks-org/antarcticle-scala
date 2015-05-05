@@ -44,7 +44,7 @@ trait AuthenticationController {
   def getReferer(implicit request: Request[AnyContent]) : String = {
     request.session.get(REFERER).filter(
       referer => referer != routes.AuthenticationController.showRegistrationPage().url
-    ).getOrElse(routes.ArticleController.allArticles().absoluteURL())
+    ).getOrElse(routes.IndexController.index().absoluteURL())
   }
 
   def login = Action.async { implicit request =>
@@ -60,7 +60,7 @@ trait AuthenticationController {
   }
 
   def logout = Action {
-    Redirect(controllers.routes.ArticleController.allArticles())
+    Redirect(controllers.routes.IndexController.index())
       .withNewSession
       .discardingCookies(DiscardingCookie(rememberMeCookie))
   }
@@ -78,13 +78,13 @@ trait AuthenticationController {
     securityService.signUpUser(User(username, email, password), activationUrl).map {
       _.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
-        succ = uid => Ok(routes.ArticleController.allArticles().absoluteURL())
+        succ = uid => Ok(routes.IndexController.index().absoluteURL())
       )
     }
   }
 
   def activate(uid: String) = Action.async { implicit request =>
-    val mainPage = Redirect(routes.ArticleController.allArticles())
+    val mainPage = Redirect(routes.IndexController.index())
     async {
       val cookie = await(securityService.activateUser(uid)).toOption map {
         token => Cookie(rememberMeCookie, token, some(rememberMeExpirationTime), httpOnly = true)

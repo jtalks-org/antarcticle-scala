@@ -1,13 +1,16 @@
+import controllers.IndexController
 import controllers.filters.{CsrfFilter, KeepReferrerFilter}
 import play.api
 import play.api.mvc.Results._
-import play.api.mvc.{RequestHeader, SimpleResult, WithFilters}
+import play.api.mvc.{Action, Handler, RequestHeader, SimpleResult, WithFilters}
 import play.api.{GlobalSettings, Logger}
 import play.libs.Akka
 
 import scala.concurrent.Future
 
 object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSettings  {
+
+  lazy val initialized = !getControllerInstance(classOf[IndexController]).isInstanceOf[FailedApplication.type]
 
   /*
    * Get controller instances as Application instance, because all controllers
@@ -26,6 +29,18 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSet
             case None => ""
           }))
         FailedApplication.asInstanceOf[A]
+    }
+  }
+
+  private def isPublicAsset(path: String): Boolean =
+    path == "/" || List("/stylesheets", "/javascripts", "/images", "/fonts").exists(p => path.startsWith(p))
+
+
+  override def onRouteRequest(req: RequestHeader): Option[Handler] = {
+    if (initialized || (req.method == "GET" && isPublicAsset(req.path))) {
+       super.onRouteRequest(req)
+    } else {
+      Some(Action(Ok(views.html.errors.internalError())))
     }
   }
 

@@ -3,7 +3,6 @@
 # ~~~~
 
 GET           /                                        @controllers.IndexController.index()
-GET           /home                                    @controllers.ArticleController.allArticles()
 # Authentication
 GET           /signin                                  @controllers.AuthenticationController.showLoginPage
 POST          /signin                                  @controllers.AuthenticationController.login

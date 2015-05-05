@@ -1,16 +1,16 @@
 package controllers
 
-import models.Page
-import play.api.mvc.{AnyContent, Action, Controller}
-import services.{CommentsServiceComponent, ArticlesServiceComponent}
+import models.ArticleModels.{Article, ArticleDetailsModel, Language}
 import play.api.data.Form
 import play.api.data.Forms._
-import models.ArticleModels.{ArticleDetailsModel, Article, Language}
-import security.{AuthenticatedUser, Authentication}
+import play.api.mvc.{Action, AnyContent, Controller}
 import security.Result._
+import security.{AuthenticatedUser, Authentication}
+import services.{ArticlesServiceComponent, CommentsServiceComponent}
 import utils.RFC822
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 /**
  * Serves web-based operations on articles
@@ -33,9 +33,7 @@ trait ArticleController extends IndexController {
       ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString(), article.sourceId)))
   )
 
-  override def index() = allArticles()
-
-  def allArticles() = listArticles(None)
+  override def index() = listArticles(None)
 
   def listArticles(tags: Option[String]) = listArticlesPaged(tags)
 
@@ -132,7 +130,7 @@ trait ArticleController extends IndexController {
     articlesService.removeArticle(id).fold(
       fail = errors,
       succ =  {
-        case Authorized(_) => Ok(routes.ArticleController.allArticles().absoluteURL())
+        case Authorized(_) => Ok(routes.IndexController.index().absoluteURL())
         case NotAuthorized() => Unauthorized("Not authorized to remove this article")
       }
     )
@@ -154,7 +152,7 @@ trait ArticleController extends IndexController {
             <channel>
               <title>articles.javatalks.ru{user.cata(username => s" [$username]", "")}</title>
               <description>JavaTalks Articles{user.cata(username => s" by $username", "")}</description>
-              <link>{routes.ArticleController.allArticles().absoluteURL()}</link>
+              <link>{routes.IndexController.index().absoluteURL()}</link>
               {
                 for (article <- articlesPage.list) yield {
                   <item>

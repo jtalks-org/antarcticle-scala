@@ -4,6 +4,8 @@ import java.net.ServerSocket
 
 object TestHelpers {
 
+  type :=>[A, B] = PartialFunction[A, B]
+
   def findFreePort() = {
     import resource._
     var port = -1

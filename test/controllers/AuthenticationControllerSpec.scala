@@ -1,6 +1,7 @@
 package controllers
 
 import conf.Constants._
+import models.UserModels.User
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.specification.AfterExample
@@ -34,6 +35,10 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     org.mockito.Mockito.reset(usersRepository)
   }
 
+  val username = "username"
+  val password = "password"
+  val rememberMeToken = "token"
+
   "show login page" should {
 
     "render login page" in {
@@ -44,12 +49,19 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     }
   }
 
+  "show signup page" should {
+
+    "render signup page" in {
+      val page = controller.showRegistrationPage(FakeRequest())
+
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
   "login form submit" should {
 
-    val username = "username"
-    val password = "password"
     val referer = "/articles/new"
-    val rememberMeToken = "token"
     val user = mock[AuthenticatedUser]
     val request = FakeRequest("POST","/")
       .withFormUrlEncodedBody(("login", username),("password", password), ("referer", referer))
@@ -88,5 +100,52 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
       // cookie is destroyed by setting negative maxAge, so browser should drop it
       cookies(page).get(rememberMeCookie).get.maxAge.get must beLessThan(0)
     }
+  }
+
+  "register action" should {
+
+    val email = "fake@email.com"
+    val uuid = "fake-uuid"
+    val request = FakeRequest("POST","/")
+      .withFormUrlEncodedBody(("login", username),("password", password), ("email", email))
+
+    "after successful registration return home page url" in {
+      securityService.signUpUser(any[User], anyString) returns Future.successful(uuid.successNel)
+
+      val page = controller.register(request)
+      status(page) must equalTo(200)
+      contentType(page) must beSome("text/plain")
+    }
+
+    "show error page in case of failed registration" in {
+      securityService.signUpUser(any[User], anyString) returns Future.successful("error".failureNel)
+
+      val page = controller.register(request)
+
+      status(page) must equalTo(400)
+      contentType(page) must beSome("text/html")
+    }
+  }
+
+  "activate action" should {
+
+    val uid = "fake-uuid"
+    val request = FakeRequest("GET","/activate/" + uid)
+
+    "perform authentication based on uid" in {
+      securityService.activateUser(uid) returns Future.successful(rememberMeToken.successNel)
+      val page = controller.activate(uid)(request)
+      redirectLocation(page) must beSome.which(_ == "/home")
+      cookies(page).get(rememberMeCookie).get must equalTo(
+        Cookie(rememberMeCookie, rememberMeToken, Some(rememberMeExpirationTime), httpOnly = true)
+      )
+    }
+
+    "redirect to main page in case of failed activation" in {
+      securityService.activateUser(uid) returns Future.successful("error".failureNel)
+      val page = controller.activate(uid)(request)
+      redirectLocation(page) must beSome.which(_ == "/home")
+    }
+
   }
 }

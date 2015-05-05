@@ -69,7 +69,7 @@ trait AuthenticationController {
     Ok(html.signup(registerForm))
   }
 
-  def register() = Action.async { implicit request =>
+  def register = Action.async { implicit request =>
     val (username, email, password) = registerForm.bindFromRequest.get
     val activationUrl = request.path.indexOf("/signup") match {
       case i if i < 0 => request.host

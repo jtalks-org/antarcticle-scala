@@ -76,7 +76,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
 
     for {
       response <- sendRequest()
-      errors = if (response.status == 200) List.empty[String] else getErrors(response)
+      errors = if (response.status == 200) List.empty[String] else getErrors(response, user)
     } yield {
       errors match {
         case head :: tail => Failure(NonEmptyList(head, tail : _*))
@@ -94,6 +94,20 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
         case Nil => ().successNel
       }
     }
+  }
+  private def translate(key : String, user: UserInfo) :String = {
+    key match {
+      case "user.username.already_exists" => s"User with the username ${user.username} already exists"
+      case "user.email.already_exists" => s"User with the email ${user.email} already exists"
+      case _ => key
+    }
+  }
+
+  private def getErrors(response: Response, user: UserInfo): List[String] = {
+    for {
+      key <- getErrors(response)
+      error = translate(key, user)
+    } yield error
   }
 
   private def getErrors(response: Response): List[String] = (response.xml \ "error").map(x => (x \ "@code").text).toList

@@ -16,6 +16,7 @@ import services.{ApplicationPropertiesServiceComponent, MailServiceComponent}
 import util.FakeSessionProvider
 import util.FakeSessionProvider.FakeSessionValue
 import utils.SecurityUtil
+import util.TestHelpers._
 import validators.UserValidator
 
 import scala.concurrent.Future
@@ -76,7 +77,7 @@ class SecurityServiceSpec extends Specification
         authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns Some(userFromDb.copy(admin=true))
 
-        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+        val expected: (String, AuthenticatedUser) :=> MatchResult[_] = {
           case (_, user) if user.authority == Authorities.Admin => ok
         }
 
@@ -139,7 +140,7 @@ class SecurityServiceSpec extends Specification
         authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(userInfo.username)(FakeSessionValue) returns None
 
-        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+        val expected: (String, AuthenticatedUser) :=> MatchResult[_] = {
           case (_, user) if user.authority == Authorities.User => ok
         }
 
@@ -162,7 +163,7 @@ class SecurityServiceSpec extends Specification
         authenticationManager.authenticate(username, password) returns Future.successful(userInfo.some)
         usersRepository.getByUsername(username)(FakeSessionValue) returns Some(userFromDb)
 
-        val expected: PartialFunction[(String, AuthenticatedUser), MatchResult[_]] = {
+        val expected: (String, AuthenticatedUser) :=> MatchResult[_] = {
           case (_, user) if user.username == username => ok
         }
 

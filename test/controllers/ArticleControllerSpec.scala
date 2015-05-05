@@ -52,7 +52,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     "return first page of all exist articles" in {
       articlesService.getPage(1, None) returns new ArticlePage(1, 1, Seq(articleListModel)).successNel
 
-      val page = controller.allArticles()(FakeRequest())
+      val page = controller.index()(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")

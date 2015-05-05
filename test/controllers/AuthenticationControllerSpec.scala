@@ -135,7 +135,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     "perform authentication based on uid" in {
       securityService.activateUser(uid) returns Future.successful(rememberMeToken.successNel)
       val page = controller.activate(uid)(request)
-      redirectLocation(page) must beSome.which(_ == "/home")
+      redirectLocation(page) must beSome.which(_ == "/")
       cookies(page).get(rememberMeCookie).get must equalTo(
         Cookie(rememberMeCookie, rememberMeToken, Some(rememberMeExpirationTime), httpOnly = true)
       )
@@ -144,7 +144,7 @@ class AuthenticationControllerSpec extends Specification with Mockito with After
     "redirect to main page in case of failed activation" in {
       securityService.activateUser(uid) returns Future.successful("error".failureNel)
       val page = controller.activate(uid)(request)
-      redirectLocation(page) must beSome.which(_ == "/home")
+      redirectLocation(page) must beSome.which(_ == "/")
     }
 
   }

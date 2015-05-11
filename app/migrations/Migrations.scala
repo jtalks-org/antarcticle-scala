@@ -224,7 +224,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("ALTER TABLE users ADD COLUMN uid varchar(100)").execute
-      val users = Q.query[Unit, (String, String)]("SELECT id, username FROM users").apply().list
+      val users = Q.query[Unit, (String, String)]("SELECT id, username FROM users").list
       for {
         (id, username) <- users
         uid = SecurityUtil.generateUid

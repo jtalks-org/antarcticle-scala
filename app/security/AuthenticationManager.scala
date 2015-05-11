@@ -13,6 +13,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.slick.jdbc.JdbcBackend
 import scala.util.Try
+//TODO disable DTD on poulpe
+import scala.xml.XML
 import scalaz.Scalaz._
 import scalaz._
 
@@ -46,7 +48,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
     for {
       response <- WS.url(s"$poulpeUrl/rest/authenticate")
         .withQueryString(("username", username), ("passwordHash", SecurityUtil.md5(password))).get()
-      xmlResponseBody = response.xml
+      xmlResponseBody = XML.loadString(response.body)
     } yield {
       for {
         status <- (xmlResponseBody \\ "status").headOption.map(_.text) if status == "success"
@@ -111,7 +113,11 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
     } yield error
   }
 
-  private def getErrors(response: WSResponse): List[String] = (response.xml \ "error").map(x => (x \ "@code").text).toList
+  //TODO disable DTD on poulpe and use response.xml instead
+  //https://groups.google.com/forum/#!topic/play-framework/2mtqhoKLn4Q
+  private def getErrors(response: WSResponse): List[String] = {
+    (XML.loadString(response.body) \ "error").map(x => (x \ "@code").text).toList
+  }
 }
 
 class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provider: SessionProvider)

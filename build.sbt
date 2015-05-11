@@ -59,7 +59,7 @@ buildInfoKeys ++= Seq[BuildInfoKey](
 
 buildInfoPackage := "build"
 
-// Coffee Script compilation options
+//  Coffee Script compilation options
 CoffeeScriptKeys.bare := true
 
 includeFilter in (Assets, LessKeys.less) := "*.less"

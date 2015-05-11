@@ -1,6 +1,7 @@
 package repositories
 
 import models.database._
+import scala.language.higherKinds
 import scala.slick.jdbc.JdbcBackend
 
 trait CommentsRepositoryComponent {

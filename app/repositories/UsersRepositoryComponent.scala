@@ -3,6 +3,7 @@ package repositories
 import java.sql.Timestamp
 
 import models.database._
+import scala.language.higherKinds
 import scala.slick.jdbc.JdbcBackend
 
 trait UsersRepositoryComponent {

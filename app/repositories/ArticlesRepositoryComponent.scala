@@ -1,12 +1,9 @@
 package repositories
 
-import models.database._
-import models.database.ArticleToUpdate
-import models.database.UserRecord
-import models.database.ArticleRecord
+import models.database.{ArticleRecord, ArticleToUpdate, UserRecord, _}
+
+import scala.language.higherKinds
 import scala.slick.jdbc.JdbcBackend
-import scalaz._
-import Scalaz._
 
 trait ArticlesRepositoryComponent {
   val articlesRepository: ArticlesRepository
@@ -50,7 +47,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
   /**
    * Query extensions to avoid criteria duplication
    */
-  implicit class ArticlesExtension[E](val q: Query[Articles, E]) {
+  implicit class ArticlesExtension[E, C[_]](val q: Query[Articles, E, C]) {
     def withAuthor = {
       q.leftJoin(users).on(_.authorId === _.id)
     }
@@ -62,11 +59,11 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
         .withAuthor
     }
 
-    def byId(id: Column[Int]) = {
+    def byId(id: Column[Int]): Query[Articles, E, C] = {
       q.filter(_.id === id)
     }
 
-    def byAuthor(id: Column[Int]) = {
+    def byAuthor(id: Column[Int]): Query[Articles, E, C] = {
       q.filter(_.authorId === id)
     }
 
@@ -118,7 +115,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
 
     def get(id: Int)(implicit s: JdbcBackend#Session) = {
-      articles.byId(id).withAuthor().firstOption.map(fetchTags)
+      articles.byId(id).withAuthor.firstOption.map(fetchTags)
     }
 
     def insert(article: ArticleRecord)(implicit s: Session) = {

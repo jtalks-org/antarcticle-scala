@@ -7,7 +7,6 @@ import scala.slick.driver.{H2Driver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 import scala.slick.jdbc.JdbcBackend.Database
 import migrations.{MigrationTool, MigrationsContainer}
-import scala.Some
 
 /**
  * Configures H2 database for tests. Database scope is single session.

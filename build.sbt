@@ -1,35 +1,43 @@
 import com.github.play2war.plugin._
-import play.Project._
 
 name := "antarcticle-scala"
 
 version := "2.7"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.6"
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 libraryDependencies ++= Seq(
+  cache,
+  ws,
   "org.scala-lang.modules" %% "scala-async" % "0.9.3",
-  "com.typesafe.slick" %% "slick" % "2.0.2",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.9",
+  "com.typesafe.slick" %% "slick" % "2.1.0",
+//  "com.typesafe.slick" %% "slick-codegen" % "2.1.0",
+//  "com.typesafe.slick" %% "slick-extensions" % "2.1.0",
   // Joda time wrapper for scala
-  "com.github.nscala-time" %% "nscala-time" % "0.6.0",
-  // 1.3.174 has problem fixed in trunk:
-  // https://code.google.com/p/h2database/source/detail?r=5363
-  "com.h2database" % "h2" % "1.3.173",
+  "com.github.nscala-time" %% "nscala-time" % "2.0.0",
+  "com.h2database" % "h2" % "1.4.187",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
   // markdown support
   "org.pegdown" % "pegdown" % "1.5.0",
   // scalaz magic
-  "org.scalaz" %% "scalaz-core" % "7.0.5",
-  "org.typelevel" %% "scalaz-specs2" % "0.1.5" % "test",
+  "org.scalaz" %% "scalaz-core" % "7.1.0",
+  "org.typelevel" %% "scalaz-specs2" % "0.4.0" % "test",
   // production database
   "mysql" % "mysql-connector-java" % "5.1.28",
-  "javax.mail" % "mail" % "1.5.0-b01"
+  "javax.mail" % "mail" % "1.5.0-b01",
+  "com.netaporter" %% "pre-canned" % "0.0.6" % "test",
+  "org.specs2" %% "specs2-core" % "3.6" % "test",
+  "org.specs2" %% "specs2-mock" % "3.6" % "test",
+  "org.specs2" %% "specs2-junit" % "3.6" % "test",
+  "org.specs2" %% "specs2-matcher-extra" % "3.6" % "test",
+  "org.specs2" %% "specs2-analysis" % "3.6" % "test"
 )
 
-playScalaSettings
-
 // global imports for templates
-templatesImport ++= Seq(
+TwirlKeys.templateImports ++= Seq(
   "security.Entities._",
   "security.Permissions._",
   "security.Authorities._",
@@ -52,9 +60,17 @@ buildInfoKeys ++= Seq[BuildInfoKey](
 buildInfoPackage := "build"
 
 // Coffee Script compilation options
-coffeescriptOptions := Seq("bare")
+CoffeeScriptKeys.bare := true
+
+includeFilter in (Assets, LessKeys.less) := "*.less"
 
 scalacOptions ++= Seq("-feature")
+
+scalacOptions in Test ++= Seq("-Yrangepos")
+
+parallelExecution in Test := false
+
+testOptions in Test += Tests.Argument("sequential")
 
 // WAR packaging
 
@@ -68,8 +84,8 @@ publishArtifact in (Compile, packageDoc) := false
 // disable publishing the main sources jar
 publishArtifact in (Compile, packageSrc) := false
 
-instrumentSettings
+net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-ScoverageKeys.excludedPackages in ScoverageCompile := "<empty>"
+ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := "<empty>"
 
-ScoverageKeys.highlighting := true
+ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true

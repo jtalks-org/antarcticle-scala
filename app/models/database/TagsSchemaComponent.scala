@@ -1,7 +1,5 @@
 package models.database
 
-import scala.slick.model.ForeignKeyAction
-
 case class Tag(id: Int, name: String)
 
 trait TagsSchemaComponent {
@@ -34,7 +32,7 @@ trait TagsSchemaComponent {
     // remove association with tags on article deletion
     def article = foreignKey("article_fk", articleId, articles)(_.id, onDelete = ForeignKeyAction.Cascade)
     // but don't touch tags
-    def tag = foreignKey("tag_fk", tagId, tags)(_.id, onDelete = ForeignKeyAction.Restrict)
+    def tagFk = foreignKey("tag_fk", tagId, tags)(_.id, onDelete = ForeignKeyAction.Restrict)
 
     // projections
     def * = (articleId, tagId)

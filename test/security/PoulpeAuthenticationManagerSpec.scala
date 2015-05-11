@@ -1,15 +1,24 @@
 package security
 
-import play.api.mvc.{Action, SimpleResult}
-import play.api.test.{FakeApplication, PlaySpecification}
-import util.TestHelpers
+import org.specs2.concurrent.ExecutionEnv
+import org.specs2.mutable.Specification
+import org.specs2.specification.mutable.ExecutionEnvironment
+import play.api.mvc.Action
+import play.api.mvc.Results._
+import play.api.test.{FakeApplication, WithServer}
+import util.PortFinder
 
-class PoulpeAuthenticationManagerSpec extends PlaySpecification {
+import scala.concurrent.duration._
 
-  val port = TestHelpers.findFreePort()
+class PoulpeAuthenticationManagerSpec extends Specification with ExecutionEnvironment {
+
+  type HttpResult = play.api.mvc.Result
+
+  def is(implicit ee: ExecutionEnv) = {
+  val port = PortFinder.findFreePort()
   val poulpeUrl = "http://127.0.0.1:" + port
   val authUrl = "/rest/authenticate"
-  var poulpeAuthManager = new PoulpeAuthenticationManager(poulpeUrl)
+  val poulpeAuthManager = new PoulpeAuthenticationManager(poulpeUrl)
 
   val successResponse =
     """
@@ -52,31 +61,31 @@ class PoulpeAuthenticationManagerSpec extends PlaySpecification {
       |</authentication>
     """.stripMargin
 
-  def getFakeAppWithResponse(result: SimpleResult) = FakeApplication(
-    withRoutes = {
-      case ("GET", url) if url == authUrl =>
-        Action {
-          result
-        }
+    def getFakeAppWithResponse(result: HttpResult) = FakeApplication(
+      withRoutes = {
+        case ("GET", url) if url == authUrl =>
+          Action {
+            result
+          }
+      }
+    )
+
+    "authentication manager" should {
+
+      "authenticate valid user" in new WithServer(getFakeAppWithResponse(Ok(successResponse)), port) {
+        poulpeAuthManager.authenticate("admin", "123") must beSome.which {
+          user:UserInfo => user.username == "admin" && user.firstName.isDefined
+        }.awaitFor(10.seconds)
+      }
+
+      "not perform authentication for invalid credentials" in
+        new WithServer(getFakeAppWithResponse(NotFound(invalidCredentialsResponse)), port) {
+        poulpeAuthManager.authenticate("admin", "invalidPassword") must beNone.awaitFor(10.seconds)
+      }
+
+      "not authenticate disabled user" in new WithServer(getFakeAppWithResponse(Ok(disabledUserResponse)), port) {
+        poulpeAuthManager.authenticate("admin", "123") must beNone.awaitFor(10.seconds)
+      }
     }
-  )
-
-//  "authentication manager" should {
-//
-//    "authenticate valid user" in new WithServer(getFakeAppWithResponse(Ok(successResponse)), port) {
-//      poulpeAuthManager.authenticate("admin", "123") must beSome.which {
-//        user:UserInfo => user.username == "admin" && user.firstName.isDefined
-//      }.await
-//    }
-//
-//    "not perform authentication for invalid credentials" in
-//      new WithServer(getFakeAppWithResponse(NotFound(invalidCredentialsResponse)), port) {
-//      poulpeAuthManager.authenticate("admin", "invalidPassword") must beNone.await
-//    }
-//
-//    "not authenticate disabled user" in new WithServer(getFakeAppWithResponse(Ok(disabledUserResponse)), port) {
-//      poulpeAuthManager.authenticate("admin", "123") must beNone.await
-//    }
-//  }
-
+  }
 }

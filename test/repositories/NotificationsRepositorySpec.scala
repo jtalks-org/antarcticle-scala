@@ -1,12 +1,11 @@
 package repositories
 
-import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
-import util.TestDatabaseConfigurationWithFixtures
 import models.database.Schema
+import org.specs2.mutable.Specification
+import util.TestDatabaseConfigurationWithFixtures
 
 
-class NotificationsRepositorySpec extends Specification with NoTimeConversions {
+class NotificationsRepositorySpec extends Specification {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
   with NotificationsRepositoryComponentImpl
 

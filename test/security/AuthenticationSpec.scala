@@ -5,7 +5,7 @@ import models.database.UserRecord
 import org.mockito.Matchers
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import play.api.mvc.{Cookie, _}
 import play.api.test.FakeRequest
 import repositories.UsersRepositoryComponent
@@ -13,7 +13,7 @@ import util.FakeSessionProvider
 
 import scala.slick.jdbc.JdbcBackend
 
-class AuthenticationSpec extends Specification with Mockito with AfterExample {
+class AuthenticationSpec extends Specification with Mockito with AfterEach {
 
   object auth extends Authentication
                       with Controller

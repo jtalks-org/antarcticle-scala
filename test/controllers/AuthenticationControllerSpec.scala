@@ -4,7 +4,7 @@ import conf.Constants._
 import models.UserModels.User
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import play.api.mvc.Cookie
 import play.api.test.Helpers._
 import play.api.test._
@@ -15,7 +15,7 @@ import util.{FakeAuthentication, FakePropertiesProvider}
 import scala.concurrent.Future
 import scalaz.Scalaz._
 
-class AuthenticationControllerSpec extends Specification with Mockito with AfterExample {
+class AuthenticationControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends AuthenticationController
                      with SecurityServiceComponent

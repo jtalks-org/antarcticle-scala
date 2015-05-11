@@ -47,18 +47,18 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   /**
    * Query extensions to avoid criteria duplication
    */
-  implicit class UsersExtension[C](val q: Query[Users, C]) {
+  implicit class UsersExtension[E, C[_]](val q: Query[Users, E, C]) {
     type SColumn = Column[String]
 
-    def byId(id: Column[Int]): Query[Users, C] = {
+    def byId(id: Column[Int]): Query[Users, E, C] = {
       q.filter(_.id === id)
     }
 
-    def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
+    def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, E, C] = {
       q.filter(user => f(user.username) === f(username))
     }
 
-    def stringFieldsMatch(search: SColumn): Query[Users, C] = {
+    def stringFieldsMatch(search: SColumn): Query[Users, E, C] = {
       q.filter(user => user.username.toLowerCase.like(search.toLowerCase)
         || user.firstName.toLowerCase.like(search.toLowerCase)
         || user.lastName.toLowerCase.like(search.toLowerCase))
@@ -91,7 +91,7 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
       byTokenCompiled(token).firstOption
 
     def getByUsername(username: String)(implicit session: JdbcBackend#Session) =
-      byUsernameCompiled(username).list().find(user => user.username == username)
+      byUsernameCompiled(username).list.find(user => user.username == username)
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
       // todo: cannot be compiled: https://github.com/slick/slick/pull/764

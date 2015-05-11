@@ -7,7 +7,7 @@ import models.ArticlePage
 import models.UserModels.UserModel
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, WithApplication}
 import security.Result.{Authorized, NotAuthorized}
@@ -17,7 +17,7 @@ import util.{FakeAuthentication, FakePropertiesProvider}
 
 import scalaz.Scalaz._
 
-class ArticleControllerSpec extends Specification with Mockito with AfterExample {
+class ArticleControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends ArticleController
                       with ArticlesServiceComponent

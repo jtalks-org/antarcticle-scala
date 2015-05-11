@@ -36,12 +36,12 @@ trait CommentsRepositoryComponentImpl extends CommentsRepositoryComponent {
   /**
    * Query extensions to avoid criteria duplication
    */
-  implicit class CommentsExtension[E](val q: Query[Comments, E]) {
+  implicit class CommentsExtension[E, C[_]](val q: Query[Comments, E, C]) {
     def withAuthor = {
       q.leftJoin(users).on(_.userId === _.id)
     }
 
-    def byId(id: Column[Int]): Query[Comments, E] = {
+    def byId(id: Column[Int]): Query[Comments, E, C] = {
       q.filter(_.id === id)
     }
   }

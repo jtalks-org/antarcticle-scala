@@ -7,6 +7,8 @@ import utils.Implicits._
 import conf.Constants
 import scalaz._
 import Scalaz._
+//TODO avoid using Validation with for syntax
+import scalaz.Validation.FlatMap._
 import validators.{TagValidator, Validator}
 import scala.slick.jdbc.JdbcBackend
 import security.Principal
@@ -111,7 +113,7 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
         } match {
           case Authorized(result) => result.fold(
             succ = success => Authorized(()).successNel,
-            fail = errors => errors.head.failNel
+            fail = errors => errors.head.failureNel
           )
           case NotAuthorized() => NotAuthorized().successNel
         }

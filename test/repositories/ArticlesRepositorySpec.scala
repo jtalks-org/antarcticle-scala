@@ -5,13 +5,12 @@ import org.specs2.mutable._
 
 import models.database._
 import utils.Implicits._
-import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import util.TestDatabaseConfigurationWithFixtures
 
 import migrations.{MigrationTool, MigrationsContainer}
 
-class ArticlesRepositorySpec extends Specification with NoTimeConversions {
+class ArticlesRepositorySpec extends Specification {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
     with SlickArticlesRepositoryComponent
 
@@ -98,7 +97,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
      val tagId = 1
      val tagName = "tag1"
 
-     val portion = articlesRepository.getListForUser(userId, 0, 10, Some(Seq((tagId))))
+     val portion = articlesRepository.getListForUser(userId, 0, 10, Some(Seq(tagId)))
 
      portion.map(asTags(_).contains(tagName)) must_== Seq(true)
    }
@@ -108,7 +107,7 @@ class ArticlesRepositorySpec extends Specification with NoTimeConversions {
 
      val portion = articlesRepository.getListForUser(userId, 0, 3, None)
 
-     portion.map(asCommentsCount(_)) must_== Seq(1, 1, 2)
+     portion.map(asCommentsCount(_)) must_== Seq(2, 1, 1)
    }
  }
 

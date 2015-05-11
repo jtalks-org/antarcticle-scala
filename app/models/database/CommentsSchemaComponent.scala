@@ -1,7 +1,6 @@
 package models.database
 
 import java.sql.Timestamp
-import scala.slick.model.ForeignKeyAction
 
 case class CommentToUpdate(content: String, updatedAt: Timestamp)
 
@@ -16,7 +15,7 @@ trait CommentsSchemaComponent {
   /**
    * Comments to articles
    */
-  class Comments(tag: Tag) extends Table[CommentRecord](tag, "comments") {
+  class Comments(tag: scala.slick.lifted.Tag) extends Table[CommentRecord](tag, "comments") {
     // columns
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def userId = column[Int]("user_id", O.NotNull)

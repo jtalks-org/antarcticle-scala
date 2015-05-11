@@ -1,21 +1,19 @@
 package services
 
-import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
-import org.specs2.mock.Mockito
-import org.specs2.specification.BeforeExample
-import org.specs2.scalaz.ValidationMatchers
-import util.FakeSessionProvider
-import repositories.ApplicationPropertiesRepositoryComponent
-import util.FakeSessionProvider._
-import models.database.ApplicationProperty
 import java.sql.Timestamp
-import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
-import security.Result.Authorized
-import org.joda.time.DateTime
 
-class PropertiesServiceSpec extends Specification
-  with NoTimeConversions with Mockito with BeforeExample with ValidationMatchers{
+import models.database.ApplicationProperty
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.scalaz.ValidationMatchers
+import org.specs2.specification.BeforeEach
+import repositories.ApplicationPropertiesRepositoryComponent
+import security.Result.Authorized
+import security.{AnonymousPrincipal, AuthenticatedUser, Authorities}
+import util.FakeSessionProvider
+import util.FakeSessionProvider._
+
+class PropertiesServiceSpec extends Specification with Mockito with BeforeEach with ValidationMatchers{
 
   object service extends ApplicationPropertiesServiceComponentImpl with ApplicationPropertiesRepositoryComponent with FakeSessionProvider {
     val propertiesRepository = mock[ApplicationPropertiesRepository]

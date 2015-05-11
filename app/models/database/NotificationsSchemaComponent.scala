@@ -1,7 +1,6 @@
 package models.database
 
 import java.sql.Timestamp
-import scala.slick.model.ForeignKeyAction
 
 case class Notification(id: Option[Int], var userId: Int, articleId: Int, commentId: Option[Int],
                          var title: String, content: String, createdAt: Timestamp)

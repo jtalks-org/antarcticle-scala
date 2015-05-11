@@ -49,7 +49,7 @@ trait NotificationsRepositoryComponentImpl extends NotificationsRepositoryCompon
     def insertNotification(notification: Notification)(implicit session: JdbcBackend#Session) =
       compiledForInsert.insert(notification)
 
-    def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) = compiledByUser(userId).list()
+    def getNotificationsForUser(userId: Int)(implicit session: JdbcBackend#Session) = compiledByUser(userId).list
 
     def getNotification(id: Int)(implicit session: JdbcBackend#Session) = compiledById(id).firstOption
 

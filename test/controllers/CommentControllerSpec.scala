@@ -2,7 +2,7 @@ package controllers
 
 import conf.PropertiesProviderComponent
 import models.ArticleModels.Language._
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import org.specs2.mutable.Specification
 import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
 import util.{FakePropertiesProvider, FakeAuthentication}
@@ -20,7 +20,7 @@ import models.ArticleModels.ArticleDetailsModel
 import security.Result._
 
 
-class CommentControllerSpec extends Specification with Mockito with AfterExample {
+class CommentControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends CommentController
                       with CommentsServiceComponent

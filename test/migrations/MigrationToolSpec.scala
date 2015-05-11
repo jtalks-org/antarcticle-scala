@@ -1,18 +1,16 @@
 package migrations
 
-import org.specs2.specification.BeforeExample
-import org.mockito.Matchers
+import models.database.Schema
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import scala.slick.jdbc.meta.MTable
-import scala.slick.jdbc.JdbcBackend
+import org.specs2.specification.BeforeEach
 import util.TestDatabaseConfiguration
-import scala.slick.jdbc.{StaticQuery => Q}
-import models.database.Schema
+
+import scala.slick.jdbc.meta.MTable
+import scala.slick.jdbc.{JdbcBackend, StaticQuery => Q}
 import scala.slick.lifted.AbstractTable
 
-class MigrationToolSpec extends Specification
-              with Mockito with BeforeExample {
+class MigrationToolSpec extends Specification with Mockito with BeforeEach {
 
   val mockContainer = mock[MigrationsContainer]
   val mockMigration1 = mock[Migration]

@@ -5,12 +5,13 @@ import java.sql.Timestamp
 import models.database.UserRecord
 import org.mockito.Matchers
 import org.mockito.Matchers.{eq => mockEq}
+import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.{MatchResult, Matcher}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.scalaz.ValidationMatchers
-import org.specs2.specification.BeforeExample
-import org.specs2.time.NoTimeConversions
+import org.specs2.specification.BeforeEach
+import org.specs2.specification.mutable.ExecutionEnvironment
 import repositories.UsersRepositoryComponent
 import services.{ApplicationPropertiesServiceComponent, MailServiceComponent}
 import util.FakeSessionProvider
@@ -24,7 +25,8 @@ import scala.slick.jdbc.JdbcBackend
 import scalaz.Scalaz._
 
 class SecurityServiceSpec extends Specification
-    with ValidationMatchers with Mockito with BeforeExample with NoTimeConversions {
+    with ValidationMatchers with Mockito with BeforeEach
+    with ExecutionEnvironment {
 
   object service extends SecurityServiceComponentImpl with UsersRepositoryComponent
   with FakeSessionProvider with SecurityServiceComponent with ApplicationPropertiesServiceComponent with MailServiceComponent {
@@ -38,10 +40,12 @@ class SecurityServiceSpec extends Specification
 
   import service._
 
-  def before = {
+  override protected def before = {
     org.mockito.Mockito.reset(usersRepository)
     org.mockito.Mockito.reset(authenticationManager)
   }
+
+  def is(implicit ee: ExecutionEnv) = {
 
   def anySession = any[JdbcBackend#Session]
 
@@ -183,4 +187,5 @@ class SecurityServiceSpec extends Specification
       }
     }
   }
+}
 }

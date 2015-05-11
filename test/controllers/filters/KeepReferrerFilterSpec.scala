@@ -1,24 +1,22 @@
 package controllers.filters
 
-import play.api.test._
-import play.api.mvc._
 import org.specs2.mock.Mockito
-import play.mvc.Http.HeaderNames
-import play.api.test.FakeHeaders
-import play.api.test.FakeApplication
+import org.specs2.specification.BeforeEach
 import play.api.libs.iteratee.Enumerator
-import org.specs2.specification.BeforeExample
-import util.TestHelpers
+import play.api.mvc._
+import play.api.test.{FakeHeaders, _}
+import play.mvc.Http.HeaderNames
+import util.PortFinder
 
-class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeExample {
+class KeepReferrerFilterSpec extends PlaySpecification with Mockito with BeforeEach {
 
-  var resultRequest: SimpleResult = _
+  var resultRequest: Result = _
   var action: Action[AnyContent] = _
   val fakeApp = FakeApplication(additionalConfiguration = Map("application.secret" -> "test"))
-  val port = TestHelpers.findFreePort()
+  val port = PortFinder.findFreePort()
   
   def before = {
-    resultRequest = spy(SimpleResult(header = ResponseHeader(200, Map()), body = mock[Enumerator[Array[Byte]]]))
+    resultRequest = spy(Result(header = ResponseHeader(200, Map()), body = mock[Enumerator[Array[Byte]]]))
     action = Action { request => resultRequest }
   }
 

@@ -8,7 +8,7 @@ import java.sql.Timestamp
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import util.{FakePropertiesProvider, FakeAuthentication}
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import scalaz._
@@ -17,7 +17,7 @@ import security.AuthenticatedUser
 import scala.Some
 import models.database.Notification
 
-class NotificationControllerSpec extends Specification with Mockito with AfterExample {
+class NotificationControllerSpec extends Specification with Mockito with AfterEach {
   object controller extends NotificationsController
     with NotificationsServiceComponent
     with ApplicationPropertiesServiceComponent
@@ -58,7 +58,7 @@ class NotificationControllerSpec extends Specification with Mockito with AfterEx
 
   "dismiss notification" should {
     "show error when user isn't authenticated" in {
-      notificationsService.deleteNotification(anyInt)(any[Principal]) returns "Not authenticated".failNel
+      notificationsService.deleteNotification(anyInt)(any[Principal]) returns "Not authenticated".failureNel
       val notificationId = 1
 
       val page = controller.dismissNotification(notificationId)(FakeRequest())

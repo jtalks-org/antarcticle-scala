@@ -67,8 +67,8 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
       authenticationManager.authenticate(username.trim, password) map {result =>
         for {
           user <- result.cata(
-            some = info => if (info.active) info.successNel else s"User ${info.username} is not active".failNel,
-            none = "Invalid username or password".failNel
+            some = info => if (info.active) info.successNel else s"User ${info.username} is not active".failureNel,
+            none = "Invalid username or password".failureNel
           )
           userRecord = createOrUpdateUser(user)
           authority = if (userRecord.admin) Authorities.Admin else Authorities.User
@@ -133,16 +133,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
             _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))
           } yield token
         }
-
-//        for {
-//          _ <- authenticationManager.activate(uid)
-//          t = for {
-//            user <- usersRepository.getByUID(uid).toSuccess(NonEmptyList("User not found"))
-//            token = SecurityUtil.generateRememberMeToken
-//            _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))
-//          } yield token
-//
-//        } yield t
     }
   }
 

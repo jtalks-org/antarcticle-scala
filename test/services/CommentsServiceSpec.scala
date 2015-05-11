@@ -1,27 +1,23 @@
 package services
 
-import org.specs2.mutable.Specification
-import models.database._
-import utils.Implicits._
-import org.specs2.time.NoTimeConversions
-import util.FakeSessionProvider
-import util.FakeSessionProvider.FakeSessionValue
 import com.github.nscala_time.time.Imports._
-import org.specs2.mock.Mockito
-import org.mockito.Matchers
-import util.TimeFridge
-import org.specs2.specification.BeforeExample
-import scalaz._
-import Scalaz._
-import repositories.CommentsRepositoryComponent
-import org.specs2.scalaz.ValidationMatchers
 import models.CommentModels.Comment
-import security._
+import models.database._
+import org.mockito.Matchers
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.scalaz.ValidationMatchers
+import org.specs2.specification.BeforeEach
+import repositories.CommentsRepositoryComponent
 import security.Result._
+import security._
+import util.FakeSessionProvider.FakeSessionValue
+import util.{FakeSessionProvider, TimeFridge}
+import utils.Implicits._
 
-class CommentsServiceSpec extends Specification
-  with NoTimeConversions with Mockito with BeforeExample
-  with ValidationMatchers {
+import scalaz.Scalaz._
+
+class CommentsServiceSpec extends Specification with Mockito with BeforeEach with ValidationMatchers {
 
   object service extends CommentsServiceComponentImpl
     with CommentsRepositoryComponent
@@ -33,7 +29,7 @@ class CommentsServiceSpec extends Specification
 
   import service._
 
-  def before = {
+  override protected def before = {
     org.mockito.Mockito.reset(commentsRepository)
     org.mockito.Mockito.reset(notificationsService)
   }
@@ -54,13 +50,8 @@ class CommentsServiceSpec extends Specification
   }
 
   "creating new comment" should {
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Comment))
-      usr
-    }
+    implicit def getCurrentUser: AuthenticatedUser = AuthenticatedUser(1, "username", Authorities.User)
+
     val articleId = 2
     val content = "3n4hbi4ho45y"
 
@@ -115,13 +106,7 @@ class CommentsServiceSpec extends Specification
   "updating comment" should {
     val commentId = commentRecord.id.get
     val content = "3n4hbi4ho45y"
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Permissions.Update, commentRecord)
-      usr
-    }
+    implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
 
     "update comment in repository" in {
       commentsRepository.get(commentId)(FakeSessionValue) returns commentRecord.some
@@ -168,13 +153,7 @@ class CommentsServiceSpec extends Specification
   }
 
   "comment removal" should {
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Matchers.eq(Permissions.Delete), Matchers.eq(commentRecord))
-      usr
-    }
+    implicit def getCurrentUser: AuthenticatedUser = AuthenticatedUser(1, "username", Authorities.User)
     val commentId = commentRecord.id.get
 
     "fail authorization when user is not authorized to do it" in {

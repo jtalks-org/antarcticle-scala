@@ -2,13 +2,12 @@ package repositories
 
 import org.specs2.mutable.Specification
 import utils.Implicits._
-import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import scala.slick.jdbc.JdbcBackend
 
-class TagsRepositorySpec extends Specification with NoTimeConversions {
+class TagsRepositorySpec extends Specification {
 
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
   with TagsRepositoryComponentImpl {

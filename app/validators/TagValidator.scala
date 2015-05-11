@@ -13,12 +13,12 @@ class TagValidator extends Validator[String] {
 
   def validate(tag: String): ValidationNel[String, String] = {
     def checkLength = if (tag.trim.length > TAG_MAX_LENGTH)
-                        s"Tag $tag is too long, should not exceed $TAG_MAX_LENGTH characters".failNel
+                        s"Tag $tag is too long, should not exceed $TAG_MAX_LENGTH characters".failureNel
                       else
                         tag.successNel
 
     def checkFormat = if (!tag.matches(TAG_FORMAT))
-                        s"Tag $tag should not contain special characters".failNel
+                        s"Tag $tag should not contain special characters".failureNel
                       else
                         tag.successNel
 

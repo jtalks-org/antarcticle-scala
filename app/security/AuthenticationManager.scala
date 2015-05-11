@@ -2,7 +2,8 @@ package security
 
 import models.database.UserRecord
 import play.api.Logger
-import play.api.libs.ws.{Response, WS}
+import play.api.Play.current
+import play.api.libs.ws.{WS, WSResponse}
 import repositories.UsersRepositoryComponent
 import security.UserInfoImplicitConversions._
 import services.SessionProvider
@@ -23,7 +24,7 @@ private[security] trait AuthenticationManager {
 
 class FakeAuthenticationManager extends AuthenticationManager {
 
-  val notSupported: ValidationNel[String, Nothing] = "Not supported by fake AuthenticationManager".failNel
+  val notSupported: ValidationNel[String, Nothing] = "Not supported by fake AuthenticationManager".failureNel
   
   override def authenticate(username: String, password: String) = Future.successful {
     (username, password) match {
@@ -63,7 +64,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
 
   override def register(user: UserInfo) = {
 
-    def sendRequest(): Future[Response] = {
+    def sendRequest(): Future[WSResponse] = {
       val data =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <user xmlns="http://www.jtalks.org/namespaces/1.0">
@@ -103,14 +104,14 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
     }
   }
 
-  private def getErrors(response: Response, user: UserInfo): List[String] = {
+  private def getErrors(response: WSResponse, user: UserInfo): List[String] = {
     for {
       key <- getErrors(response)
       error = translate(key, user)
     } yield error
   }
 
-  private def getErrors(response: Response): List[String] = (response.xml \ "error").map(x => (x \ "@code").text).toList
+  private def getErrors(response: WSResponse): List[String] = (response.xml \ "error").map(x => (x \ "@code").text).toList
 }
 
 class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provider: SessionProvider)
@@ -133,11 +134,11 @@ class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provide
     implicit s: JdbcBackend#Session =>
 
     def checkUsernameUnique = repo.usersRepository.getByUsername(user.username).cata(
-      existingUser => s"User with the username ${user.username} already exists".failNel,
+      existingUser => s"User with the username ${user.username} already exists".failureNel,
       ().successNel
     )
     def checkEmailUnique = repo.usersRepository.getByEmail(user.email).cata(
-      existingUser => s"User with the email ${user.email} already exists".failNel,
+      existingUser => s"User with the email ${user.email} already exists".failureNel,
       ().successNel
     )
 
@@ -150,8 +151,8 @@ class LocalDatabaseAuthenticationManager(repo: UsersRepositoryComponent, provide
     implicit s: JdbcBackend#Session =>
     Future {
       repo.usersRepository.getByUID(uuid).cata(
-        user => if (!user.active) ().successNel else "User is already activated".failNel,
-        none = "There is no user with such uid".failNel
+        user => if (!user.active) ().successNel else "User is already activated".failureNel,
+        none = "There is no user with such uid".failureNel
       )
     }
   }
@@ -163,7 +164,7 @@ class CompositeAuthenticationManager(poulpeAuthManager: Option[AuthenticationMan
   override def authenticate(username: String, password: String) = {
     Try {
       poulpeAuthManager.cata(
-        none = Future(none[UserInfo]),
+        none = localAuthManager.authenticate(username, password),
         some = manager => manager.authenticate(username, password))
     } match {
       case scala.util.Success(userInfo) => userInfo

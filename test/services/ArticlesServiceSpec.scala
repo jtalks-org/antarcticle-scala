@@ -4,7 +4,6 @@ import models.ArticleModels.Language._
 import org.specs2.mutable.Specification
 import models.database._
 import utils.Implicits._
-import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import org.specs2.mock.Mockito
 import repositories.{UsersRepositoryComponent, TagsRepositoryComponent, ArticlesRepositoryComponent}
@@ -12,7 +11,7 @@ import org.mockito.Matchers
 import models.ArticleModels.{Translation, ArticleDetailsModel, Article, ArticleListModel}
 import util.{TimeFridge, MockSession}
 import models.Page
-import org.specs2.specification.BeforeExample
+import org.specs2.specification.BeforeEach
 import scala.slick.jdbc.JdbcBackend
 import scalaz._
 import Scalaz._
@@ -24,9 +23,7 @@ import security._
 import security.Result._
 
 
-class ArticlesServiceSpec extends Specification
-  with NoTimeConversions with Mockito
-  with BeforeExample with ValidationMatchers with MockSession {
+class ArticlesServiceSpec extends Specification with Mockito with BeforeEach with ValidationMatchers with MockSession {
 
   object service extends ArticlesServiceComponentImpl
   with ArticlesRepositoryComponent
@@ -182,8 +179,8 @@ class ArticlesServiceSpec extends Specification
       articlesService.getPage(1).fold(
         fail = nel => ko,
         succ = model => {
-          model.list(0).id must_== 1
-          model.list(0).author.id must_== 1
+          model.list.head.id must_== 1
+          model.list.head.author.id must_== 1
         }
       )
     }
@@ -262,13 +259,7 @@ class ArticlesServiceSpec extends Specification
   }
 
   "creating new article" should {
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Matchers.eq(Permissions.Create), Matchers.eq(Entities.Article))
-      usr
-    }
+    implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
     val article = Article(None, "", "", List(), Russian, None)
     val userRecord = UserRecord(1.some, "user", "password", "mail01@mail.zzz").some
 
@@ -277,7 +268,7 @@ class ArticlesServiceSpec extends Specification
           val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId, Russian, None)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
-          tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+          tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
           usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
           articlesService.insert(article)
@@ -291,7 +282,7 @@ class ArticlesServiceSpec extends Specification
         val article = Article(None, "", "", List(), Russian, Some(1))
         articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
         articleValidator.validate(any[Article]) returns article.successNel
-        tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+        tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
         usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
         articlesRepository.getTranslations(anyInt)(Matchers.eq(session)) returns List()
 
@@ -305,7 +296,7 @@ class ArticlesServiceSpec extends Specification
     "return model with assigned id" in {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
       articlesService.insert(article) match {
@@ -320,7 +311,7 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns articleId
       articleValidator.validate(any[Article]) returns article.successNel
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns tags.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns tags.successNel
 
       articlesService.insert(article.copy(tags = tags))
 
@@ -328,8 +319,8 @@ class ArticlesServiceSpec extends Specification
     }
 
     "not create article when validation failed" in {
-      articleValidator.validate(any[Article]) returns "".failNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+      articleValidator.validate(any[Article]) returns "".failureNel
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
 
       articlesService.insert(article)
 
@@ -338,7 +329,7 @@ class ArticlesServiceSpec extends Specification
 
     "rollback transaction when tags creation failed" in {
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns "".failNel
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns "".failureNel
 
       articlesService.insert(article)
 
@@ -348,7 +339,7 @@ class ArticlesServiceSpec extends Specification
     "set author as current user" in {
       articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.success
+      tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
       usersRepository.getByUsername(getCurrentUser.username)(session) returns userRecord
 
       articlesService.insert(article) match {
@@ -375,13 +366,7 @@ class ArticlesServiceSpec extends Specification
     val tags = dbRecord._3
     val article = Article(articleId.some, "", "", tags, Russian, articleId.some)
     val translations = List((articleId, Russian.toString))
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Matchers.eq(Permissions.Update), Matchers.eq(dbRecord._1))
-      usr
-    }
+    implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
 
     "update existing article" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
@@ -422,14 +407,14 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.get(articleId)(session) returns dbRecord.some
       articlesRepository.getTranslations(articleId)(session) returns translations
       articleValidator.validate(any[Article]) returns article.successNel
-      tagsService.updateTagsForArticle(articleId, tags)(session) returns "".failNel
+      tagsService.updateTagsForArticle(articleId, tags)(session) returns "".failureNel
 
       articlesService.updateArticle(article) must beFailing
     }
 
     "return failure when article validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
-      articleValidator.validate(any[Article]) returns "".failNel
+      articleValidator.validate(any[Article]) returns "".failureNel
 
       articlesService.updateArticle(article) must beFailing
 
@@ -446,7 +431,7 @@ class ArticlesServiceSpec extends Specification
       articlesRepository.get(articleId)(session) returns dbRecord.some
       articleValidator.validate(any[Article]) returns article.successNel
       articlesRepository.getTranslations(articleId)(session) returns translations
-      tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns "".failNel
+      tagsService.updateTagsForArticle(Matchers.eq(articleId), any[Seq[String]])(Matchers.eq(session)) returns "".failureNel
 
       articlesService.updateArticle(article) must beFailing
 
@@ -455,7 +440,7 @@ class ArticlesServiceSpec extends Specification
 
     "not update article when article validation failed" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some
-      articleValidator.validate(any[Article]) returns "".failNel
+      articleValidator.validate(any[Article]) returns "".failureNel
 
       articlesService.updateArticle(article) must beFailing
 
@@ -478,13 +463,7 @@ class ArticlesServiceSpec extends Specification
 
   "article removal" should {
     val articleId = 1
-    implicit def getCurrentUser = {
-      val usr = spy(AuthenticatedUser(1, "username", Authorities.User))
-      org.mockito.Mockito.doReturn(true)
-        .when(usr)
-        .can(Matchers.eq(Permissions.Delete), Matchers.eq(dbRecord._1))
-      usr
-    }
+    implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
 
     "remove article" in {
       articlesRepository.get(articleId)(session) returns dbRecord.some

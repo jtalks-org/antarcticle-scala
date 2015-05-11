@@ -2,7 +2,7 @@ package controllers
 
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import org.specs2.specification.AfterExample
+import org.specs2.specification.AfterEach
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeHeaders, _}
@@ -12,7 +12,7 @@ import services.ApplicationPropertiesServiceComponent
 import util.{FakeAuthentication, FakePropertiesProvider}
 
 
-class ApplicationPropertiesControllerSpec extends Specification with Mockito with AfterExample {
+class ApplicationPropertiesControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends ApplicationPropertiesController
   with PropertiesProvider

@@ -8,6 +8,8 @@ scalaVersion := "2.11.6"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
+resolvers += "Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases"
+
 libraryDependencies ++= Seq(
   cache,
   ws,
@@ -59,7 +61,7 @@ buildInfoKeys ++= Seq[BuildInfoKey](
 
 buildInfoPackage := "build"
 
-//  Coffee Script compilation options
+// Coffee Script compilation options
 CoffeeScriptKeys.bare := true
 
 includeFilter in (Assets, LessKeys.less) := "*.less"

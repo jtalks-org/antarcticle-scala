@@ -107,21 +107,31 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           }
         }
 
-        def createUserRecord(uid: String): UserRecord = {
+        def createUserRecord(uid: String): Unit = {
           val salt = some(SecurityUtil.generateSalt)
           val encodedPassword = SecurityUtil.encodePassword(user.password, salt)
-          UserRecord(None, user.username, encodedPassword, user.email, salt = salt, uid = uid)
-        }
-                      
-        for {
-          _ <- Future.successful(userValidator.validate(user))
-          uid <- authenticationManager.register(UserInfo(user.username, SecurityUtil.md5(user.password), user.email))
-        } yield uid.map { uuid => {
-          val record = createUserRecord(uuid)
+          val record = UserRecord(None, user.username, encodedPassword, user.email, salt = salt, uid = uid)
           usersRepository.insert(record)
           sendActivationLink(record.uid)
-          record.uid
-        }}
+        }
+
+
+
+        val validationResult = userValidator.validate(user)
+        val r: Future[ValidationNel[String, String]] = validationResult.fold(
+          fail = e => Future.successful(Failure(e)),
+          succ = s => {
+            for {
+              uid <- authenticationManager.register(UserInfo(user.username, SecurityUtil.md5(user.password), user.email))
+            } yield {
+              for {
+                uuid <- uid
+              } yield createUserRecord(uuid)
+              uid
+            }
+          }
+        )
+        r
     }
 
     override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {

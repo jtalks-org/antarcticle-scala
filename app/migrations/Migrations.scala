@@ -246,4 +246,13 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     }
 
   }
+
+  val fixToRemoveEmptyUsers = new Migration {
+    val version = 22
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("DELETE from users WHERE username = ''").execute
+    }
+
+  }
 }

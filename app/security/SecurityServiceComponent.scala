@@ -115,10 +115,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           sendActivationLink(record.uid)
         }
 
-
-
-        val validationResult = userValidator.validate(user)
-        val r: Future[ValidationNel[String, String]] = validationResult.fold(
+        userValidator.validate(user).fold(
           fail = e => Future.successful(Failure(e)),
           succ = s => {
             for {
@@ -131,7 +128,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
             }
           }
         )
-        r
     }
 
     override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {

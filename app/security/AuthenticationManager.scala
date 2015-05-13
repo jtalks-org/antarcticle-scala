@@ -12,7 +12,6 @@ import utils.SecurityUtil
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.slick.jdbc.JdbcBackend
-import scala.util.Try
 import scalaz.Scalaz._
 import scalaz._
 
@@ -100,7 +99,7 @@ class PoulpeAuthenticationManager(poulpeUrl: String) extends AuthenticationManag
     key match {
       case "user.username.already_exists" => s"User with the username ${user.username} already exists"
       case "user.email.already_exists" => s"User with the email ${user.email} already exists"
-      case _ => key
+      case _ => "Some unexpected error occurred, please contact administrator or try later"
     }
   }
 
@@ -164,16 +163,16 @@ class CompositeAuthenticationManager(poulpeAuthManager: Option[AuthenticationMan
                                      localAuthManager: AuthenticationManager)
   extends AuthenticationManager {
   override def authenticate(username: String, password: String) = {
-    Try {
-      poulpeAuthManager.cata(
-        none = localAuthManager.authenticate(username, password),
-        some = manager => manager.authenticate(username, password))
-    } match {
-      case scala.util.Success(userInfo) => userInfo
+    val p = Promise[Option[UserInfo]]()
+    poulpeAuthManager.cata(
+      none = localAuthManager.authenticate(username, password),
+      some = manager => manager.authenticate(username, password)).onComplete {
+      case s@scala.util.Success(x) => p.tryComplete(s)
       case scala.util.Failure(e) =>
         Logger.error("Error while asking Poulpe to authenticate user", e)
-        localAuthManager.authenticate(username, password)
+        p.completeWith(localAuthManager.authenticate(username, password))
     }
+    p.future
   }
 
   override def register(user: UserInfo) = {

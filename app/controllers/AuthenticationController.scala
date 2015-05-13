@@ -2,9 +2,12 @@ package controllers
 
 import conf.Constants._
 import models.UserModels.User
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
+import scala.concurrent.Promise
+import scala.util
 import scalaz._
 import Scalaz._
 import security.{Authentication, SecurityServiceComponent}
@@ -75,12 +78,20 @@ trait AuthenticationController {
       case i if i < 0 => request.host
       case i => request.host + request.path.slice(0, i)
     }
+    val p = Promise[Result]()
     securityService.signUpUser(User(username, email, password), activationUrl).map {
       _.fold(
         fail = nel => BadRequest(views.html.templates.formErrors(nel.list)),
         succ = uid => Ok(routes.IndexController.index().absoluteURL())
       )
+    } onComplete {
+      case t@util.Success(x) => p.tryComplete(t)
+      case util.Failure(e) =>
+        Logger.error("Poulpe is not available", e)
+        val error = List("Authentication service is not available right now. Please, contact administrator or try later")
+        p.success(BadRequest(views.html.templates.formErrors(error)))
     }
+    p.future
   }
 
   def activate(uid: String) = Action.async { implicit request =>

@@ -29,7 +29,8 @@ class SecurityServiceSpec extends Specification
     with ExecutionEnvironment {
 
   object service extends SecurityServiceComponentImpl with UsersRepositoryComponent
-  with FakeSessionProvider with SecurityServiceComponent with ApplicationPropertiesServiceComponent with MailServiceComponent {
+  with FakeSessionProvider with SecurityServiceComponent with AuthenticationManagerProvider
+  with ApplicationPropertiesServiceComponent with MailServiceComponent {
     override val usersRepository = mock[UsersRepository]
     override val authenticationManager = mock[AuthenticationManager]
     override val userValidator = mock[UserValidator]

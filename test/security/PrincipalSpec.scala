@@ -67,10 +67,8 @@ class PrincipalSpec extends Specification {
 
     "not be able to modify any collection" >> {
       Fragment.foreach(allEntities.zip(modificationPermissions)) {
-        case (entity, permission) => {
-          s"not be able to $permission $entity collection" ! {
+        case (entity, permission) => s"not be able to $permission $entity collection" ! {
             AnonymousPrincipal.can(permission, entity) must beFalse
-          }
         }
       }
     }
@@ -83,58 +81,50 @@ class PrincipalSpec extends Specification {
     "be able to read all objects and collections" >>
       readPermissionsOnAll(userPrincipal)
 
-//    "be able to create any object" >> {
-//      allEntities.foreach { entity =>
-//        s"be able to create $entity" >> {
-//          userPrincipal.can(Create, entity) must beTrue
-//        }
-//      }
-//    }
+    "be able to create any object" >> {
+      Fragment.foreach(allEntities) { entity =>
+        s"be able to create $entity" ! {
+          userPrincipal.can(Create, entity) must beTrue
+        }
+      }
+    }
 
-//    "be able to modify authored objects" >> {
-//      allObjects.foreach { obj =>
-//        modificationPermissions.foreach { permission =>
-//          s"be able to $permission $obj" >> {
-//            userPrincipal.can(permission, obj) must beTrue
-//          }
-//        }
-//      }
-//    }
+    "be able to modify authored objects" >> {
+      Fragment.foreach(allObjects.zip(modificationPermissions)) {
+        case (obj, permission) => s"be able to $permission $obj" ! {
+            userPrincipal.can(permission, obj) must beTrue
+        }
+      }
+    }
 
-//    "not be able to modify not authored objects" >> {
-//       val notAuthorPrincipal = new AuthenticatedPrincipal(99, Authorities.User)
-//       allObjects.foreach { obj =>
-//         modificationPermissions.foreach { permission =>
-//           s"not be able to $permission $obj" >> {
-//             notAuthorPrincipal.can(permission, obj) must beFalse
-//           }
-//         }
-//       }
-//    }
-//  }
-//
-//  "admin" should {
-//    val adminPrincipal = new AuthenticatedPrincipal(9389, Authorities.Admin)
-//
-//    "be able to anything with any object" >> {
-//      allObjects.foreach { obj =>
-//        SpecResult.unit{allPermissions.foreach { permission =>
-//          s"be able to $permission $obj" >> {
-//            adminPrincipal.can(permission, obj) must beTrue
-//          }
-//        }}
-//      }
-//    }
-//
-//    "be able to anything with any collection" >> {
-//      allEntities.foreach { entity =>
-//        allPermissions.foreach { permission =>
-//          s"be able to $permission $entity" >> {
-//            adminPrincipal.can(permission, entity) must beTrue
-//          }
-//        }
-//      }
-//    }
+    "not be able to modify not authored objects" >> {
+      val notAuthorPrincipal = new AuthenticatedPrincipal(99, Authorities.User)
+      Fragment.foreach(allObjects.zip(modificationPermissions)) {
+        case (obj, permission) => s"not be able to $permission $obj" ! {
+             notAuthorPrincipal.can(permission, obj) must beFalse
+         }
+      }
+    }
+
+
+    "admin" should {
+      val adminPrincipal = new AuthenticatedPrincipal(9389, Authorities.Admin)
+
+      "be able to anything with any object" >> {
+        Fragment.foreach(allObjects.zip(allPermissions)) {
+          case (obj, permission)  => s"be able to $permission $obj" ! {
+              adminPrincipal.can(permission, obj) must beTrue
+          }
+        }
+      }
+
+      "be able to anything with any collection" >> {
+        Fragment.foreach(allEntities.zip(allPermissions)) {
+          case (entity, permission) => s"be able to $permission $entity" ! {
+              adminPrincipal.can(permission, entity) must beTrue
+          }
+        }
+      }
+    }
   }
-
 }

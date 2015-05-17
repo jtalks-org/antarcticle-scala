@@ -35,10 +35,10 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
   this: UsersRepositoryComponent
     with SessionProvider
     with ApplicationPropertiesServiceComponent
+    with AuthenticationManagerProvider
     with MailServiceComponent =>
 
   val securityService = new SecurityServiceImpl
-  val authenticationManager: AuthenticationManager
   val userValidator: UserValidator
 
   class SecurityServiceImpl extends SecurityService {
@@ -132,8 +132,11 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
 
     override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
-        authenticationManager.activate(uid). map { _ =>
+        for {
+          r <- authenticationManager.activate(uid)
+        } yield {
           for {
+            _ <- r
             user <- usersRepository.getByUID(uid).toSuccess(NonEmptyList("User not found"))
             token = SecurityUtil.generateRememberMeToken
             _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))

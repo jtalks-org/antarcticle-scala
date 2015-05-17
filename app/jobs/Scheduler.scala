@@ -1,27 +1,25 @@
 package jobs
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.Props
 import conf.Keys.DeleteInacticveUsers
 import conf.PropertiesProviderComponent
 import jobs.actors.RemoveInactiveUsersActor
 import org.joda.time.DateTime
 import play.api.Logger
-import play.libs.Akka
+import services.ActorSystemProvider
 
 trait Scheduler {
-  this: PropertiesProviderComponent =>
+  this: PropertiesProviderComponent with ActorSystemProvider =>
 
   def runJobs() = {
     import play.api.libs.concurrent.Execution.Implicits._
 
-import scala.concurrent.duration._
-
-    val system: ActorSystem = Akka.system
+    import scala.concurrent.duration._
 
     if (propertiesProvider.get[Boolean](DeleteInacticveUsers).getOrElse(false)) {
       Logger.info("Inactive user will be removed every 24 hours")
-      val userCleaner = system.actorOf(Props[RemoveInactiveUsersActor])
-      system.scheduler.schedule(1.second, 24.hour, userCleaner, DateTime.now().minusHours(24))
+      val userCleaner = actorSystem.actorOf(Props[RemoveInactiveUsersActor])
+      actorSystem.scheduler.schedule(1.second, 24.hour, userCleaner, DateTime.now().minusHours(24))
     } else {
       Logger.info("Inactive users are never removed from database")
     }

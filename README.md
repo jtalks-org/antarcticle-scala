@@ -173,9 +173,9 @@ To get unit test coverage report run ```sbt clean coverage test``` and then ```s
 - IDE or text editor on your choice
 - GIT client
 - JDK 1.7
-- Scala 2.10
+- Scala 2.11
 - SBT 0.13
-- Play Framework 2.2 
+- Play Framework 2.3 
 
 ###Useful links
 - Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)

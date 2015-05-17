@@ -244,7 +244,6 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("UPDATE users set createdAt = CURRENT_TIMESTAMP").execute
       Q.updateNA("ALTER TABLE users CHANGE COLUMN createdAt createdAt timestamp NOT NULL").execute
     }
-
   }
 
   val fixToRemoveEmptyUsers = new Migration {
@@ -253,6 +252,13 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.updateNA("DELETE from users WHERE username = ''").execute
     }
+  }
 
+  val fixEmptyEmails = new Migration {
+    val version: Int = 23
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("UPDATE users set email='NA' WHERE email = ''").execute
+    }
   }
 }

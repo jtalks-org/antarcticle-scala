@@ -16,15 +16,16 @@ object Application
   with Schema
   with MigrationTool
   with Repositories
-  with SecurityComponent
   with Services
+  with AuthenticationManagerProviderImpl
   with Controllers
+  with Authentication
   with PropertiesProvider
   with MailServiceComponentImpl
+  with PlayActorSystemProvider
   with Scheduler {
 
   override val migrationsContainer = new Migrations(profile)
-  override val userValidator = new UserValidator
 
   lazy val instanceName = propertiesService.getInstanceName()
 
@@ -44,7 +45,7 @@ trait Controllers
   with CommentController
   with ApplicationPropertiesController
   with TagsController {
-  this: Services with SecurityComponent with PropertiesProvider =>
+  this: Services with Authentication with SecurityServiceComponent with PropertiesProvider =>
 }
 
 trait Services
@@ -53,11 +54,16 @@ trait Services
   with CommentsServiceComponentImpl
   with NotificationsServiceComponentImpl
   with UsersServiceComponentImpl
+  with SecurityServiceComponentImpl
   with ApplicationPropertiesServiceComponentImpl {
-  this: Repositories with SessionProvider =>
+  this: Repositories
+    with SessionProvider
+    with AuthenticationManagerProvider
+    with MailServiceComponent =>
 
   override val tagValidator = new TagValidator
   override val articleValidator = new ArticleValidator(tagValidator)
+  override val userValidator = new UserValidator
 }
 
 trait Repositories

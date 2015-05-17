@@ -8,7 +8,10 @@ scalaVersion := "2.11.6"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-resolvers += "Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases"
+resolvers ++= Seq(
+  "Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases",
+  "spray repo" at "http://repo.spray.io"
+)
 
 libraryDependencies ++= Seq(
   cache,
@@ -16,8 +19,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-async" % "0.9.3",
   "com.typesafe.akka" %% "akka-actor" % "2.3.9",
   "com.typesafe.slick" %% "slick" % "2.1.0",
-//  "com.typesafe.slick" %% "slick-codegen" % "2.1.0",
-//  "com.typesafe.slick" %% "slick-extensions" % "2.1.0",
+  "io.spray" %% "spray-client" % "1.3.3",
   // Joda time wrapper for scala
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "com.h2database" % "h2" % "1.4.187",

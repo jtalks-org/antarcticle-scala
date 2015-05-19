@@ -116,7 +116,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
         }
       }
 
-    override def authenticate(username: String, password: String) = {
+    override def authenticate(username: String, password: String): Future[Option[UserInfo]] = {
       val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/authenticate").withQuery(
         "username" -> username, "passwordHash" -> SecurityUtil.md5(password)
       ))
@@ -132,7 +132,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
       }
     }
 
-    override def register(user: UserInfo) = {
+    override def register(user: UserInfo): Future[ValidationNel[String, String]] = {
       val data =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <user xmlns="http://www.jtalks.org/namespaces/1.0">
@@ -173,6 +173,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
         }
       }
     }
+
     override def activate(uuid: String): Future[ValidationNel[String, Unit]] = {
       val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/activate").withQuery("uuid" -> uuid))
       pipeline(request).map { response =>

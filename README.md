@@ -81,11 +81,17 @@ application.conf:
 
     security.authentication.useFake=false
     security.authentication.poulpe.url="http://mydomain.com/poulpeContext"
+    ##optional if poulpe required authentication for REST API
+    security.authentication.poulpe.username=your_username
+    security.authentication.poulpe.secret=your_password
     
 JNDI properties:
 
     <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" value="false" type="java.lang.Boolean"/>
-    <Environment name="ANTARCTICLE_POULPE_URL" value="http://mydomain.com/poulpeContext" type="java.lang.String"/>  
+    <Environment name="ANTARCTICLE_POULPE_URL" value="http://mydomain.com/poulpeContext" type="java.lang.String"/>
+    <!-- optional if poulpe required authentication for REST API -->
+    <Environment name="ANTARCTICLE_POULPE_USERNAME" value="your_username" type="java.lang.String"/>  
+    <Environment name="ANTARCTICLE_POULPE_SECRET" value="your_password" type="java.lang.String"/>  
 
 To configure fake authentication manager (contains only admin/admin user) set properties as follows:
 

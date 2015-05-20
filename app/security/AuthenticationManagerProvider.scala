@@ -1,5 +1,6 @@
 package security
 
+import conf.Keys.{PoulpeSecret, PoulpeUsername}
 import conf.{Keys, PropertiesProviderComponent}
 import models.database.UserRecord
 import play.api.Logger
@@ -30,6 +31,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
 
   import spray.http._
   import HttpMethods._
+  import spray.client.pipelining._
   import spray.httpx.unmarshalling._
 
   override val authenticationManager = new CompositeAuthenticationManager()
@@ -84,7 +86,6 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
   }
 
   trait PipeProviderImpl extends PipeProvider {
-    import spray.client.pipelining._
     implicit val system = actorSystem
     override def pipeline: HttpRequest => Future[HttpResponse] = sendReceive
   }
@@ -93,6 +94,20 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
     this : PipeProvider =>
 
     val genericError = "Some unexpected error occurred, please contact administrator or try later"
+
+    val poulpeCredentials = for {
+      poulpeUsername <- propertiesProvider.get[String](PoulpeUsername)
+      poulpeSecret <- propertiesProvider.get[String](PoulpeSecret)
+    } yield BasicHttpCredentials(poulpeUsername, poulpeSecret)
+
+    val addPoulpeCredentials: HttpRequest => HttpRequest = { request =>
+      poulpeCredentials match {
+        case Some(credentials) => request ~> addCredentials(credentials)
+        case None =>
+          Logger.warn("Poulpe credentials are not set")
+          request
+      }
+    }
 
     implicit val errorsUnmarshaller: Unmarshaller[List[String]] =
       Unmarshaller.delegate[NodeSeq, List[String]](MediaTypes.`text/xml`, MediaTypes.`application/xml`) {
@@ -165,7 +180,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
         }
       }
 
-      pipeline(request).map { response =>
+      pipeline(request ~> addPoulpeCredentials).map { response =>
         response.status match {
           case StatusCodes.OK => response.entity.asString.trim().successNel
           case StatusCodes.BadRequest => deserialize(response.entity.as[List[String]])
@@ -175,8 +190,8 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
     }
 
     override def activate(uuid: String): Future[ValidationNel[String, Unit]] = {
-      val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/activate").withQuery("uuid" -> uuid))
-      pipeline(request).map { response =>
+      val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/private/activate").withQuery("uuid" -> uuid))
+      pipeline(request ~> addPoulpeCredentials).map { response =>
         response.status match {
           case status if List(StatusCodes.OK, StatusCodes.NoContent).any(_ == status)  => ().successNel
           case status if List(StatusCodes.NotFound, StatusCodes.BadRequest).any(_ == status) =>

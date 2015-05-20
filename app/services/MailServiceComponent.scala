@@ -6,14 +6,15 @@ import javax.mail.internet.{InternetAddress, MimeMessage}
 
 import conf.{Keys, PropertiesProviderComponent}
 
+import scala.concurrent.Future
+
 trait MailServiceComponent {
 
   val mailService: MailService
 
   trait MailService {
-    def sendEmail(to: String, subject: String, text: String)
+    def sendEmail(to: String, subject: String, text: String): Future[Unit]
   }
-
 }
 
 trait MailServiceComponentImpl extends MailServiceComponent {
@@ -43,26 +44,28 @@ trait MailServiceComponentImpl extends MailServiceComponent {
 
       Session.getInstance(properties, new Authenticator {
         override def getPasswordAuthentication: PasswordAuthentication = {
-          val username = propertiesProvider.get[String](Keys.MailSmtpUser).getOrElse("jtalks@inbox.ru")
-          val password = propertiesProvider.get[String](Keys.MailSmtpPassword).getOrElse("javatalks")
+          val username = propertiesProvider.get[String](Keys.MailSmtpUser).getOrElse("")
+          val password = propertiesProvider.get[String](Keys.MailSmtpPassword).getOrElse("")
           new PasswordAuthentication(username, password)
         }
       })
     }
 
-    override def sendEmail(to: String, subject: String, text: String): Unit = {
-      val message = new MimeMessage(session)
-      message.addHeader("Content-type", "text/HTML; charset=UTF-8")
-      message.addHeader("format", "flowed")
-      message.addHeader("Content-Transfer-Encoding", "8bit")
-      val from = propertiesProvider.get[String](Keys.MailSmtpFrom).getOrElse("jtalks@inbox.ru")
-      message.setFrom(new InternetAddress(from))
-      message.addRecipients(Message.RecipientType.TO, to)
-      message.setSubject(subject)
-      message.setSentDate(new Date)
-      message.setContent(text, "text/html")
-      Transport.send(message)
+    override def sendEmail(to: String, subject: String, text: String): Future[Unit] = {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      Future {
+        val message = new MimeMessage(session)
+        message.addHeader("Content-type", "text/HTML; charset=UTF-8")
+        message.addHeader("format", "flowed")
+        message.addHeader("Content-Transfer-Encoding", "8bit")
+        val from = propertiesProvider.get[String](Keys.MailSmtpFrom).getOrElse("")
+        message.setFrom(new InternetAddress(from))
+        message.addRecipients(Message.RecipientType.TO, to)
+        message.setSubject(subject)
+        message.setSentDate(new Date)
+        message.setContent(text, "text/html")
+        Transport.send(message)
+      }
     }
   }
-
 }

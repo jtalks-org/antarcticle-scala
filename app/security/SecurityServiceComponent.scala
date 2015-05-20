@@ -85,20 +85,21 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         token
       }
 
+    //TODO cover with UT
     override def signUpUser(user: User, host: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
 
         def sendActivationLink(userUid: String) = {
-          import scala.concurrent.ExecutionContext.Implicits.global
           val url = s"http://$host/activate/$userUid"
           val message = s"""<p>Dear ${user.username}!</p>
             |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName()}.<br/>
             |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
             |Best regards,<br/><br/>
             |Antarticle.</p>""".stripMargin
-          val mailFuture = Future(
-            mailService.sendEmail(user.email, s"Account activation at ${propertiesService.getInstanceName()}", message)
+          val mailFuture = mailService.sendEmail(
+            user.email, s"Account activation at ${propertiesService.getInstanceName()}", message
           )
+
           mailFuture.onSuccess {
             case _ => Logger.info(s"Activation link was sent to user ${user.username}")
           }
@@ -130,6 +131,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         )
     }
 
+    //TODO cover with UT
     override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
         for {

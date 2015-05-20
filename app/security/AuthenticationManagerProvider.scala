@@ -224,7 +224,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
 
   class CompositeAuthenticationManager extends AuthenticationManager {
 
-    val poulpeAuthManager: Option[AuthenticationManager] = {
+    lazy val poulpeAuthManager: Option[AuthenticationManager] = {
       propertiesProvider.get[Boolean](Keys.UseFakeAuthentication) match {
         case Some(useFake) if useFake => Some(new FakeAuthenticationManager)
         case _ =>
@@ -239,7 +239,7 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
       }
     }
 
-    val localAuthManager: AuthenticationManager = new LocalDatabaseAuthenticationManager
+    lazy val localAuthManager: AuthenticationManager = new LocalDatabaseAuthenticationManager
 
     override def authenticate(username: String, password: String) = {
       val p = Promise[Option[UserInfo]]()

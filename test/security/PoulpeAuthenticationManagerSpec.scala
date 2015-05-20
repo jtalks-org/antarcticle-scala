@@ -3,7 +3,7 @@ package security
 import java.net.SocketTimeoutException
 
 import akka.actor.ActorSystem
-import conf.{PropertiesProvider, PropertiesProviderComponent}
+import conf.{Keys, PropertiesProvider, PropertiesProviderComponent}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.{MatchResult, Matcher, MatcherMacros}
 import org.specs2.mock.Mockito
@@ -38,9 +38,11 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
       def pipeline = mockPipeline
     }
     override val usersRepository = mock[UsersRepository]
-    override def actorSystem = ActorSystem("test-antarcticle-system")
-    override def propertiesProvider = mock[PropertiesProvider]
-    val poulpeAuthManager = new PoulpeAuthenticationManager("") with FakePipeProvider
+    override val actorSystem = ActorSystem("test-antarcticle-system")
+    override val propertiesProvider = mock[PropertiesProvider]
+    propertiesProvider.get[String](Keys.PoulpeUsername) returns None
+    propertiesProvider.get[String](Keys.PoulpeSecret) returns None
+    lazy val poulpeAuthManager = new PoulpeAuthenticationManager("") with FakePipeProvider
   }
 
   def is(implicit ee: ExecutionEnv) = {

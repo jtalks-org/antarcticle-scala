@@ -130,14 +130,12 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         )
     }
 
-    //TODO cover with UT
     override def activateUser(uid: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
-        for {
-          r <- authenticationManager.activate(uid)
-        } yield {
+        authenticationManager.activate(uid).map { result =>
+          import scalaz.Validation.FlatMap._
           for {
-            _ <- r
+            _ <- result
             user <- usersRepository.getByUID(uid).toSuccess(NonEmptyList("User not found"))
             token = SecurityUtil.generateRememberMeToken
             _ = usersRepository.update(user.copy(rememberToken = Some(token), active = true))
@@ -145,7 +143,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         }
     }
   }
-
 }
 
 

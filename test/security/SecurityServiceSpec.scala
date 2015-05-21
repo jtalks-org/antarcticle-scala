@@ -1,5 +1,6 @@
 package security
 
+import java.net.SocketTimeoutException
 import java.sql.Timestamp
 
 import models.UserModels.User
@@ -226,7 +227,7 @@ with ExecutionEnvironment {
           one(usersRepository).insert(expectedUserRecord)(anySession)
       }
 
-      "fail when user is invalid " in {
+      "fail when user is invalid" in {
         userValidator.validate(user) returns "error".failureNel
 
         securityService.signUpUser(user, host) must beFailing.await
@@ -237,7 +238,7 @@ with ExecutionEnvironment {
         there was no(usersRepository).insert(any[UserRecord])(anySession)
       }
 
-      "fail when user is not registered by authenticvation manager" in {
+      "fail when user is not registered by authentication manager" in {
         userValidator.validate(user) returns user.successNel
         authenticationManager.register(any[UserInfo]) returns Future.successful(uuid.failureNel)
 
@@ -248,6 +249,59 @@ with ExecutionEnvironment {
         there was no(mailService).sendEmail(anyString, anyString, anyString)
         there was no(usersRepository).insert(any[UserRecord])(anySession)
       }
+
+      "fail when authentication manager is not available" in {
+        userValidator.validate(user) returns user.successNel
+        authenticationManager.register(any[UserInfo]) returns Future.failed(new SocketTimeoutException())
+
+        securityService.signUpUser(user, host) must throwA[Exception].like{
+          case e: Exception => e.isInstanceOf[SocketTimeoutException] must beTrue
+        }.await
+
+        there was one(userValidator).validate(user) andThen
+          one(authenticationManager).register(expectedUserInfo)
+        there was no(mailService).sendEmail(anyString, anyString, anyString)
+        there was no(usersRepository).insert(any[UserRecord])(anySession)
+      }
     }
+
+    "activation" should {
+      val uid = "fake-user-uid"
+      val userRecord = Some(UserRecord(Some(1), "username", "passW0rD", "email@e,ai.net", admin = false, Some("saLt")))
+
+      "be successful" in {
+        authenticationManager.activate(uid) returns Future.successful(().successNel)
+        usersRepository.getByUID(===(uid))(anySession) returns userRecord
+
+        securityService.activateUser(uid) must beSuccessful.await
+
+        there was one(authenticationManager).activate(===(uid)) andThen
+          one(usersRepository).getByUID(===(uid))(anySession) andThen
+          one(usersRepository).update(any[UserRecord])(anySession)
+      }
+
+      "fail if user is not activated by authentication manager" in {
+        authenticationManager.activate(uid) returns Future.successful("errror".failureNel)
+
+        securityService.activateUser(uid) must beFailing.await
+
+        there was one(authenticationManager).activate(===(uid))
+        there was no(usersRepository).getByUID(===(uid))(anySession)
+        there was no(usersRepository).update(any[UserRecord])(anySession)
+      }
+
+      "fail when authentication manager is not available" in {
+        authenticationManager.activate(uid) returns Future.failed(new SocketTimeoutException())
+
+        securityService.activateUser(uid) must throwA[Exception].like{
+          case e: Exception => e.isInstanceOf[SocketTimeoutException] must beTrue
+        }.await
+
+        there was one(authenticationManager).activate(===(uid))
+        there was no(usersRepository).getByUID(===(uid))(anySession)
+        there was no(usersRepository).update(any[UserRecord])(anySession)
+      }
+    }
+
   }
 }

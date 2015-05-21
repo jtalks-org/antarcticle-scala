@@ -57,7 +57,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
               record
             },
             none = {
-              val record = UserRecord(None, username.trim, encodedPassword, "NA", false, salt, info.firstName,
+              val record = UserRecord(None, username.trim, encodedPassword, "NA", admin = false, salt, info.firstName,
                 info.lastName, active = true)
               record.copy(id = some(usersRepository.insert(record)))
             }
@@ -85,7 +85,6 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         token
       }
 
-    //TODO cover with UT
     override def signUpUser(user: User, host: String): Future[ValidationNel[String, String]] = withSession {
       implicit s: JdbcBackend#Session =>
 

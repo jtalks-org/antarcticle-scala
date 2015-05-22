@@ -41,7 +41,7 @@ class JndiPropertiesProvider extends PropertiesProvider{
     case MailSmtpSsl => "ANTARCTICLE_SMTP_SSL"
     case DeleteInacticveUsers => "ANTARCTICLE_DELETE_INACTIVE_USERS"
     case PoulpeUsername => "ANTARCTICLE_POULPE_USERNAME"
-    case PoulpeSecret => "ANTARCTICLE_POULPE_SECRET"
+    case PoulpeSecret => "ANTARCTICLE_POULPE_PASSWORD"
     case k => throw new RuntimeException(s"Key $k can't be translated to JNDI property key")
   }
 }

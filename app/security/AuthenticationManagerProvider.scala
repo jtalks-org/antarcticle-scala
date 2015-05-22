@@ -182,9 +182,18 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
 
       pipeline(request ~> addPoulpeCredentials).map { response =>
         response.status match {
-          case StatusCodes.OK => response.entity.asString.trim().successNel
-          case StatusCodes.BadRequest => deserialize(response.entity.as[List[String]])
-          case _ => genericError.failureNel
+          case StatusCodes.OK =>
+            Logger.info(s"Registration request to poulpe was successful with http status ${response.status} " +
+              s"and response ${response.entity.asString}")
+            response.entity.asString.trim().successNel
+          case StatusCodes.BadRequest =>
+            Logger.info(s"Registration request to poulpe failed with http status ${response.status} " +
+              s"and response ${response.entity.asString}")
+            deserialize(response.entity.as[List[String]])
+          case _ =>
+            Logger.warn(s"Registration request to poulpe failed with http status ${response.status} " +
+              s"and response ${response.entity.asString}")
+            genericError.failureNel
         }
       }
     }

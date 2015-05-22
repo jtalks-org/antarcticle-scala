@@ -20,6 +20,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.3.9",
   "com.typesafe.slick" %% "slick" % "2.1.0",
   "io.spray" %% "spray-client" % "1.3.3",
+  "org.webjars" %% "webjars-play" % "2.3.0-2",
+  "org.webjars" %  "bootstrap" % "3.0.3",
+  "org.webjars" %  "jquery" % "1.10.2",
   // Joda time wrapper for scala
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "com.h2database" % "h2" % "1.4.187",
@@ -68,7 +71,7 @@ CoffeeScriptKeys.bare := true
 
 includeFilter in (Assets, LessKeys.less) := "*.less"
 
-scalacOptions ++= Seq("-feature")
+scalacOptions ++= Seq("-feature", "-target:jvm-1.7")
 
 scalacOptions in Test ++= Seq("-Yrangepos")
 

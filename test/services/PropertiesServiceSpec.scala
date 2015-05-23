@@ -40,7 +40,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
-      val foundInstanceName = propertiesService.getInstanceName()
+      val foundInstanceName = propertiesService.getInstanceName
 
       foundInstanceName mustEqual expectedInstanceName
     }
@@ -52,7 +52,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
-      val foundInstanceName = propertiesService.getInstanceName()
+      val foundInstanceName = propertiesService.getInstanceName
 
       foundInstanceName mustEqual propertyDefaultValue
     }
@@ -64,7 +64,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
       val newValue = "New Instance Name"
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns None
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(adminUser)
 
       there was one(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -79,7 +79,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
       val existProperty = ApplicationProperty(None, propertyName, Some("value"), "value", time)
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(existProperty)
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(adminUser)
 
       there was one(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -92,7 +92,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(user)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(user)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
@@ -106,7 +106,7 @@ class PropertiesServiceSpec extends Specification with Mockito with BeforeEach w
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(anonymousUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(anonymousUser)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)

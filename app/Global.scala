@@ -33,7 +33,7 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSet
   }
 
   private def isPublicAsset(path: String): Boolean =
-    path == "/" || List("/stylesheets", "/javascripts", "/images", "/fonts").exists(p => path.startsWith(p))
+    path == "/" || List("/stylesheets", "/javascripts", "/images", "/fonts", "/webjars").exists(p => path.startsWith(p))
 
 
   override def onRouteRequest(req: RequestHeader): Option[Handler] = {

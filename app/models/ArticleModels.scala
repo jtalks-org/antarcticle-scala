@@ -48,6 +48,6 @@ object ArticleModels {
 
   case class Translation(id: Int, language: Language)
 
-  implicit def detailsAsArticle(details: ArticleDetailsModel) =
+  implicit def detailsAsArticle(details: ArticleDetailsModel): Article =
     Article(Some(details.id), details.title, details.content, details.tags, details.language, Some(details.sourceId))
 }

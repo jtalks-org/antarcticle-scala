@@ -1,9 +1,10 @@
 package controllers
 
-import play.api.mvc.{Controller, Action}
-import services.{ApplicationPropertyNames, ApplicationPropertiesServiceComponent}
+import play.api.mvc.{Action, Controller}
 import security.Authentication
-import security.Result.{NotAuthorized, Authorized}
+import security.Result.{Authorized, NotAuthorized}
+import services.ApplicationPropertiesServiceComponent
+import services.AppProperty._
 
 /**
  * Manages application properties - global per-instance values, that
@@ -18,7 +19,7 @@ trait ApplicationPropertiesController {
       (request.body \ "instanceName").asOpt[String] match {
         case None => BadRequest("")
         case Some(x) =>
-          propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, x) match {
+          propertiesService.writeProperty(InstanceName, x) match {
             case Authorized(created) => Ok("")
             case NotAuthorized() => Unauthorized("You are not authorized to perform this action")
           }
@@ -31,8 +32,8 @@ trait ApplicationPropertiesController {
         case None => BadRequest("")
         case Some(value) =>
           id match {
-            case _ if id.equals(ApplicationPropertyNames.topBannerURL) ||
-              id.equals(ApplicationPropertyNames.bottomBannerURL) =>
+            case _ if id.equals(TopBannerUrl.name) ||
+              id.equals(BottomBannerUrl.name) =>
               propertiesService.writeProperty(id, value) match {
                 case Authorized(created) => Ok("")
                 case NotAuthorized() => Unauthorized("You are not authorized to perform this action")

@@ -9,7 +9,7 @@ import security._
 import services._
 import validators.{ArticleValidator, TagValidator, UserValidator}
 
-object FailedApplication extends IndexController with Controller
+object FailedApplication extends IndexController with WebJarControllerImpl with Controller
 
 object Application
   extends ConfigurationComponent
@@ -27,7 +27,7 @@ object Application
 
   override val migrationsContainer = new Migrations(profile)
 
-  lazy val instanceName = propertiesService.getInstanceName()
+  lazy val instanceName = propertiesService.getInstanceName
 
   withSession { implicit session =>
     migrate
@@ -44,7 +44,8 @@ trait Controllers
   with NotificationsController
   with CommentController
   with ApplicationPropertiesController
-  with TagsController {
+  with TagsController
+  with WebJarControllerImpl {
   this: Services with Authentication with SecurityServiceComponent with PropertiesProvider =>
 }
 

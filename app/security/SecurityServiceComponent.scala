@@ -91,12 +91,12 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
         def sendActivationLink(userUid: String) = {
           val url = s"http://$host/activate/$userUid"
           val message = s"""<p>Dear ${user.username}!</p>
-            |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName()}.<br/>
+            |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName}.<br/>
             |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
             |Best regards,<br/><br/>
             |Antarticle.</p>""".stripMargin
           val mailFuture = mailService.sendEmail(
-            user.email, s"Account activation at ${propertiesService.getInstanceName()}", message
+            user.email, s"Account activation at ${propertiesService.getInstanceName}", message
           )
 
           mailFuture.onSuccess {

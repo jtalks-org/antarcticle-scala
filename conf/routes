@@ -52,6 +52,6 @@ GET           /stylesheets/:file                       controllers.Assets.at(pat
 GET           /javascripts/:file                       controllers.Assets.at(path="/public/javascripts", file)
 GET           /images/:file                            controllers.Assets.at(path="/public/images", file)
 GET           /fonts/:file                             controllers.Assets.at(path="/public/fonts", file)
-GET           /webjars/*file                           controllers.WebJarAssets.at(file)
+GET           /webjars/*file                           @controllers.WebJarController.file(file)
 
     

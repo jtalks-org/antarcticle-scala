@@ -7,10 +7,20 @@ import play.api.{GlobalSettings, Logger}
 import play.libs.Akka
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSettings  {
 
   lazy val initialized = !getControllerInstance(classOf[IndexController]).isInstanceOf[FailedApplication.type]
+
+  lazy val app  = {
+    Try {Application} match {
+      case Success(a) => a
+      case Failure(e) =>
+        Logger.error("Could not initialize application", e)
+        FailedApplication
+    }
+  }
 
   /*
    * Get controller instances as Application instance, because all controllers
@@ -18,17 +28,11 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSet
    */
   override def getControllerInstance[A](controllerClass: Class[A]): A = {
     try {
-      Application.asInstanceOf[A]
+      app.asInstanceOf[A]
     } catch {
       case e: ClassCastException =>
         Logger.error(s"Controller ${controllerClass.getName} not mixed in into Application object")
         throw e
-      case e: Error =>
-          Logger.error("Could not initialize application" +  (Option(e.getMessage) match {
-            case Some(msg) => s": $msg"
-            case None => ""
-          }))
-        FailedApplication.asInstanceOf[A]
     }
   }
 

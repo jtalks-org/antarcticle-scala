@@ -3,6 +3,7 @@ import controllers._
 import jobs.Scheduler
 import migrations.{MigrationTool, Migrations}
 import models.database._
+import play.api.Logger
 import play.api.mvc.Controller
 import repositories._
 import security._
@@ -23,7 +24,17 @@ object Application
   with PropertiesProvider
   with MailServiceComponentImpl
   with PlayActorSystemProvider
-  with Scheduler {
+  with Scheduler
+  with ApplicationValidatorImpl {
+
+
+  validateApp match {
+    case Nil => Logger.info("There are no errors during application validation")
+    case errors => {
+      errors.foreach(error => Logger.error(error))
+      throw new Error("Application is not properly configured.")
+    }
+  }
 
   override val migrationsContainer = new Migrations(profile)
 

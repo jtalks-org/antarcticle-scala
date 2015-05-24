@@ -12,8 +12,6 @@ trait PropertiesProvider {
     val instanceName = propertiesService.getInstanceName
     val topBannerUrl = propertiesService.getBannerUrl(AppProperty.TopBannerUrl)
     val bottomBannerUrl = propertiesService.getBannerUrl(AppProperty.BottomBannerUrl)
-    val poulpeUrl: Option[String] = propertiesProvider.get[String](Keys.PoulpeUrl)
-    val fakePoulpe: Boolean = propertiesProvider.get[Boolean](Keys.UseFakeAuthentication).getOrElse(false)
     MainTemplateProperties(instanceName,
       if(topBannerUrl == null) None else topBannerUrl,
       if(bottomBannerUrl == null) None else bottomBannerUrl

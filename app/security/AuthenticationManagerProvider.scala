@@ -96,8 +96,8 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
     val genericError = "Some unexpected error occurred, please contact administrator or try later"
 
     val poulpeCredentials = for {
-      poulpeUsername <- propertiesProvider.get[String](PoulpeUsername)
-      poulpeSecret <- propertiesProvider.get[String](PoulpeSecret)
+      poulpeUsername <- propertiesProvider.get(PoulpeUsername)
+      poulpeSecret <- propertiesProvider.get(PoulpeSecret)
     } yield BasicHttpCredentials(poulpeUsername, poulpeSecret)
 
     val addPoulpeCredentials: HttpRequest => HttpRequest = { request =>
@@ -234,10 +234,10 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
   class CompositeAuthenticationManager extends AuthenticationManager {
 
     lazy val poulpeAuthManager: Option[AuthenticationManager] = {
-      propertiesProvider.get[Boolean](Keys.UseFakeAuthentication) match {
-        case Some(useFake) if useFake => Some(new FakeAuthenticationManager)
+      propertiesProvider.get(Keys.UseFakeAuthentication) match {
+        case Some(true) => Some(new FakeAuthenticationManager)
         case _ =>
-          propertiesProvider.get[String](Keys.PoulpeUrl) match {
+          propertiesProvider.get(Keys.PoulpeUrl) match {
             case Some(url) if !url.isEmpty =>
               Logger.warn(s"Using Poulpe authentication manager with Poulpe at $url")
               Some(new PoulpeAuthenticationManager(url) with PipeProviderImpl)

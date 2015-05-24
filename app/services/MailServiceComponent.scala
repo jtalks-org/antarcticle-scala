@@ -24,28 +24,29 @@ trait MailServiceComponentImpl extends MailServiceComponent {
 
   class MailServiceImpl extends MailService {
 
-    val session = {
+    lazy val session = {
       val properties = new Properties()
-      val host = propertiesProvider.get[String](Keys.MailSmtpHost).getOrElse("smtp.mail.ru")
-      val port = propertiesProvider.get[String](Keys.MailSmtpPort).getOrElse("465")
+      val host = propertiesProvider.get(Keys.MailSmtpHost).get
+      val port = propertiesProvider.get(Keys.MailSmtpPort).get
       properties.put("mail.smtp.host", host)
       properties.put("mail.smtp.port", port)
-      propertiesProvider.get[String](Keys.MailSmtpPort)
-      propertiesProvider.get[Boolean](Keys.MailSmtpAuth).map {
+      propertiesProvider.get(Keys.MailSmtpAuth).map {
         auth => {
           if (auth) {
             properties.put("mail.smtp.auth", "true")
             properties.put("mail.smtp.socketFactory.port", port)
             properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory")
-            properties.put("mail.smtp.starttls.enable", propertiesProvider.get[String](Keys.MailSmtpSsl).getOrElse("true"))
+            propertiesProvider.get(Keys.MailSmtpSsl) map {
+              key => properties.put("mail.smtp.starttls.enable", key)
+            }
           }
         }
       }
 
       Session.getInstance(properties, new Authenticator {
         override def getPasswordAuthentication: PasswordAuthentication = {
-          val username = propertiesProvider.get[String](Keys.MailSmtpUser).getOrElse("")
-          val password = propertiesProvider.get[String](Keys.MailSmtpPassword).getOrElse("")
+          val username = propertiesProvider.get(Keys.MailSmtpUser).get
+          val password = propertiesProvider.get(Keys.MailSmtpPassword).get
           new PasswordAuthentication(username, password)
         }
       })
@@ -58,7 +59,7 @@ trait MailServiceComponentImpl extends MailServiceComponent {
         message.addHeader("Content-type", "text/HTML; charset=UTF-8")
         message.addHeader("format", "flowed")
         message.addHeader("Content-Transfer-Encoding", "8bit")
-        val from = propertiesProvider.get[String](Keys.MailSmtpFrom).getOrElse("")
+        val from = propertiesProvider.get(Keys.MailSmtpFrom).getOrElse(propertiesProvider.get(Keys.MailSmtpUser).get)
         message.setFrom(new InternetAddress(from))
         message.addRecipients(Message.RecipientType.TO, to)
         message.setSubject(subject)

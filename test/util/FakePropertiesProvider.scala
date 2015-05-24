@@ -1,13 +1,12 @@
 package util
 
 import conf.PropertiesProviderComponent
-
-import scala.reflect.runtime.universe._
+import conf.Keys._
 
 trait FakePropertiesProvider extends  PropertiesProviderComponent {
   override val propertiesProvider = {
     new conf.PropertiesProvider {
-      override def apply[T: TypeTag](property: conf.Keys.ConfigurationKey): Option[T] = None
+      override def apply[T](property: ConfigurationKey[T]): Option[T] = None
       override def isAvailable = true
     }
   }

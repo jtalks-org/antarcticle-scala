@@ -40,8 +40,8 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
     override val usersRepository = mock[UsersRepository]
     override val actorSystem = ActorSystem("test-antarcticle-system")
     override val propertiesProvider = mock[PropertiesProvider]
-    propertiesProvider.get[String](Keys.PoulpeUsername) returns None
-    propertiesProvider.get[String](Keys.PoulpeSecret) returns None
+    propertiesProvider.get(Keys.PoulpeUsername) returns None
+    propertiesProvider.get(Keys.PoulpeSecret) returns None
     lazy val poulpeAuthManager = new PoulpeAuthenticationManager("") with FakePipeProvider
   }
 

@@ -92,9 +92,7 @@ trait SecurityServiceComponentImpl extends SecurityServiceComponent {
           val url = s"http://$host/activate/$userUid"
           val message = s"""<p>Dear ${user.username}!</p>
             |<p>This mail is to confirm your registration at ${propertiesService.getInstanceName}.<br/>
-            |Please follow the link below to activate your account <br/><a href='$url'>$url</a><br/>
-            |Best regards,<br/><br/>
-            |Antarticle.</p>""".stripMargin
+            |Please follow the link below to activate your account <br/><a href='$url'>$url</p>""".stripMargin
           val mailFuture = mailService.sendEmail(
             user.email, s"Account activation at ${propertiesService.getInstanceName}", message
           )

@@ -118,7 +118,9 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
       "not perform authentication for invalid credentials" in {
         mockPipeline.apply(any[HttpRequest]) returns responseWithBody(disabledUserResponse)
 
-        poulpeAuthManager.authenticate("admin", "invalidPassword") must beNone.await
+        poulpeAuthManager.authenticate("admin", "invalidPassword") must beSome.which{
+          user: UserInfo => user.username == "admin" && !user.active
+        }.await
 
         there was one(mockPipeline).apply(requestWithUsername("admin"))
       }

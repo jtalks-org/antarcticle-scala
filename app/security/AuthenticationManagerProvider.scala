@@ -119,14 +119,14 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
         xmlResponse => {
           for {
             status <- (xmlResponse \\ "status").headOption.map(_.text) if status == "success"
-            enabled <- (xmlResponse \\ "enabled").headOption.map(_.text) if enabled == "true"
+            enabled <- (xmlResponse \\ "enabled").headOption.map(_.text == "true")
             returnedUsername <- (xmlResponse \\ "username").headOption.map(_.text)
             email <- (xmlResponse \\ "email").headOption.map(_.text)
             firstName = (xmlResponse \\ "firstName").headOption.map(_.text)
             lastName = (xmlResponse \\ "lastName").headOption.map(_.text)
             password = (xmlResponse \\ "password").headOption.map(_.text)
           } yield {
-            UserInfo(returnedUsername, "todo", email, firstName, lastName, active = true)
+            UserInfo(returnedUsername, "todo", email, firstName, lastName, active = enabled)
           }
         }
       }

@@ -40,7 +40,10 @@ trait AuthenticationController {
   )
 
   def showLoginPage = Action { implicit request =>
-    Ok(html.signin(loginForm.bind(Map("referer" -> getReferer))))
+    currentUser match {
+      case Some(_) => Redirect(controllers.routes.IndexController.index())
+      case None => Ok(html.signin(loginForm.bind(Map("referer" -> getReferer))))
+    }
   }
 
 
@@ -69,7 +72,10 @@ trait AuthenticationController {
   }
 
   def showRegistrationPage = Action { implicit request =>
-    Ok(html.signup(registerForm))
+    currentUser match {
+      case Some(_) => Redirect(controllers.routes.IndexController.index())
+      case None => Ok(html.signup(registerForm))
+    }
   }
 
   def register = Action.async { implicit request =>

@@ -38,19 +38,19 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
 
   class LocalDatabaseAuthenticationManager extends AuthenticationManager {
     override def authenticate(username: String, password: String): Future[Option[UserInfo]] = {
-        def isValidPassword(user: UserRecord) = {
-          !password.isEmpty && user.password === SecurityUtil.encodePassword(password, user.salt)
-        }
-        Future {
-          withSession {
-            implicit s: JdbcBackend#Session => {
-              val user : Option[UserInfo] = for {
-                record <- usersRepository.getByUsername(username) if isValidPassword(record)
-              } yield record
-              user
-            }
+      def isValidPassword(user: UserRecord) = {
+        !password.isEmpty && user.password === SecurityUtil.encodePassword(password, user.salt)
+      }
+      Future {
+        withSession {
+          implicit s: JdbcBackend#Session => {
+            val user : Option[UserInfo] = for {
+              record <- usersRepository.getByUsername(username) if isValidPassword(record)
+            } yield record
+            user
           }
         }
+      }
     }
 
     override def register(user: UserInfo) = withSession {

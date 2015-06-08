@@ -16,7 +16,8 @@ object KeepReferrerFilter extends Filter {
     "/fonts/",
     "/stylesheets/",
     "/images/",
-    "/javascripts/"
+    "/javascripts/",
+    "/webjars/"
   )
 
   override def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {

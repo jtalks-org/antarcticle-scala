@@ -21,6 +21,13 @@ enterAdminMode = () ->
   # change icon into pencil
   appNameContainer = $('#application-name-container')
   oldApplicationName = appNameContainer.text()
+  $('#application-icon')
+  .addClass("glyphicon glyphicon-pencil")
+  .click((e) ->
+    e.preventDefault()
+    appNameContainer.focus()
+  )
+  $('#main-rss-link').hide()
   # make app name editable
   appNameContainer
   .attr('contenteditable', "true")
@@ -97,6 +104,10 @@ enableBannerEditor = () ->
 
 exitAdminMode = () ->
   sessionStorage.adminMode = false
+  $('#main-rss-link').show()
+  $('#application-icon')
+  .removeClass("glyphicon glyphicon-pencil")
+  .unbind('click')
   # turn app name editor into plain caption
   $('#application-name-container')
   .attr('contenteditable', "false")

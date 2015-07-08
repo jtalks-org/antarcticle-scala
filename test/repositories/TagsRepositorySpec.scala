@@ -2,13 +2,12 @@ package repositories
 
 import org.specs2.mutable.Specification
 import utils.Implicits._
-import org.specs2.time.NoTimeConversions
 import com.github.nscala_time.time.Imports._
 import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import scala.slick.jdbc.JdbcBackend
 
-class TagsRepositorySpec extends Specification with NoTimeConversions {
+class TagsRepositorySpec extends Specification {
 
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
   with TagsRepositoryComponentImpl {
@@ -20,7 +19,7 @@ class TagsRepositorySpec extends Specification with NoTimeConversions {
 
       tags.map(_.name) ++= Seq("tag1", "tag2", "tag3")
 
-      users ++= Seq(UserRecord(None, "user1", "fakePassword"))
+      users ++= Seq(UserRecord(None, "user1", "fakePassword", "mail01@mail.zzz"))
 
       articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(
         ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),

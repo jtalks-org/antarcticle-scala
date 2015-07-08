@@ -1,19 +1,19 @@
 package util
 
-import java.net.ServerSocket
-
 object TestHelpers {
 
-  def findFreePort() = {
-    import resource._
-    var port = -1
-    for {
-      socket <- managed(new ServerSocket(0))
-    } {
-      port = socket.getLocalPort
-      socket.close()
-    }
-    port
-  }
+  type :=>[A, B] = PartialFunction[A, B]
 
+  def withHttp[T](response: String, port: Int)(doTest: => T) = {
+    import akka.actor.ActorSystem
+    import com.netaporter.precanned.dsl.basic._
+    implicit val system = ActorSystem()
+    val httpApi = httpServerMock(system).bind(port).block
+
+    httpApi.expect(req => true).andRespondWith(entity(response))
+
+    val result = doTest
+    system.shutdown()
+    result
+  }
 }

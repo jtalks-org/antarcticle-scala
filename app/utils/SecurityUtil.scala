@@ -20,4 +20,5 @@ object SecurityUtil {
       case _ => md5(password)
     }
 
+  def generateUid = java.util.UUID.randomUUID.toString
 }

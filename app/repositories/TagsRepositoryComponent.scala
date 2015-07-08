@@ -48,7 +48,7 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
     val compiledForInsert = tags.map(t => t.name).returning(tags.map(_.id)).insertInvoker
     val compiledArticleTagsForInsert = articlesTags.insertInvoker
 
-    override def getAllTags()(implicit session: JdbcBackend#Session) = tags.list().map(r => Tag(r._1.get, r._2))
+    override def getAllTags()(implicit session: JdbcBackend#Session) = tags.list.map(r => Tag(r._1.get, r._2))
 
     override def getByName(name: Option[String])(implicit session: JdbcBackend#Session) =
       compiledByName(name).firstOption.map(r => Tag(r._1.get, r._2))
@@ -65,7 +65,7 @@ trait TagsRepositoryComponentImpl extends TagsRepositoryComponent {
     override def getByNames(names: Seq[String])(implicit session: JdbcBackend#Session) = {
       (for {
         tag <- tags if tag.name inSet names.map(_.toLowerCase)
-      } yield tag).list().map(tag => Tag(tag._1.get, tag._2))
+      } yield tag).list.map(tag => Tag(tag._1.get, tag._2))
     }
   }
 }

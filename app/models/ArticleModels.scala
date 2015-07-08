@@ -27,8 +27,8 @@ object ArticleModels {
 
     def languageIterator: Iterator[Language] = super.values.iterator.map(l => l.asInstanceOf[Language])
 
-    implicit def languageToString(lang: Language) = lang.toString()
-    implicit def parseLanguage(lang: String) = Language.withName(lang).asInstanceOf[Val]
+    implicit def languageToString(lang: Language): String = lang.toString()
+    implicit def parseLanguage(lang: String): Val = Language.withName(lang).asInstanceOf[Val]
   }
 
   import Language._
@@ -48,6 +48,6 @@ object ArticleModels {
 
   case class Translation(id: Int, language: Language)
 
-  implicit def detailsAsArticle(details: ArticleDetailsModel) =
+  implicit def detailsAsArticle(details: ArticleDetailsModel): Article =
     Article(Some(details.id), details.title, details.content, details.tags, details.language, Some(details.sourceId))
 }

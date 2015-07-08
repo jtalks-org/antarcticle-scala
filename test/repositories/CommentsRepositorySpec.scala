@@ -1,7 +1,6 @@
 package repositories
 
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import com.github.nscala_time.time.Imports._
@@ -11,7 +10,7 @@ import scala.Some
 import models.database.CommentRecord
 import models.database.UserRecord
 
-class CommentsRepositorySpec extends Specification with NoTimeConversions {
+class CommentsRepositorySpec extends Specification {
   object repository extends TestDatabaseConfigurationWithFixtures with Schema
               with CommentsRepositoryComponentImpl
 

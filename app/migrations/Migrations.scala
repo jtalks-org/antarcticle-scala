@@ -1,9 +1,11 @@
 package migrations
 
 import models.ArticleModels.Language
+import play.api.Logger
+import utils.SecurityUtil
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery => Q, JdbcBackend}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery => Q}
 
 /**
  * This class contains all database schema migrations, which are applied to the database
@@ -87,7 +89,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
         " CONSTRAINT notification_user_fk FOREIGN KEY (user_id) REFERENCES users (id)," +
         " CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id)," +
         " CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id)" +
-        ");").execute()
+        ");").execute
     }
   }
 
@@ -95,12 +97,12 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     val version = 9
 
     def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_user_fk").execute()
-      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_article_fk").execute()
-      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute()
-      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_user_fk FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE").execute()
-      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE").execute()
-      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute()
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_user_fk").execute
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_article_fk").execute
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_user_fk FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE").execute
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_article_fk FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE").execute
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute
     }
   }
 
@@ -108,8 +110,8 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     val version = 10
 
     def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("alter table users add salt varchar(64)").execute()
-      Q.updateNA("alter table users convert to character set utf8 collate utf8_bin").execute()
+      Q.updateNA("alter table users add salt varchar(64)").execute
+      Q.updateNA("alter table users convert to character set utf8 collate utf8_bin").execute
     }
   }
 
@@ -124,7 +126,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
         " default_value varchar(200) NOT NULL," +
         " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
         " PRIMARY KEY(id)" +
-        ");").execute()
+        ");").execute
     }
   }
 
@@ -132,7 +134,7 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     val version: Int = 12
 
     def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("INSERT INTO properties VALUES(1, 'INSTANCE_NAME', 'ANTARCTICLE', 'ANTARCTICLE', CURRENT_TIMESTAMP);").execute()
+      Q.updateNA("INSERT INTO properties VALUES(1, 'INSTANCE_NAME', 'ANTARCTICLE', 'ANTARCTICLE', CURRENT_TIMESTAMP);").execute
     }
   }
 
@@ -149,9 +151,9 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     val version: Int = 14
 
     def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("ALTER TABLE articles ADD (language varchar(30), source_id int)").execute()
-      Q.updateNA("UPDATE articles SET source_id = id").execute()
-      Q.updateNA(s"UPDATE articles SET language = '${Language.Russian}'").execute()
+      Q.updateNA("ALTER TABLE articles ADD (language varchar(30), source_id int)").execute
+      Q.updateNA("UPDATE articles SET source_id = id").execute
+      Q.updateNA(s"UPDATE articles SET language = '${Language.Russian}'").execute
     }
   }
 
@@ -160,14 +162,14 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.queryNA[String]("SELECT username FROM users GROUP BY username HAVING COUNT(*) > 1") foreach { login =>
-        val ids = Q.queryNA[String](s"SELECT id FROM users WHERE username='$login'").list()
+        val ids = Q.queryNA[String](s"SELECT id FROM users WHERE username='$login'").list
         val masterId = ids.head
         println(s"Found ${ids.size} duplicate account records for user $login, merging...")
         ids.tail.foreach(duplicateId => {
-          Q.updateNA(s"UPDATE articles SET author_id='$masterId' WHERE author_id='$duplicateId'").execute()
-          Q.updateNA(s"UPDATE comments SET user_id='$masterId' WHERE user_id='$duplicateId'").execute()
-          Q.updateNA(s"UPDATE notifications SET user_id='$masterId' WHERE user_id='$duplicateId'").execute()
-          Q.updateNA(s"DELETE FROM users WHERE id='$duplicateId'").execute()
+          Q.updateNA(s"UPDATE articles SET author_id='$masterId' WHERE author_id='$duplicateId'").execute
+          Q.updateNA(s"UPDATE comments SET user_id='$masterId' WHERE user_id='$duplicateId'").execute
+          Q.updateNA(s"UPDATE notifications SET user_id='$masterId' WHERE user_id='$duplicateId'").execute
+          Q.updateNA(s"DELETE FROM users WHERE id='$duplicateId'").execute
           println(s"Merged user id=$duplicateId into id=$masterId")
         })
         println(s"All duplicate records for user $login merged")
@@ -180,17 +182,17 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
 
     def run(implicit session: JdbcBackend#Session): Unit = {
       Q.queryNA[String]("SELECT name FROM tags GROUP BY name HAVING COUNT(*) > 1") foreach { tag =>
-        val ids = Q.queryNA[String](s"SELECT id FROM tags WHERE name='$tag'").list()
+        val ids = Q.queryNA[String](s"SELECT id FROM tags WHERE name='$tag'").list
         val masterId = ids.head
         println(s"Found ${ids.tail.size} duplicates for tag '$tag', merging...")
         ids.tail.foreach(duplicateId => {
-          Q.updateNA(s"DELETE FROM articles_tags WHERE tag_id='$duplicateId'").execute()
-          Q.updateNA(s"DELETE FROM tags WHERE id='$duplicateId'").execute()
+          Q.updateNA(s"DELETE FROM articles_tags WHERE tag_id='$duplicateId'").execute
+          Q.updateNA(s"DELETE FROM tags WHERE id='$duplicateId'").execute
           println(s"Merged tag id=$duplicateId into id=$masterId")
         })
       }
       Q.updateNA("ALTER IGNORE TABLE articles_tags ADD UNIQUE INDEX idx_name (tag_id, article_id)")
-      Q.updateNA(s"UPDATE tags SET name = lower(name)").execute()
+      Q.updateNA(s"UPDATE tags SET name = lower(name)").execute
     }
   }
 
@@ -198,9 +200,65 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
     val version: Int = 18
 
     def run(implicit session: JdbcBackend#Session): Unit = {
-      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute()
-      Q.updateNA("ALTER TABLE notifications CHANGE COLUMN comment_id comment_id INT(11) NULL").execute()
-      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute()
+      Q.updateNA("ALTER TABLE notifications DROP FOREIGN KEY notification_comment_fk").execute
+      Q.updateNA("ALTER TABLE notifications CHANGE COLUMN comment_id comment_id INT(11) NULL").execute
+      Q.updateNA("ALTER TABLE notifications ADD CONSTRAINT notification_comment_fk FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE").execute
+    }
+  }
+
+  val addEmailToUsers = new Migration {
+    val version: Int = 19
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN email varchar(100)").execute
+      Q.updateNA("UPDATE users set email='NA'").execute
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN email email varchar(100) NOT NULL").execute
+      Q.updateNA("ALTER TABLE users ADD COLUMN active INT(1)").execute
+      Q.updateNA("UPDATE users set active=1").execute
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN active active INT(1) NOT NULL").execute
+    }
+  }
+
+  val addUserUid = new Migration {
+    val version = 20
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN uid varchar(100)").execute
+      val users = Q.query[Unit, (String, String)]("SELECT id, username FROM users").list
+      for {
+        (id, username) <- users
+        uid = SecurityUtil.generateUid
+        } yield {
+          Logger.info("Updating user with username " + username)
+          Q.updateNA(s"UPDATE users set uid = '$uid' WHERE id = $id").execute
+      }
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN uid uid varchar(100) NOT NULL").execute
+    }
+  }
+
+  val addUserCreatedAt = new Migration {
+    val version = 21
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE users ADD COLUMN createdAt timestamp").execute
+      Q.updateNA("UPDATE users set createdAt = CURRENT_TIMESTAMP").execute
+      Q.updateNA("ALTER TABLE users CHANGE COLUMN createdAt createdAt timestamp NOT NULL").execute
+    }
+  }
+
+  val fixToRemoveEmptyUsers = new Migration {
+    val version = 22
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("DELETE from users WHERE username = ''").execute
+    }
+  }
+
+  val fixEmptyEmails = new Migration {
+    val version: Int = 23
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("UPDATE users set email='NA' WHERE email = ''").execute
     }
   }
 }

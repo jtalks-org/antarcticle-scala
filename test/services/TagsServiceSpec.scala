@@ -6,14 +6,14 @@ import repositories.TagsRepositoryComponent
 import util.FakeSessionProvider.FakeSessionValue
 import org.mockito.Matchers
 import models.database.Tag
-import org.specs2.specification.BeforeExample
+import org.specs2.specification.BeforeEach
 import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.ArgumentCapture
 import validators.Validator
 import scalaz._
 import Scalaz._
 
-class TagsServiceSpec extends Specification with Mockito with BeforeExample {
+class TagsServiceSpec extends Specification with Mockito with BeforeEach {
   object service extends TagsServiceComponentImpl
                   with TagsRepositoryComponent
                   with FakeSessionProvider {
@@ -96,7 +96,7 @@ class TagsServiceSpec extends Specification with Mockito with BeforeExample {
     }
 
     "not create any tags if validation fail" in {
-      tagValidator.validate(any[String]) returns "".failNel
+      tagValidator.validate(any[String]) returns "".failureNel
 
       there was noMoreCallsTo(tagsRepository)
     }

@@ -81,11 +81,17 @@ application.conf:
 
     security.authentication.useFake=false
     security.authentication.poulpe.url="http://mydomain.com/poulpeContext"
+    ##optional if poulpe required authentication for REST API
+    security.authentication.poulpe.username=your_username
+    security.authentication.poulpe.secret=your_password
     
 JNDI properties:
 
     <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" value="false" type="java.lang.Boolean"/>
-    <Environment name="ANTARCTICLE_POULPE_URL" value="http://mydomain.com/poulpeContext" type="java.lang.String"/>  
+    <Environment name="ANTARCTICLE_POULPE_URL" value="http://mydomain.com/poulpeContext" type="java.lang.String"/>
+    <!-- optional if poulpe required authentication for REST API -->
+    <Environment name="ANTARCTICLE_POULPE_USERNAME" value="your_username" type="java.lang.String"/>  
+    <Environment name="ANTARCTICLE_POULPE_PASSWORD" value="your_password" type="java.lang.String"/>
 
 To configure fake authentication manager (contains only admin/admin user) set properties as follows:
 
@@ -124,19 +130,58 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
     <Environment name="ANTARCTICLE_POULPE_URL" 
          value="http://mydomain.com/poulpeContext"
          type="java.lang.String"/>    
+    <Environment name="ANTARCTICLE_SMTP_HOST" 
+         value="smtp.mail.ru"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PORT" 
+         value="465"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_FROM" 
+         value="your_from"
+         type="java.lang.String"/>     
+    <Environment name="ANTARCTICLE_SMTP_USER" 
+         value="your_username"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PASSWORD" 
+         value="your_password"
+         type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_AUTH" 
+         value="true"
+         type="java.lang.Boolean"/>
+    <Environment name="ANTARCTICLE_SMTP_SSL" 
+         value="true"
+         type="java.lang.String"/>
 </Context>
 ```
+
+##Logging
+For logging logback library is used. Sample of logging config logger.xml could be found in project/conf folder.
+By default logback writes logs to $USER_HOME/logs/application.log file and STDOUT with DEBUG log level 
+
+In order to use custom logger.xml file on Tomcat you need to logger.file java system property like this:
+
+On Windows:
+    
+    set JAVA_OPTS=-Dlogger.file=c:/logger.xml
+    
+On Unix:
+    
+    export JAVA_OPTS=-Dlogger.file=/opt/prod/logger.xml
+    
+
 ##Development
 
 It's possible to generate project files for Intellij Idea with ```sbt idea``` command. For Eclipse the same can be archived with a separate [plugin](https://github.com/typesafehub/sbteclipse).
+
+To get unit test coverage report run ```sbt clean coverage test``` and then ```sbt coverageReport```
 
 ###Necessary software
 - IDE or text editor on your choice
 - GIT client
 - JDK 1.7
-- Scala 2.10
+- Scala 2.11
 - SBT 0.13
-- Play Framework 2.2 
+- Play Framework 2.3 
 
 ###Useful links
 - Bug tracker: [http://jira.jtalks.org/browse/ANTARCTICLE](http://jira.jtalks.org/browse/ANTARCTICLE)

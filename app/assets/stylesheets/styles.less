@@ -32,7 +32,7 @@
     width: 100%;
   }
   .navbar-brand {
-    max-width: 100%;
+    max-width: 95%;
     padding-top: 8px !important;
     padding-bottom: 0px !important;
     text-align: center;
@@ -44,6 +44,10 @@
         margin-bottom: 5px;
         display: inline-block;
         width: 100%;
+      }
+      i {
+        display: inline-block;
+        vertical-align: super;
       }
     }
   }
@@ -331,17 +335,26 @@ h6 {
 
 .user-profile .user-profile-header .user-stats {
   margin: 0;
-  width: 115px;
   color: #676767;
   list-style: none;
+}
+
+.user-profile .user-profile-header .user-stats a {
+  color: #676767
+}
+
+.user-profile .user-profile-header .user-stats a:hover,
+.user-profile .user-profile-header .user-stats a:focus {
+  color: #000;
+  background-color: transparent
 }
 
 .user-profile .user-profile-header .user-stats li {
   display: block;
   float: left;
-  padding-left: 8px;
-  width: 95px;
   height: 45px;
+  padding-left: 8px;
+  padding-right: 8px;
   border-left: 1px dashed #c8c8c8;
   text-transform: uppercase;
 }
@@ -724,4 +737,8 @@ div.table-column-left {
   height: 50px;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
   pointer-events: none;
+}
+
+#login-links a {
+  display: inline-block;
 }

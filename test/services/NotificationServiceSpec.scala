@@ -1,9 +1,8 @@
 package services
 
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import org.specs2.mock.Mockito
-import org.specs2.specification.BeforeExample
+import org.specs2.specification.BeforeEach
 import org.specs2.scalaz.ValidationMatchers
 import repositories.{ArticlesRepositoryComponent, NotificationsRepositoryComponent}
 import util.FakeSessionProvider
@@ -15,9 +14,7 @@ import models.database.Notification
 import scala.slick.jdbc.JdbcBackend
 
 
-class NotificationServiceSpec extends  Specification
-  with NoTimeConversions with Mockito with BeforeExample
-  with ValidationMatchers {
+class NotificationServiceSpec extends  Specification with Mockito with BeforeEach with ValidationMatchers {
 
   object service extends NotificationsServiceComponentImpl
     with NotificationsRepositoryComponent

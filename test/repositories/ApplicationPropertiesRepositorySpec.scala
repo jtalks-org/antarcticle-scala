@@ -2,12 +2,11 @@ package repositories
 
 
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import models.database._
 import util.TestDatabaseConfigurationWithFixtures
 import scala.Some
 
-class ApplicationPropertiesRepositorySpec extends Specification with NoTimeConversions {
+class ApplicationPropertiesRepositorySpec extends Specification {
   object repository$Application extends TestDatabaseConfigurationWithFixtures with Schema with ApplicationPropertiesRepositoryComponentImpl
 
   import repository$Application._

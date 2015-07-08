@@ -3,7 +3,8 @@ package migrations
 import models.database.{Schema, Profile}
 import scala.slick.jdbc.meta.MTable
 import scala.slick.jdbc.{StaticQuery => Q}
-import play.api.Logger //tmp
+import play.api.Logger
+import scala.util.{Failure, Success, Try}
 import scala.slick.jdbc.JdbcBackend
 
 trait Migration {
@@ -38,25 +39,30 @@ trait MigrationTool {
   private val VERSION_COLUMN = "current_version"
 
   def migrate(implicit session: JdbcBackend#Session) = {
-    MTable.getTables(SCHEMA_VERSION_TABLE).list match {
-      case Nil =>
-        Logger.info("Migrating new database")
-        createSchemaVersionTable
-        val ddls = schema.map(_.ddl)
-        ddls.tail.fold(ddls.head)(_ ++ _).create
-        val version = migrations.lastOption.map(_.version) getOrElse 0
-        setInitialVersion(version)
-        Logger.info(s"Migration completed (version: $version)")
-      case xs =>
-        val currentVersion = getCurrentVersion
-        val notPerformedMigrations = migrations.filter(_.version > currentVersion)
-        if (!notPerformedMigrations.isEmpty) {
-          val newVersion = notPerformedMigrations.last.version
-          Logger.info(s"Migrating database from version $currentVersion to $newVersion")
-          notPerformedMigrations.foreach(_.run)
-          updateVersion(newVersion)
-          Logger.info(s"Migration completed")
-        }
+    Try {
+      MTable.getTables(SCHEMA_VERSION_TABLE).list match {
+        case Nil =>
+          Logger.info("Migrating new database")
+          createSchemaVersionTable
+          val ddls = schema.map(_.ddl)
+          ddls.tail.fold(ddls.head)(_ ++ _).create
+          val version = migrations.lastOption.map(_.version) getOrElse 0
+          setInitialVersion(version)
+          Logger.info(s"Migration completed (version: $version)")
+        case xs =>
+          val currentVersion = getCurrentVersion
+          val notPerformedMigrations = migrations.filter(_.version > currentVersion)
+          if (notPerformedMigrations.nonEmpty) {
+            val newVersion = notPerformedMigrations.last.version
+            Logger.info(s"Migrating database from version $currentVersion to $newVersion")
+            notPerformedMigrations.foreach(_.run)
+            updateVersion(newVersion)
+            Logger.info(s"Migration completed")
+          }
+      }
+    } match {
+      case Success(_) => Logger.info("Database is properly configured")
+      case Failure(e) => Logger.error("Database is not properly configured", e)
     }
   }
 

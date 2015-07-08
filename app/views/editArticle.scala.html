@@ -12,7 +12,7 @@
           <li><a id="preview-tab" data-href="@routes.ArticleController.previewArticle()" href="#preview" data-toggle="tab">
             Preview</a></li>
         </ul>
-        <form class="default-form" method="POST" action="@routes.ArticleController.postArticleEdits">
+        <form class="default-form" method="POST" action="@routes.ArticleController.postArticleEdits()">
           <div class="tab-content">
             <div class="tab-pane fade in active" id="edit">
               <input type="hidden" name="id" value="@form("id").value">
@@ -28,17 +28,13 @@
                 </label>
                 <div class="input-group pull-right language-picker">
                   <label for="language-button" class="language-label">Choose language:</label>
-                  <button id="language-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="lang-label">@Language.parseLanguage(form("language").value.get).title</span>
-                    &nbsp;&nbsp;
-                    <span class="caret"></span>
-                    <input class="lang-input" name="language" type="hidden" value="@form("language").value"/>
-                  </button>
-                  <ul class="dropdown-menu">
+                  <select id="language-button" name="language">
                   @for(language <- Language.languageIterator) {
-                    <li><a class="language-item" href="#" data-lang="@language">@language.title</a></li>
+                    <option value="@language" @if(Some(language) == form("language").value.map(Language.parseLanguage)) {
+                      selected="selected"
+                      }>@language.title</option>
                   }
-                  </ul>
+                  </select>
                 </div>
                 <textarea id="content" name="content" class="form-control article-input"
                 placeholder="Enter article content here ..." rows="20">@form("content").value</textarea>

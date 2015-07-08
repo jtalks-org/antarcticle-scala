@@ -1,21 +1,19 @@
 package services
 
-import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
-import org.specs2.mock.Mockito
-import org.specs2.specification.BeforeExample
-import org.specs2.scalaz.ValidationMatchers
-import util.FakeSessionProvider
-import repositories.ApplicationPropertiesRepositoryComponent
-import util.FakeSessionProvider._
-import models.database.ApplicationProperty
 import java.sql.Timestamp
-import security.{AnonymousPrincipal, Authorities, AuthenticatedUser}
-import security.Result.Authorized
-import org.joda.time.DateTime
 
-class PropertiesServiceSpec extends Specification
-  with NoTimeConversions with Mockito with BeforeExample with ValidationMatchers{
+import models.database.ApplicationProperty
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.scalaz.ValidationMatchers
+import org.specs2.specification.BeforeEach
+import repositories.ApplicationPropertiesRepositoryComponent
+import security.Result.Authorized
+import security.{AnonymousPrincipal, AuthenticatedUser, Authorities}
+import util.FakeSessionProvider
+import util.FakeSessionProvider._
+
+class PropertiesServiceSpec extends Specification with Mockito with BeforeEach with ValidationMatchers{
 
   object service extends ApplicationPropertiesServiceComponentImpl with ApplicationPropertiesRepositoryComponent with FakeSessionProvider {
     val propertiesRepository = mock[ApplicationPropertiesRepository]
@@ -42,7 +40,7 @@ class PropertiesServiceSpec extends Specification
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
-      val foundInstanceName = propertiesService.getInstanceName()
+      val foundInstanceName = propertiesService.getInstanceName
 
       foundInstanceName mustEqual expectedInstanceName
     }
@@ -54,7 +52,7 @@ class PropertiesServiceSpec extends Specification
 
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(property)
 
-      val foundInstanceName = propertiesService.getInstanceName()
+      val foundInstanceName = propertiesService.getInstanceName
 
       foundInstanceName mustEqual propertyDefaultValue
     }
@@ -66,7 +64,7 @@ class PropertiesServiceSpec extends Specification
       val newValue = "New Instance Name"
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns None
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(adminUser)
 
       there was one(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -81,7 +79,7 @@ class PropertiesServiceSpec extends Specification
       val existProperty = ApplicationProperty(None, propertyName, Some("value"), "value", time)
       propertiesRepository.getProperty(propertyName) (FakeSessionValue) returns Some(existProperty)
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(adminUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(adminUser)
 
       there was one(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       result match {
@@ -94,7 +92,7 @@ class PropertiesServiceSpec extends Specification
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(user)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(user)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)
@@ -108,7 +106,7 @@ class PropertiesServiceSpec extends Specification
       val propertyName = "INSTANCE_NAME"
       val newValue = "New Instance Name"
 
-      val result = propertiesService.writeProperty(ApplicationPropertyNames.instanceNameProperty, newValue)(anonymousUser)
+      val result = propertiesService.writeProperty(AppProperty.InstanceName, newValue)(anonymousUser)
 
       there was no(propertiesRepository).updateProperty(propertyName, Some(newValue)) (FakeSessionValue)
       there was no(propertiesRepository).createNewProperty(propertyName, Some(newValue)) (FakeSessionValue)

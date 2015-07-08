@@ -1,17 +1,16 @@
 @(implicit user: Principal, properties: models.ApplicationPropertyModels.MainTemplateProperties)
 <nav class="navbar navbar-inverse nav">
   <div class="container"><div class="col-lg-offset-1 col-lg-10 col-md-offset-1 col-md-10 col-sm-12 col-xs-12">
-    <ul class="nav navbar-nav">
-      <li>
-        <a href="@routes.ArticleController.fullRssFeed()">
-          <img src="@routes.Assets.at("/public/images", "rss.png")" width="21px"/>
-        </a>
-      </li>
-    </ul>
     <ul class="nav navbar-nav brand-container">
       <li>
-        <a href="@routes.ArticleController.allArticles()" class="navbar-brand" tabindex="-1">
+        <a id="main-rss-link" href="@routes.ArticleController.fullRssFeed()" class="navbar-brand">
           <span>
+            <i class="fa fa-rss-square"></i>
+          </span>
+        </a>
+        <a href="@routes.IndexController.index()" class="navbar-brand" tabindex="-1">
+          <span>
+            <i id="application-icon"></i>
             <span id="application-name-container" class="ellipsis-overflow">@properties.instanceName</span>
           </span>
         </a>
@@ -32,7 +31,7 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
           @authenticatedUser.authority match {
-            case Admin => {
+            case security.Authorities.Admin => {
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
                         Administration <b class="caret"></b>
@@ -80,9 +79,12 @@
       }
       case _ => {
         <ul class="nav navbar-nav navbar-right">
-          <li>
-            <a href="@routes.AuthenticationController.showLoginPage" tabindex="-1">
+          <li id="login-links">
+            <a href="@routes.AuthenticationController.showLoginPage()" tabindex="-1">
               <i class="glyphicon glyphicon-log-in"></i> Sign in
+            </a>
+            <a href="@routes.AuthenticationController.showRegistrationPage()" tabindex="-1">
+              <i class="glyphicon glyphicon-edit"></i> Sign Up
             </a>
           </li>
         </ul>

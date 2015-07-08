@@ -2,11 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET           /                                        @controllers.ArticleController.allArticles()
+GET           /                                        @controllers.IndexController.index()
 # Authentication
 GET           /signin                                  @controllers.AuthenticationController.showLoginPage
 POST          /signin                                  @controllers.AuthenticationController.login
+GET           /signup                                  @controllers.AuthenticationController.showRegistrationPage
+POST          /signup                                  @controllers.AuthenticationController.register
 GET           /signout                                 @controllers.AuthenticationController.logout
+GET           /activate/:uid                           @controllers.AuthenticationController.activate(uid: String)
 # Articles
 GET           /articles                                @controllers.ArticleController.listArticles(tags: Option[String])
 GET           /articles/rss                            @controllers.ArticleController.fullRssFeed()
@@ -49,5 +52,6 @@ GET           /stylesheets/:file                       controllers.Assets.at(pat
 GET           /javascripts/:file                       controllers.Assets.at(path="/public/javascripts", file)
 GET           /images/:file                            controllers.Assets.at(path="/public/images", file)
 GET           /fonts/:file                             controllers.Assets.at(path="/public/fonts", file)
+GET           /webjars/*file                           @controllers.WebJarController.file(file)
 
     

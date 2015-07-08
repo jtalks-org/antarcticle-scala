@@ -1,31 +1,30 @@
 package controllers
 
-import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
-import org.specs2.specification.AfterExample
-import services.{ApplicationPropertiesServiceComponent, UsersServiceComponent, ArticlesServiceComponent}
-import util.FakeAuthentication
-import play.api.test._
-import play.api.test.Helpers._
-import models.{UserPage, ArticlePage}
-import security._
-import scalaz._
-import Scalaz._
-import security.AuthenticatedUser
-import models.database.UserRecord
 import models.ArticleModels.ArticleListModel
-import scala.Some
-import security.Authorities.Admin
-import play.api.libs.json.Json
+import models.database.UserRecord
+import models.{ArticlePage, UserPage}
 import org.mockito.Matchers
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.specification.AfterEach
+import play.api.libs.json.Json
+import play.api.test.Helpers._
+import play.api.test._
+import security.Authorities.Admin
+import security.{AuthenticatedUser, _}
+import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, UsersServiceComponent}
+import util.{FakeAuthentication, FakePropertiesProvider}
 
-class UserControllerSpec extends Specification with Mockito with AfterExample {
+import scalaz.Scalaz._
+
+class UserControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends UserController
                       with ArticlesServiceComponent
                       with UsersServiceComponent
                       with ApplicationPropertiesServiceComponent
                       with PropertiesProvider
+                      with FakePropertiesProvider
                       with FakeAuthentication
                        {
     override val articlesService = mock[ArticlesService]
@@ -44,7 +43,8 @@ class UserControllerSpec extends Specification with Mockito with AfterExample {
 
   val username = "user"
   val password = "password"
-  val user = new UserRecord(Some(1), username, password, true)
+  val email = "mail@mail.zzz"
+  val user = new UserRecord(Some(1), username, password, email, true)
   implicit def principal = {
     val usr = mock[AuthenticatedUser]
     usr.userId returns 1

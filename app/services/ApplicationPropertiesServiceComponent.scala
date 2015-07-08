@@ -4,19 +4,24 @@ import repositories.ApplicationPropertiesRepositoryComponent
 import security.{Entities, Principal}
 import security.Permissions.Manage
 import security.Result.AuthorizationResult
+import scala.language.implicitConversions
 
+object AppProperty extends Enumeration {
+  protected case class Val(name: String, defaultValue: Option[String]) extends super.Val
+  type ApplicationProperty = Val
 
-object ApplicationPropertyNames {
-  val instanceNameProperty = "INSTANCE_NAME"
-  val topBannerURL = "topBanner"
-  val bottomBannerURL = "bottomBanner"
+  val InstanceName = Val("INSTANCE_NAME", Some("ANTARCTICLE"))
+  val TopBannerUrl = Val("topBanner", None)
+  val BottomBannerUrl = Val("bottomBanner", None)
+
+  implicit def propertyToString(prop: ApplicationProperty): String = prop.name
 }
 
 trait ApplicationPropertiesServiceComponent {
   val propertiesService: ApplicationPropertiesService
 
   trait ApplicationPropertiesService {
-    def getInstanceName(): String
+    def getInstanceName: String
 
     def getBannerUrl(id: String): Option[String]
 
@@ -27,6 +32,7 @@ trait ApplicationPropertiesServiceComponent {
 
 trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesServiceComponent {
   this: SessionProvider with ApplicationPropertiesRepositoryComponent =>
+  import AppProperty._
 
   val propertiesService = new ApplicationPropertiesServiceImpl
 
@@ -34,11 +40,9 @@ trait ApplicationPropertiesServiceComponentImpl extends ApplicationPropertiesSer
 
     def getInstanceName: String = withSession {
       implicit session =>
-        // todo: bind default into property class itself
-        val defaultValue = "ANTARCTICLE"
-        propertiesRepository.getProperty(ApplicationPropertyNames.instanceNameProperty) match {
-          case Some(x) => x.value.getOrElse(defaultValue)
-          case None => defaultValue
+        propertiesRepository.getProperty(InstanceName) match {
+          case Some(x) => x.value.getOrElse(InstanceName.defaultValue.get)
+          case None => InstanceName.defaultValue.get
         }
     }
 

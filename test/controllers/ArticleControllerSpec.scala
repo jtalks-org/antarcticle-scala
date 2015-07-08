@@ -1,33 +1,30 @@
 package controllers
 
-import models.ArticleModels.Language.Russian
-import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
-import services.{ApplicationPropertiesServiceComponent, CommentsServiceComponent, ArticlesServiceComponent}
-import util.FakeAuthentication
-import org.specs2.specification.AfterExample
 import com.github.nscala_time.time.Imports._
-import play.api.test.{WithApplication, FakeRequest}
-import play.api.test.Helpers._
-import scalaz._
-import Scalaz._
-import security.AnonymousPrincipal
+import models.ArticleModels.Language.Russian
+import models.ArticleModels.{ArticleDetailsModel, ArticleListModel}
 import models.ArticlePage
-import security.Result.NotAuthorized
-import scala.Some
-import security.Result.Authorized
 import models.UserModels.UserModel
-import models.ArticleModels.ArticleDetailsModel
-import security.AuthenticatedUser
-import models.ArticleModels.ArticleListModel
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import org.specs2.specification.AfterEach
+import play.api.test.Helpers._
+import play.api.test.{FakeRequest, WithApplication}
+import security.Result.{Authorized, NotAuthorized}
+import security.{AnonymousPrincipal, AuthenticatedUser}
+import services.{ApplicationPropertiesServiceComponent, ArticlesServiceComponent, CommentsServiceComponent}
+import util.{FakeAuthentication, FakePropertiesProvider}
 
-class ArticleControllerSpec extends Specification with Mockito with AfterExample{
+import scalaz.Scalaz._
+
+class ArticleControllerSpec extends Specification with Mockito with AfterEach {
 
   object controller extends ArticleController
                       with ArticlesServiceComponent
                       with CommentsServiceComponent
                       with ApplicationPropertiesServiceComponent
                       with FakeAuthentication
+                      with FakePropertiesProvider
                       with PropertiesProvider {
      override val articlesService = mock[ArticlesService]
      override val usersRepository = mock[UsersRepository]
@@ -55,7 +52,7 @@ class ArticleControllerSpec extends Specification with Mockito with AfterExample
     "return first page of all exist articles" in {
       articlesService.getPage(1, None) returns new ArticlePage(1, 1, Seq(articleListModel)).successNel
 
-      val page = controller.allArticles()(FakeRequest())
+      val page = controller.index()(FakeRequest())
 
       status(page) must equalTo(200)
       contentType(page) must beSome("text/html")

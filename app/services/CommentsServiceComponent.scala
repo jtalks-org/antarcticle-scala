@@ -37,7 +37,7 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
       commentsRepository.getByArticle(articleId).map((toComment _).tupled)
     }
 
-    def insert(articleId: Int, content: String)(implicit principal: Principal) =
+    def insert(articleId: Int, content: String)(implicit principal: Principal) = {
       principal.doAuthorizedOrFail(Create, Entities.Comment) { () =>
         withTransaction { implicit session =>
           //TODO: avoid explicit cast. pass AuthenticatedUser as function param?
@@ -49,6 +49,7 @@ trait CommentsServiceComponentImpl extends CommentsServiceComponent {
           result
         }
       }
+    }
 
     def update(id: Int, content: String)(implicit principal: Principal) = withTransaction { implicit session =>
       commentsRepository.get(id) match {

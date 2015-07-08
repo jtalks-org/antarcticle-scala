@@ -80,7 +80,7 @@
                     <span class="glyphicon glyphicon-calendar"></span> @comment.createdAt.format("dd-MMM-yyyy hh:mm")
                   </time>
                 </header>
-                <div>@Html(Markdown.toHtml(comment.content))</div>
+                <div class="content clearfix">@Html(Markdown.toHtml(comment.content))</div>
               </div>
               <div class="toolb">
               <a id="@comment.id" class="btn btn-default btn-xs permalink" title="Get a permanent link to this comment"

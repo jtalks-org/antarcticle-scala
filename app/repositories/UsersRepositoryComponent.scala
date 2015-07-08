@@ -1,6 +1,9 @@
 package repositories
 
+import java.sql.Timestamp
+
 import models.database._
+import scala.language.higherKinds
 import scala.slick.jdbc.JdbcBackend
 
 trait UsersRepositoryComponent {
@@ -11,7 +14,11 @@ trait UsersRepositoryComponent {
    * Database session should be provided by a caller via implicit parameter.
    */
   trait UsersRepository {
+    def getByUID(uid: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
     def getByUsername(username: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
+
+    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session): Option[UserRecord]
 
@@ -21,11 +28,13 @@ trait UsersRepositoryComponent {
 
     def insert(userToInert: UserRecord)(implicit session: JdbcBackend#Session): Int
 
-    def update(user: UserRecord)(implicit session: JdbcBackend#Session)
+    def update(user: UserRecord)(implicit session: JdbcBackend#Session): Unit
 
     def updateRememberToken(id: Int, tokenValue: String)(implicit session: JdbcBackend#Session): Boolean
 
     def updateUserRole(id: Int, isAdmin: Boolean)(implicit session: JdbcBackend#Session): Boolean
+
+    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session): Unit
   }
 }
 
@@ -39,18 +48,18 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   /**
    * Query extensions to avoid criteria duplication
    */
-  implicit class UsersExtension[C](val q: Query[Users, C]) {
+  implicit class UsersExtension[E, C[_]](val q: Query[Users, E, C]) {
     type SColumn = Column[String]
 
-    def byId(id: Column[Int]): Query[Users, C] = {
+    def byId(id: Column[Int]): Query[Users, E, C] = {
       q.filter(_.id === id)
     }
 
-    def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, C] = {
+    def byUsername(username: SColumn, f: SColumn => SColumn = col => col ): Query[Users, E, C] = {
       q.filter(user => f(user.username) === f(username))
     }
 
-    def stringFieldsMatch(search: SColumn): Query[Users, C] = {
+    def stringFieldsMatch(search: SColumn): Query[Users, E, C] = {
       q.filter(user => user.username.toLowerCase.like(search.toLowerCase)
         || user.firstName.toLowerCase.like(search.toLowerCase)
         || user.lastName.toLowerCase.like(search.toLowerCase))
@@ -66,19 +75,24 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
   class SlickUsersRepository extends UsersRepository {
 
     val byUsernameCompiled = Compiled((username: Column[String]) => users.byUsername(username))
+    val byUserUIDCompiled = Compiled((uid: Column[String]) => users.filter(_.uid === uid))
     val byTokenCompiled = Compiled((token: Column[String]) => users.filter(_.rememberToken === token))
     val userSearchCount = Compiled((search: Column[String]) => users.stringFieldsMatch(search).length)
     val updateTokenCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.rememberToken))
     val updateUserRoleCompiled = Compiled((id: Column[Int]) => users.byId(id).map(_.admin))
     val insertUserCompiled = users.returning(users.map(_.id)).insertInvoker
     val byIdCompiled = Compiled((id: Column[Int]) => users.byId(id))
+    val byEmailCompiled = Compiled((email: Column[String]) => users.filter(_.email === email))
     val forUpdateCompiled = Compiled((id: Column[Int]) => users.byId(id).map(u => (u.password, u.salt)))
+    val inactiveUsersCompiled = (created: Column[Timestamp]) => users.filter(u => !u.active && u.createdAt < created).deleteInvoker
+
+    def getByUID(uid: String)(implicit session: JdbcBackend#Session) = byUserUIDCompiled(uid).firstOption
 
     def getByRememberToken(token: String)(implicit session: JdbcBackend#Session) =
       byTokenCompiled(token).firstOption
 
     def getByUsername(username: String)(implicit session: JdbcBackend#Session) =
-      byUsernameCompiled(username).list().find(user => user.username == username)
+      byUsernameCompiled(username).list.find(user => user.username == username)
 
     def findUserPaged(search: String, offset: Int, portionSize: Int)(implicit session: JdbcBackend#Session) =
       // todo: cannot be compiled: https://github.com/slick/slick/pull/764
@@ -97,6 +111,13 @@ trait UsersRepositoryComponentImpl extends UsersRepositoryComponent {
 
     def update(user: UserRecord)(implicit session: JdbcBackend#Session):Unit = {
       for (id <- user.id) yield byIdCompiled(id).update(user)
+    }
+
+    def getByEmail(email: String)(implicit session: JdbcBackend#Session): Option[UserRecord] =
+      byEmailCompiled(email).firstOption
+
+    def deleteInactiveUsers(time: Timestamp)(implicit session: JdbcBackend#Session):Unit = {
+      inactiveUsersCompiled(time).delete
     }
   }
 }

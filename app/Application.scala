@@ -1,30 +1,49 @@
+import conf.ConfigurationComponent
 import controllers._
-import migrations.{Migrations, MigrationTool}
+import jobs.Scheduler
+import migrations.{MigrationTool, Migrations}
+import models.database._
+import play.api.Logger
+import play.api.mvc.Controller
+import repositories._
 import security._
 import services._
-import repositories._
-import models.database._
-import conf.ConfigurationComponent
-import play.api.mvc.Controller
-import validators.{ArticleValidator, TagValidator}
+import validators.{ArticleValidator, TagValidator, UserValidator}
+
+object FailedApplication extends IndexController with WebJarControllerImpl with Controller
 
 object Application
   extends ConfigurationComponent
   with Schema
   with MigrationTool
   with Repositories
-  with SecurityComponent
   with Services
+  with AuthenticationManagerProviderImpl
   with Controllers
-  with PropertiesProvider {
+  with Authentication
+  with PropertiesProvider
+  with MailServiceComponentImpl
+  with PlayActorSystemProvider
+  with Scheduler
+  with ApplicationValidatorImpl {
+
+
+  validateApp match {
+    case Nil => Logger.info("There are no errors during application validation")
+    case errors => {
+      errors.foreach(error => Logger.error(error))
+      throw new Error("Application is not properly configured.")
+    }
+  }
 
   override val migrationsContainer = new Migrations(profile)
 
-  lazy val instanceName = propertiesService.getInstanceName()
+  lazy val instanceName = propertiesService.getInstanceName
 
   withSession { implicit session =>
     migrate
   }
+  runJobs()
 }
 
 trait Controllers
@@ -36,8 +55,9 @@ trait Controllers
   with NotificationsController
   with CommentController
   with ApplicationPropertiesController
-  with TagsController {
-  this: Services with SecurityComponent with PropertiesProvider =>
+  with TagsController
+  with WebJarControllerImpl {
+  this: Services with Authentication with SecurityServiceComponent with PropertiesProvider =>
 }
 
 trait Services
@@ -46,11 +66,16 @@ trait Services
   with CommentsServiceComponentImpl
   with NotificationsServiceComponentImpl
   with UsersServiceComponentImpl
+  with SecurityServiceComponentImpl
   with ApplicationPropertiesServiceComponentImpl {
-  this: Repositories with SessionProvider =>
+  this: Repositories
+    with SessionProvider
+    with AuthenticationManagerProvider
+    with MailServiceComponent =>
 
   override val tagValidator = new TagValidator
   override val articleValidator = new ArticleValidator(tagValidator)
+  override val userValidator = new UserValidator
 }
 
 trait Repositories

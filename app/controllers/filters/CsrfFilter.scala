@@ -1,10 +1,9 @@
 package controllers.filters
 
-import play.api.mvc._
-import scala.concurrent.Future
 import play.api.mvc.Results._
-import scala.Some
-import play.api.mvc.SimpleResult
+import play.api.mvc._
+
+import scala.concurrent.Future
 
 /**
  * All data modification requests (POST, PUT, DELETE) are submitted by JS client code.
@@ -12,7 +11,7 @@ import play.api.mvc.SimpleResult
  * a form from external resource while Antarcticle session is still active
  */
 object CsrfFilter extends Filter {
-  def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader)  = {
+  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader)  = {
     rh.method  match {
       case "POST" | "PUT" | "DELETE" =>
         rh.headers.get("X-Requested-With") match {

@@ -16,10 +16,11 @@ object KeepReferrerFilter extends Filter {
     "/fonts/",
     "/stylesheets/",
     "/images/",
-    "/javascripts/"
+    "/javascripts/",
+    "/webjars/"
   )
 
-  override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
+  override def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
 
     def shouldSaveReferrer(rh: RequestHeader) = rh.method == "GET" &&
       !"XMLHttpRequest".equalsIgnoreCase(rh.headers.get("X-Requested-With").getOrElse("")) &&

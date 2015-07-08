@@ -21,8 +21,7 @@ trait Authentication {
     def getUserByToken(token: String) = withSession(usersRepository.getByRememberToken(token)(_))
 
     for {
-      tokenCookie <- request.cookies.get(Constants.rememberMeCookie)
-      token = tokenCookie.value
+      token <- request.cookies.get(Constants.rememberMeCookie).map(_.value)
       user <- getUserByToken(token)
       userId <- user.id
     } yield  {
@@ -37,7 +36,7 @@ trait Authentication {
   // implicit def authUserToOption(authUser: AuthenticatedUser) = Some(authUser)
 
   def withUser(f: AuthenticatedUser => Request[AnyContent] => Result,
-    onUnauthorized: RequestHeader => SimpleResult = defaultOnUnauthorized): EssentialAction = {
+    onUnauthorized: RequestHeader => Result = defaultOnUnauthorized): EssentialAction = {
     Action { implicit request =>
       currentUser.cata(
         some = user => f(user)(request),
@@ -46,8 +45,8 @@ trait Authentication {
     }
   }
 
-  def withUserAsync(f: AuthenticatedUser => Request[AnyContent] => Future[SimpleResult],
-    onUnauthorized: RequestHeader => Future[SimpleResult] = defaultOnUnauthorizedAsync): EssentialAction = {
+  def withUserAsync(f: AuthenticatedUser => Request[AnyContent] => Future[Result],
+    onUnauthorized: RequestHeader => Future[Result] = defaultOnUnauthorizedAsync): EssentialAction = {
     Action.async { implicit request =>
       Future(currentUser).flatMap(_.cata(
         some = user => f(user)(request),

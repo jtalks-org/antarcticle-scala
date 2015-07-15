@@ -1,6 +1,20 @@
 <configuration>
 
+  <insertFromJNDI env-entry-name="java:comp/env/ANTARCTICLE_LOG_FILE" as="log.file" />
+
   <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+
+  <if condition='isDefined("log.file")'>
+    <then>
+      <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${log.file}</file>
+        <encoder>
+          <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+        </encoder>
+      </appender>
+    </then>
+  </if>
+
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -18,6 +32,11 @@
 
   <root level="ERROR">
     <appender-ref ref="STDOUT" />
+    <if condition='isDefined("log.file")'>
+      <then>
+        <appender-ref ref="FILE" />
+      </then>
+    </if>
   </root>
 
 </configuration>

@@ -102,7 +102,34 @@ application.conf:
 JNDI properties:
 
     <Environment name="ANTARCTICLE_USE_FAKE_AUTHENTICATION" value="true" type="java.lang.Boolean"/>
+    
+###Mail
+    
+application.conf:
 
+    mail.smtp.host=smtp.mail.domain
+    mail.smtp.port=465
+    mail.smtp.auth=true
+    mail.smtp.ssl=true
+    mail.smtp.from="your@email.net"
+    mail.smtp.user="your@email.net"
+    ma1il.smtp.password="your_password"
+    
+JNDI properties:
+    
+    <Environment name="ANTARCTICLE_SMTP_HOST" value="smtp.your.domain" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PORT" value="465" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_USER" value="jtalks@your.domain" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_FROM" value="jtalks@your.domain" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_PASSWORD" value="your_password" type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_SMTP_AUTH" value="true" type="java.lang.Boolean"/>
+    <Environment name="ANTARCTICLE_SMTP_SSL" value="true" type="java.lang.String"/>
+
+###Logging
+
+It is possible to set log file only for Tomcat deployment using JNDI variable
+
+    <Environment name="ANTARCTICLE_LOG_FILE" value="c:/logs/antarcticle.log" type="java.lang.String"/>		 
 
 ###Examples
 
@@ -151,6 +178,9 @@ The following sample illustrates JNDI-based configuration for Apache Tomcat 6-7 
     <Environment name="ANTARCTICLE_SMTP_SSL" 
          value="true"
          type="java.lang.String"/>
+    <Environment name="ANTARCTICLE_LOG_FILE" 
+        value="c:/logs/antarcticle.log" 
+        type="java.lang.String"/>
 </Context>
 ```
 

@@ -35,6 +35,7 @@ libraryDependencies ++= Seq(
   // production database
   "mysql" % "mysql-connector-java" % "5.1.28",
   "javax.mail" % "mail" % "1.5.0-b01",
+  "org.codehaus.janino" % "janino" % "2.7.8",
   "com.netaporter" %% "pre-canned" % "0.0.6" % "test",
   "org.specs2" %% "specs2-core" % "3.6" % "test",
   "org.specs2" %% "specs2-mock" % "3.6" % "test",

@@ -12,23 +12,25 @@ object Global extends WithFilters(CsrfFilter, KeepReferrerFilter) with GlobalSet
 
   lazy val initialized = !getControllerInstance(classOf[IndexController]).isInstanceOf[FailedApplication.type]
 
+  lazy val app  = {
+    try Application catch {
+      case e: Throwable =>
+        Logger.error("Could not initialize application", e)
+        FailedApplication
+    }
+  }
+
   /*
    * Get controller instances as Application instance, because all controllers
    * mixed in into it.
    */
   override def getControllerInstance[A](controllerClass: Class[A]): A = {
     try {
-      Application.asInstanceOf[A]
+      app.asInstanceOf[A]
     } catch {
       case e: ClassCastException =>
         Logger.error(s"Controller ${controllerClass.getName} not mixed in into Application object")
         throw e
-      case e: Error =>
-          Logger.error("Could not initialize application" +  (Option(e.getMessage) match {
-            case Some(msg) => s": $msg"
-            case None => ""
-          }))
-        FailedApplication.asInstanceOf[A]
     }
   }
 

@@ -129,7 +129,9 @@ JNDI properties:
 
 It is possible to set log file only for Tomcat deployment using JNDI variable
 
-    <Environment name="ANTARCTICLE_LOG_FILE" value="c:/logs/antarcticle.log" type="java.lang.String"/>		 
+    <Environment name="ANTARCTICLE_LOG_FILE" value="c:/logs/antarcticle.log" type="java.lang.String"/>		
+     
+If this property is not defined then default log file is used in ${CATALINA_HOME}/logs/antarcticle.log
 
 ###Examples
 

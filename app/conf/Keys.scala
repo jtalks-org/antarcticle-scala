@@ -8,7 +8,7 @@ object Keys extends Enumeration {
   val DbDriver = Val[String]("ANTARCTICLE_DB_DRIVER", "db.default.driver", required = true)
   val DbUrl = Val[String]("ANTARCTICLE_DB_URL", "db.default.url", required = true)
   val DbUser = Val[String]("ANTARCTICLE_DB_USER", "db.default.user", required = true)
-  val DbPassword = Val[String]("ANTARCTICLE_DB_PASSWORD", "db.default.password", required = true)
+  val DbPassword = Val[String]("ANTARCTICLE_DB_PASSWORD", "db.default.password", required = false)
   val PoulpeUrl = Val[String]("ANTARCTICLE_POULPE_URL", "security.authentication.poulpe.url", required = false)
   val MailSmtpSsl = Val[String]("ANTARCTICLE_SMTP_SSL", "mail.smtp.ssl", required = false, default = Some("true"))
   val MailSmtpHost = Val[String]("ANTARCTICLE_SMTP_HOST", "mail.smtp.host", required = true)

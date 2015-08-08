@@ -2,7 +2,7 @@ import com.github.play2war.plugin._
 
 name := "antarcticle-scala"
 
-version := "2.7"
+version := "2.8"
 
 scalaVersion := "2.11.6"
 

@@ -261,4 +261,14 @@ class Migrations(profile: JdbcProfile) extends MigrationsContainer {
       Q.updateNA("UPDATE users set email='NA' WHERE email = ''").execute
     }
   }
+
+  val addPublishedField = new Migration {
+    override val version: Int = 24
+
+    def run(implicit session: JdbcBackend#Session): Unit = {
+      Q.updateNA("ALTER TABLE articles ADD COLUMN published INT(1)").execute
+      Q.updateNA("UPDATE articles SET published = true").execute
+      Q.updateNA("ALTER TABLE articles CHANGE COLUMN published published INT(1) NOT NULL").execute
+    }
+  }
 }

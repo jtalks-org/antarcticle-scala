@@ -28,9 +28,10 @@ trait ArticleController extends IndexController {
       "content" -> text,
       "tags" -> text,
       "language" -> text,
-      "sourceId" -> optional(number)
-    )((id, title, content, tags, language, sourceId) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty), language, sourceId))
-      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString(), article.sourceId)))
+      "sourceId" -> optional(number),
+      "published" -> boolean
+    )((id, title, content, tags, language, sourceId, published) => Article(id, title, content, tags.split(",").map(_.trim).filter(!_.isEmpty), language, sourceId, published))
+      ((article: Article) => Some((article.id, article.title, article.content, article.tags.mkString(","), article.language.toString(), article.sourceId, article.published)))
   )
 
   override def index() = listArticles(None)
@@ -58,7 +59,7 @@ trait ArticleController extends IndexController {
   def getTranslateArticlePage(articleId: Int) = withUser { user => implicit request =>
     articlesService.get(articleId) match {
       case Some(article : ArticleDetailsModel) =>
-        val translation: Article = Article(None, "", "", article.tags, Language.Russian, Some(article.sourceId))
+        val translation: Article = Article(None, "", "", article.tags, Language.Russian, Some(article.sourceId), article.published)
         Ok(views.html.createArticle(articleForm.fill(translation), some(article)))
       case _ => NotFound(views.html.errors.notFound())
     }

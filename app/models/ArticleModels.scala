@@ -38,10 +38,10 @@ object ArticleModels {
 
   case class ArticleDetailsModel(id: Int, title: String, content: String,
                                  createdAt: java.util.Date, author: UserModel, tags: Seq[String],
-                                 language: Language, sourceId: Int, translations: List[Translation])
+                                 language: Language, sourceId: Int, translations: List[Translation], published: Boolean)
 
   // article form
-  case class Article(id: Option[Int] = None, title: String, content: String, tags: Seq[String], language: Language, sourceId: Option[Int]) {
+  case class Article(id: Option[Int] = None, title: String, content: String, tags: Seq[String], language: Language, sourceId: Option[Int], published: Boolean) {
     //TODO: strip tags
     lazy val description = content
   }
@@ -49,5 +49,5 @@ object ArticleModels {
   case class Translation(id: Int, language: Language)
 
   implicit def detailsAsArticle(details: ArticleDetailsModel): Article =
-    Article(Some(details.id), details.title, details.content, details.tags, details.language, Some(details.sourceId))
+    Article(Some(details.id), details.title, details.content, details.tags, details.language, Some(details.sourceId), details.published)
 }

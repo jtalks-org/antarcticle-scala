@@ -132,7 +132,7 @@ class ArticlesRepositorySpec extends Specification {
       val oldCount = articlesCount
 
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None, true)
 
       articlesRepository.insert(newArticle)
 
@@ -141,7 +141,7 @@ class ArticlesRepositorySpec extends Specification {
 
     "assigns id to new article" in withTestDb { implicit session =>
       val userId = 2
-      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None)
+      val newArticle = ArticleRecord(None, "test article", "content", DateTime.now, DateTime.now, "descr", userId, Russian, None, true)
 
       val insertedArticleId: Int = articlesRepository.insert(newArticle)
       true
@@ -155,7 +155,7 @@ class ArticlesRepositorySpec extends Specification {
 
       val newContent = "new content"
       val upd = ArticleToUpdate(articleToBeUpdated.title,
-        newContent, articleToBeUpdated.createdAt, articleToBeUpdated.description, Russian.toString)
+        newContent, articleToBeUpdated.createdAt, articleToBeUpdated.description, Russian.toString, true)
 
       //TODO: split assertions
       articlesRepository.update(updatedArticleId, upd) must beTrue
@@ -164,7 +164,7 @@ class ArticlesRepositorySpec extends Specification {
     }
 
     "return false when updating not existing article" in withTestDb { implicit session =>
-      val upd = ArticleToUpdate("title", "content", DateTime.now, "desc", Russian.toString)
+      val upd = ArticleToUpdate("title", "content", DateTime.now, "desc", Russian.toString, true)
 
       articlesRepository.update(2000, upd) must beFalse
     }

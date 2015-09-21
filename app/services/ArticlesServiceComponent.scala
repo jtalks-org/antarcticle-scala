@@ -181,18 +181,18 @@ trait ArticlesServiceComponentImpl extends ArticlesServiceComponent {
 
     private def articleToInsert(article: Article, creationTime: Timestamp, authorId: Int) = {
       ArticleRecord(None, article.title, article.content, creationTime, creationTime,
-        article.description, authorId, article.language, article.sourceId)
+        article.description, authorId, article.language, article.sourceId, article.published)
     }
 
     private def articleToUpdate(article: Article, updatedAt: Timestamp) = {
-      ArticleToUpdate(article.title, article.content, updatedAt, article.description, article.language)
+      ArticleToUpdate(article.title, article.content, updatedAt, article.description, article.language, article.published)
     }
 
     private def recordToDetailsModel(articleRecord: ArticleRecord, authorRecord: UserRecord,
                                      tags: Seq[String], translations: List[Translation]) = {
       ArticleDetailsModel(articleRecord.id.get, articleRecord.title, articleRecord.content, articleRecord.createdAt,
         UserModel(authorRecord.id.get, authorRecord.username), tags, articleRecord.language,
-        articleRecord.sourceId.get, translations)
+        articleRecord.sourceId.get, translations, articleRecord.published)
     }
 
     private def recordToListModel(articleRecord: ArticleRecord, authorRecord: UserRecord, tags: Seq[String],

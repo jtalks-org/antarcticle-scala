@@ -86,7 +86,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     val forInsertCompiled = articles.returning(articles.map(_.id)).insertInvoker
     val forRemoveCompiled = Compiled((id: Column[Int]) => articles.byId(id))
     val forUpdateCompiled = Compiled((id: Column[Int]) =>
-      articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description, a.language)))
+      articles.byId(id).map(a => (a.title, a.content, a.updatedAt, a.description, a.language, a.published)))
     val forUdateSourceId = Compiled((id: Column[Int]) => articles.byId(id).map(a => a.sourceId))
     val articleTagsCompiled = Compiled((id: Column[Int]) => for {
       articleTag <- articlesTags if articleTag.articleId === id

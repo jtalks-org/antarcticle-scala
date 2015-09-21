@@ -4,10 +4,10 @@ import java.sql.Timestamp
 
 case class ArticleRecord(id: Option[Int], title: String, content: String,
                    createdAt: Timestamp, updatedAt: Timestamp, description: String,
-                   authorId: Int, language: String, sourceId: Option[Int])
+                   authorId: Int, language: String, sourceId: Option[Int], published: Boolean)
 
 case class ArticleToUpdate(title: String, content: String,
-                           updatedAt: Timestamp, description: String, language: String)
+                           updatedAt: Timestamp, description: String, language: String, published: Boolean)
 
 trait ArticlesSchemaComponent  {
   this: Profile with UsersSchemaComponent =>
@@ -25,12 +25,13 @@ trait ArticlesSchemaComponent  {
     def authorId = column[Int]("author_id", O.NotNull)
     def language = column[String]("language", O.Nullable)
     def sourceId = column[Int]("source_id", O.Nullable)
+    def published = column[Boolean]("published", O.NotNull)
 
     // FKs
     def author = foreignKey("article_author_fk", authorId, users)(_.id)
 
     // projections
-    def * = (id.?, title, content, createdAt, updatedAt, description, authorId, language, sourceId.?) <> (ArticleRecord.tupled, ArticleRecord.unapply)
+    def * = (id.?, title, content, createdAt, updatedAt, description, authorId, language, sourceId.?, published) <> (ArticleRecord.tupled, ArticleRecord.unapply)
   }
 
   val articles = TableQuery[Articles]

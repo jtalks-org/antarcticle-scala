@@ -53,7 +53,7 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
   }
 
   val dbRecord = {
-    val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1, Russian, 1.some)
+    val article = ArticleRecord(1.some, "", "", DateTime.now, DateTime.now, "", 1, Russian, 1.some, true)
     val user = UserRecord(1.some, "", "", "")
     val tags = List("tag1", "tag2")
     (article, user, tags)
@@ -106,6 +106,8 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
 
       there was one(articlesRepository).getTranslations(1)(session)
     }
+
+
   }
 
   "paginated articles list" should {
@@ -260,12 +262,12 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
 
   "creating new article" should {
     implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
-    val article = Article(None, "", "", List(), Russian, None)
+    val article = Article(None, "", "", List(), Russian, None, true)
     val userRecord = UserRecord(1.some, "user", "password", "mail01@mail.zzz").some
 
     "insert new article" in {
       TimeFridge.withFrozenTime() { dt =>
-          val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId, Russian, None)
+          val record = ArticleRecord(None, "", "", dt, dt, "", getCurrentUser.userId, Russian, None, true)
           articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
           articleValidator.validate(any[Article]) returns article.successNel
           tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
@@ -279,7 +281,7 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
 
     "insert new translation should send notification to author" in {
       TimeFridge.withFrozenTime() { dt =>
-        val article = Article(None, "", "", List(), Russian, Some(1))
+        val article = Article(None, "", "", List(), Russian, Some(1), true)
         articlesRepository.insert(any[ArticleRecord])(Matchers.eq(session)) returns 1
         articleValidator.validate(any[Article]) returns article.successNel
         tagsService.createTagsForArticle(anyInt, any[Seq[String]])(Matchers.eq(session)) returns Seq.empty.successNel
@@ -364,7 +366,7 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
   "article update" should {
     val articleId = 1
     val tags = dbRecord._3
-    val article = Article(articleId.some, "", "", tags, Russian, articleId.some)
+    val article = Article(articleId.some, "", "", tags, Russian, articleId.some, true)
     val translations = List((articleId, Russian.toString))
     implicit def getCurrentUser = AuthenticatedUser(1, "username", Authorities.User)
 
@@ -388,7 +390,7 @@ class ArticlesServiceSpec extends Specification with Mockito with BeforeEach wit
 
         articlesService.updateArticle(article)
 
-        there was one(articlesRepository).update(articleId, ArticleToUpdate("", "", now, "", Russian.toString))(session) //TODO: match only modification time
+        there was one(articlesRepository).update(articleId, ArticleToUpdate("", "", now, "", Russian.toString, true))(session) //TODO: match only modification time
       }
     }
 

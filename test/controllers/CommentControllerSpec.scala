@@ -116,7 +116,7 @@ class CommentControllerSpec extends Specification with Mockito with AfterEach {
 
     val now = DateTime.now.toDate
     val userModel = new UserModel(1, "name")
-    val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId, List())
+    val articleDetailsModel = new ArticleDetailsModel(articleId, "title", "content", now, userModel, Seq(), Russian, articleId, List(), true)
 
     "have article content and comments" in new WithApplication  {
       controller.setPrincipal(new AuthenticatedUser(1,"", null))

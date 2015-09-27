@@ -53,11 +53,12 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
       UserRecord(None, "doesn't have notifications", "password3", "mail04@mail.zzz")
     )
 
-    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId, a.language, a.sourceId)) ++= Seq(
-        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1, Russian, 1),
-        ("New title 2", "<i>html text</i>", time, time, "description2", 2, Russian, 1),
-        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2, Russian, 1),
-        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2, Russian, 1)
+    articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId, a.language, a.sourceId, a.published)) ++= Seq(
+        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1, Russian, 1, true),
+        ("New title 2", "<i>html text</i>", time, time, "description2", 2, Russian, 1, true),
+        ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2, Russian, 1, true),
+        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2, Russian, 1, true),
+        ("New title 5", "<i>html text</i>", time + 5.days, time, "description5", 2, Russian, 1, false)
       )
 
     articlesTags ++= Seq(

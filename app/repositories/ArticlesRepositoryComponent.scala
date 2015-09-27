@@ -60,7 +60,7 @@ trait SlickArticlesRepositoryComponent extends ArticlesRepositoryComponent {
     }
 
     def byId(id: Column[Int]): Query[Articles, E, C] = {
-      q.filter(_.id === id)
+      q.filter(_.id === id).filter(_.published === true)
     }
 
     def byAuthor(id: Column[Int]): Query[Articles, E, C] = {

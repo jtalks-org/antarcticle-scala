@@ -21,9 +21,9 @@ class TagsRepositorySpec extends Specification {
 
       users ++= Seq(UserRecord(None, "user1", "fakePassword", "mail01@mail.zzz"))
 
-      articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId)) ++= Seq(
-        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1),
-        ("New title 2", "<i>html text</i>", time, time, "description2", 1)
+      articles.map(a => (a.title, a.content, a.createdAt, a.updatedAt, a.description, a.authorId, a.published)) ++= Seq(
+        ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1, true),
+        ("New title 2", "<i>html text</i>", time, time, "description2", 1, true)
       )
 
       articlesTags ++= Seq((1, 1), (1, 2), (2, 1), (2, 3))

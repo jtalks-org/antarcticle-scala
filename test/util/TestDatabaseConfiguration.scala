@@ -57,8 +57,7 @@ trait TestDatabaseConfigurationWithFixtures extends TestDatabaseConfiguration wi
         ("New title 1", "<b>content</b>", time + 1.day, time, "description1", 1, Russian, 1, true),
         ("New title 2", "<i>html text</i>", time, time, "description2", 2, Russian, 1, true),
         ("New title 3", "<i>html text</i>", time + 2.days, time, "description3", 2, Russian, 1, true),
-        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2, Russian, 1, true),
-        ("New title 5", "<i>html text</i>", time + 5.days, time, "description5", 2, Russian, 1, false)
+        ("New title 4", "<i>html text</i>", time + 4.days, time, "description4", 2, Russian, 1, false)
       )
 
     articlesTags ++= Seq(

@@ -127,7 +127,7 @@ class ArticlesRepositorySpec extends Specification {
     }
 
     "return None when an article is not published" in withTestDb { implicit session =>
-      val article = articlesRepository.get(5)
+      val article = articlesRepository.get(4)
 
       article must beNone
     }

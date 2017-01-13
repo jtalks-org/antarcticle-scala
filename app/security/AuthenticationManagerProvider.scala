@@ -198,8 +198,9 @@ trait AuthenticationManagerProviderImpl extends AuthenticationManagerProvider {
       }
     }
 
-    override def activate(uuid: String): Future[ValidationNel[String, Unit]] = {
-      val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/private/activate").withQuery("uuid" -> uuid))
+    override def activate(uuid: String): Future[ValidationNel[String, Unit]] = withSession{ implicit session =>
+      val username = usersRepository.getByUID(uuid).get.username
+      val request = HttpRequest(GET, Uri(s"$poulpeUrl/rest/private/activate").withQuery("username" -> username))
       pipeline(request ~> addPoulpeCredentials).map { response =>
         response.status match {
           case status if List(StatusCodes.OK, StatusCodes.NoContent).any(_ == status)  => ().successNel

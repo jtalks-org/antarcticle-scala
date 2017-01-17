@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException
 
 import akka.actor.ActorSystem
 import conf.{Keys, PropertiesProvider, PropertiesProviderComponent}
+import models.database.UserRecord
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.{MatchResult, Matcher, MatcherMacros}
 import org.specs2.mock.Mockito
@@ -19,6 +20,7 @@ import util.TestHelpers._
 
 import scala.concurrent.Future
 import scalaz._
+import Scalaz._
 
 class PoulpeAuthenticationManagerSpec extends Specification with Mockito with ExecutionEnvironment
 with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
@@ -138,6 +140,7 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
       val registerEmail = "emal@email.net"
       val userUid = "fake-user-uid"
       val registerUserInfo = UserInfo(registerUsername, registerPassword, registerEmail)
+      val userRecord = UserRecord(1.some, registerUsername, registerPassword, registerEmail, uid = userUid)
 
       def expectedRegisterRequest: Matcher[HttpRequest] = { request: HttpRequest =>
         val body = request.entity.asString
@@ -188,14 +191,14 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
       def activateRequest(uid: String): Matcher[HttpRequest] = { request: HttpRequest =>
         val query = request.uri.query.toMap
         request.method == spray.http.HttpMethods.GET &&
-          query.get("uuid").contains(uid)
+          query.get("username").contains(registerUsername)
       }
 
       "activation should be successful" in {
         mockPipeline.apply(any[HttpRequest]) returns Future.successful {
           HttpResponse(status = StatusCodes.NoContent)
         }
-
+        usersRepository.getByUID(userUid)(session) returns userRecord.some
         poulpeAuthManager.activate(userUid) must beSuccessful.await
 
         there was one(mockPipeline).apply(activateRequest(userUid))
@@ -213,6 +216,7 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
         }
         val expected: ErrorsMatcher = {case errors if errors.size == 1 => ok}
 
+        usersRepository.getByUID(userUid)(session) returns userRecord.some
         poulpeAuthManager.activate(userUid) must beFailing.like(expected).await
 
         there was one(mockPipeline).apply(activateRequest(userUid))
@@ -221,6 +225,7 @@ with MockSession with MatcherMacros with BeforeEach with ValidationMatchers {
       "activation sould fail if poulpe is not available" in {
         mockPipeline.apply(any[HttpRequest]) returns Future.failed(new SocketTimeoutException())
 
+        usersRepository.getByUID(userUid)(session) returns userRecord.some
         poulpeAuthManager.activate(userUid) must throwA[Exception].like{
           case e: Exception => e.isInstanceOf[SocketTimeoutException] must beTrue
         }.await
